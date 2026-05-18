@@ -125,4 +125,4 @@ if st.session_state.mostrar_formulario3:
         informacion=buscar.informacion("VACA",df[0],df[1])
         generar_informe.generar_pdf(informacion[0],informacion[1],"Informe_Vaca_"+str(informacion[2].replace("/", "_")))
         st.session_state.mostrar_formulario3 = False
-#py -m streamlit run app.py
+#   py -m streamlit run app.py

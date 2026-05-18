@@ -247,8 +247,10 @@ class Buscador:
             else:
                id="error_revisa el codigo aqui nunca deberia entrar"
             if df_cria.iloc[i]["VACA"]==id_vaca:
-               edad=self.calcular_edad(df_cria.iloc[i,3])
-               df_informe_crias.loc[i]=[id,df_cria.iloc[i,0],df_cria.iloc[i,1],df_cria.iloc[i,2],df_cria.iloc[i,3],edad,df_cria.iloc[i,4],df_cria.iloc[i,5],df_cria.iloc[i,6]]
+            
+               edad=self.calcular_edad(df.iloc[i,3])
+               df_informe_crias.loc[i]=[id,df.iloc[i,0],df.iloc[i,1],df.iloc[i,2],df.iloc[i,3],edad,df.iloc[i,4],df.iloc[i,5],df.iloc[i,6]]
+      
       return df_informe_crias,id_vaca
    
    def informe_crias(self,df,filtros):
@@ -328,15 +330,14 @@ class Buscador:
 
    #aqui se van a realizar diferentes funciones dependienod que se busca
    def informacion(self,tipo_animal,df_entrada,id):
-      if tipo_animal=="VACA":
-         try:
-            show_id = df_partos[df_partos["ID"] == id].iloc[0, 0]
-         except:
-            show_id="nunca ha parido"         
-#df =df_crias con sus id
+      if tipo_animal=="VACA":   
+         show_id = df_partos[df_partos["ID"] == id]
+         
          show_raza = df_Animal[df_Animal["ID"] == id].iloc[0, 3]
          show_edad=self.calcular_edad(df_Animal[df_Animal["ID"] == id].iloc[0, 2])
-         if show_id!="nunca ha parido":
+
+         if show_id.empty==False:
+            
             show_partos=df_partos[df_partos["ID"]==id]
             df_l1=df_entrada[df_entrada["VACA"]==id].iloc[:,0:3]#muestra Id cria y finca
             df_l2=df_entrada[df_entrada["VACA"]==id].iloc[:,4]#muestra la fecha del nacimiento    
@@ -349,7 +350,7 @@ class Buscador:
          else:
             df=pd.DataFrame()
             texto="La Vaca identificada "+str(id)+" de la raza "+str(show_raza)+" "+str(show_edad)+" no tiene partos registrados"
-                  
+         
       return texto,df,id
 
 #main
