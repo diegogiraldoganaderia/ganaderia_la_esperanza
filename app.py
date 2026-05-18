@@ -112,7 +112,11 @@ if st.session_state.mostrar_formulario2:
         df_cria=buscar.ordenar_fecha_df(df_cria)
         informe=buscar.informe_crias(df_cria,filtros)
         texto="En este informe se muestran todas las crias nacidas a partir de la fecha: "+informe[0].strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe[1]))
-        generar_informe.generar_pdf( texto,informe[1],"Informe_Nacimientos")
+        nombre_pdf = ("Informe_Nacimientos")
+        generar_informe.generar_pdf( texto,informe[1],nombre_pdf)
+        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+        st.session_state.mostrar_formulario3 = False
+        st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf")
 
 #aplicacion 3
 if st.session_state.mostrar_formulario3:
@@ -122,7 +126,18 @@ if st.session_state.mostrar_formulario3:
     id_vaca = st.selectbox("Vaca",id_vacas)
     if st.button("Generar informe"):
         df=buscar.informe_crias_v(df_cria,id_vaca)
-        informacion=buscar.informacion("VACA",df[0],df[1])
-        generar_informe.generar_pdf(informacion[0],informacion[1],"Informe_Vaca_"+str(informacion[2].replace("/", "_")))
+        informacion=buscar.informacion("VACA",df[0],df[1]) 
+        nombre_pdf = ("Informe_Vaca_"+ str(informacion[2].replace("/", "_")))
+        generar_informe.generar_pdf(informacion[0],informacion[1],nombre_pdf)
+        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
         st.session_state.mostrar_formulario3 = False
+        st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf")
+    
+
+
+
+
+
+
+
 #   py -m streamlit run app.py
