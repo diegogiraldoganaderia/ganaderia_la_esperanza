@@ -121,90 +121,11 @@ class Agregar_Eliminar:
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones   ]
 
 
-   def nacimiento2(self,buscar):
-      vaca=str(input("Escribe el id de la vaca que parió: ")).lower()
-      while True:
-         fn=(input("Escribe la fecha de nacimiento del animal: dd/mm/aaaa :"))
-         try:
-            fecha_valida = datetime.strptime(fn,"%d/%m/%Y")
-            if fecha_valida>datetime.today():
-               print("La fecha aún no ha ocurrido")
-            else:
-               break
-
-         except ValueError:
-            print("Formato inválido. Use dd/mm/aaaa")
-
-      fn=pd.to_datetime(fn,format="%d/%m/%Y").date()
-      tc=buscar.comprobar_tc(vaca,fn)
-      if tc=="CN":
-         toro=str(input("Escriba el id del padre de la cria: ")).lower()  
-         raza=str(input("Escribe la raza del animal: ")).lower()
-      elif  tc=="TE":  
-         df=df_embriones.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
-         toro=df[df["RECEPTORA"]==vaca].iloc[0,6]
-         raza=df[df["RECEPTORA"]==vaca].iloc[0,7]
-      elif tc=="IA":
-         df=df_inseminacion.sort_values(by='FECHA',ascending=False).reset_index(drop=True)
-         toro=df[df["ID"]==vaca].iloc[0,6]
-      sexo=str(input("Escribe el sexo del animal: ")).lower()
-      finca=str(input("Escribe nombre de la finca: ")).lower()   
-      observaciones=str(input("Observaciones sobre el parto: ")).lower()
-      Numero_parto=len(df_partos[df_partos["ID"]==vaca])+1
-      df_cria.loc[len(df_cria)] = [finca,toro,vaca,fn,raza,sexo,tc]
-      df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,observaciones]
-      #se guardan en excel
-      
-    
-
-
 #creamos un buscador que tiene variable buscada el id del animal   
 
 class Buscador:
-   """def filtros(self,aplicativo):
-      if aplicativo==2:
-         while True:
-            filtro_fecha=(input("A Partir de que fecha quiere el informe: dd/mm/aaaa :"))
-            try:
-               fecha_valida = datetime.strptime(filtro_fecha,"%d/%m/%Y")
-               if fecha_valida>datetime.today():
-                  print("La fecha aún no ha ocurrido")
-               else:
-                  break
-            except ValueError:
-               print("Formato inválido. Use dd/mm/aaaa")
+   
 
-         filtro_fecha=pd.to_datetime(filtro_fecha,format="%d/%m/%Y")
-
-         #Se pide una finca para filtrar por fincas
-         for i in range(len(df_fincas)):
-            print("Ingrese ",str(i+1)+" para selecionar la finca: ",df_fincas.iloc[i,0])
-         print("Ingrese "+str(len(df_fincas)+1)+" para incluir todas las fincas") 
-         numero_fincas=int(input(": "))
-         while numero_fincas==0 or numero_fincas>(len(df_fincas)+1):
-            print("El valor que ingreso es invalido")
-            for i in range(len(df_fincas)):
-               print("Ingrese ",str(i+1)+" para selecionar la finca: ",df_fincas.iloc[i,0])
-            print("Ingrese "+str(len(df_fincas)+1)+" para incluir todas las fincas") 
-            numero_fincas=int(input(": "))
-               
-         if numero_fincas<(len(df_fincas)+1):
-            filtro_finca=df_fincas.iloc[numero_fincas-1,0]
-         else:
-            filtro_finca="todos"
-
-#se pide filtrar por T_C
-         print("Ingrese un numero para selecionar el tipo de concepcion.")
-         print("Ingrese 1 para CN y IA\ningrese 2 para TE\nIngrese 3 para incluir todos")
-         tipo_tc=int(input(": "))
-         if tipo_tc==1:
-            filtro_tc="CN"
-         elif tipo_tc==2:
-            filtro_tc="TE"
-         elif tipo_tc==3:
-            filtro_tc="todos"
-      return filtro_fecha,filtro_finca,filtro_tc
-"""
    def ordenar_fecha_df(self,df):
       df_new=df.sort_values(by='FECHA_NACIMIENTO',kind="stable")
       return df_new
@@ -288,7 +209,7 @@ class Buscador:
             id="error_revisa el codigo aqui nunca deberia entrar"
 #se  llena un nuevo df ya filtrado con todos los valores requeridos
          
-         if df.iloc[i]["FECHA_NACIMIENTO"]>=filtros[0] and (df.iloc[i]["FINCA"]==filtros[1] or filtros[1]=="incluir todos") and (df.iloc[i]["T_C"]==filtros[2]or filtros[1]=="incluir todos"):
+         if df.iloc[i]["FECHA_NACIMIENTO"]>=filtros[0] and (df.iloc[i]["FINCA"]==filtros[1] or filtros[1]=="incluir todos") and (df.iloc[i]["T_C"]==filtros[2]or filtros[2]=="incluir todos"):
             edad=self.calcular_edad(df_cria.iloc[i,3])
             df_informe_crias.loc[i]=[id,df.iloc[i,0],df.iloc[i,1],df.iloc[i,2],df.iloc[i,3],edad,df.iloc[i,4],df.iloc[i,5],df.iloc[i,6]]
       return filtros[0],df_informe_crias
@@ -300,15 +221,6 @@ class Buscador:
       edad = relativedelta(datetime.today(),fecha)
       return f"tiene una edad de {edad.years} años, {edad.months} meses y {edad.days} días"
 
-   """def  comprobar(self,df):
-    id=input("Escriba el ID desea Buscar: ").lower()
-    resultado=df[df["ID"]==id]
-    while resultado.empty:
-        print("El ID no se encuentra el la base de datos")
-        id=input("Escriba de nuevo el ID: ").lower()
-        resultado=df[df["ID"]==id]
-    return id"""
- 
    def  comprobar_tc(self,id,fecha_parto):
       p_embriones=df_embriones[df_embriones["RECEPTORA"]==id]
       fecha_ia=df_inseminacion[df_inseminacion["ID"]==id].iloc[:,0].max()+pd.Timedelta(days=285)
@@ -353,32 +265,3 @@ class Buscador:
          
       return texto,df,id
 
-#main
-
-"""
-generar_informe=informes()
-buscar=Buscador()
-nacimientos=Agregar_Eliminar()
-actividades=0
-prueba_datos=df_cria[df_cria["VACA"]=="carola"]
-if prueba_datos.empty!=False:
-   print(prueba_datos)
-while actividades!=20:
-   actividades=int(input("Marque 1 para reportar nacimientos\nMarque 2 generar informe de nacimientos:\nMarque 3 Reportar generar informe de Vacas\n:  "))
-#registro de nacimientos
-   if actividades==1:
-      nacimientos.nacimiento(buscar)
-      nacimientos.guardar()
-#genera informe sobre los nacimientos
-   elif actividades==2:
-      df_cria=buscar.ordenar_fecha_df(df_cria)#ordena las cria por fecha de nacimineto
-      informe=buscar.informe_crias(df_cria)#filtra y agrega id a las crias
-      texto="En este informe se muestran todas las crias nacidas a partir de la fecha: "+informe[0].strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe[1]))
-      generar_informe.generar_pdf( texto,informe[1],"Informe_Nacimientos")
-   elif actividades==3:
-      df=buscar.informe_crias_v(df_cria,id_vaca)
-      informacion=buscar.informacion("VACA",df[0],df[1])
-      generar_informe.generar_pdf(informacion[0],informacion[1],"Informe_Vaca_"+str(informacion[2].replace("/", "_")))
-   
-
-"""
