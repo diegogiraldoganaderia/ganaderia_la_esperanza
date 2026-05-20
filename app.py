@@ -147,7 +147,7 @@ from selenium.webdriver.support import expected_conditions as EC
 def prueba():
 
     try:
-        wait = WebDriverWait(driver, 20)
+        
 
         options = Options()
 
@@ -183,7 +183,7 @@ def prueba():
     driver.get("https://sir.asocebu.com.co/Genealogias/")
 
     st.write("2")
-
+    wait = WebDriverWait(driver, 20)
     input_texto = wait.until(
         EC.presence_of_element_located(
         (By.XPATH, '//input[@formcontrolname="Registro"]')
