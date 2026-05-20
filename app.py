@@ -27,6 +27,7 @@ st.markdown(
 buscar = Buscador()
 nacimientos = Agregar_Eliminar()
 generar_informe=informes()
+
 #
 
 
@@ -55,6 +56,8 @@ set_local_bg(r"fondodos.png")
 st.header("MENÚ")
 
 #FORMULARIOS CERRADOS
+if "registros" not in st.session_state:
+    st.session_state.registros = False
 
 if "registro_crias" not in st.session_state:
     st.session_state.registro_crias = False
@@ -64,9 +67,11 @@ if "informe_nacimientos" not in st.session_state:
 
 if "informe_vacas" not in st.session_state:
     st.session_state.informe_vacas = False
+if "modificar_df" not in st.session_state:
+    st.session_state.modificar_df = False
 
 #Botones 
-col1, col2, col3 ,col4= st.columns(4)
+
 st.html("""
     <style>
     button {
@@ -77,36 +82,64 @@ st.html("""
     </style>
 """)
 #      BOTON 1
+
+if st.button("Inicio",use_container_width=True):
+    st.session_state.registro_crias=False
+    st.session_state.informe_nacimientos= False
+    st.session_state.informe_vacas = False
+    st.session_state.modificar_df = False
+    st.session_state.registros=False
+
+col1, col2, col3 ,col4,col5= st.columns(5)     
+
 with col1:
     if st.button("REGISTRO NACIMIENTOS",use_container_width=True): 
         st.session_state.registro_crias=True
         st.session_state.informe_nacimientos= False
         st.session_state.informe_vacas = False
+        st.session_state.modificar_df = False
+        st.session_state.registros=False
+
 #      BOTON 2
 with col2:
     if st.button("INFORME NACIMIENTOS",use_container_width=True):
         st.session_state.informe_nacimientos= True
         st.session_state.registro_crias=False
         st.session_state.informe_vacas = False
+        st.session_state.modificar_df = False
+        st.session_state.registros=False
+
 #      BOTON 3 
 with col3:
     if st.button("INFORME VACAS",use_container_width=True):
         st.session_state.informe_vacas = True
         st.session_state.registro_crias=False
         st.session_state.informe_nacimientos= False
+        st.session_state.modificar_df = False
+        st.session_state.registros=False
 with col4:
-    if st.button("Inicio",use_container_width=True):
+    if st.button("AÑADIR REGISTRO",use_container_width=True):
+        st.session_state.modificar_df = True
         st.session_state.registro_crias=False
         st.session_state.informe_nacimientos= False
         st.session_state.informe_vacas = False
+        st.session_state.registros=False
+
+with col5:
+    if st.button("REGISTROS",use_container_width=True):
+        st.session_state.registro_crias=False
+        st.session_state.informe_nacimientos= False
+        st.session_state.informe_vacas = False
+        st.session_state.modificar_df = False
+        st.session_state.registros=True
+
+    
 
 
+#//FORMULARIOS//que ejecutan los formularios
 
 
-#aplicacion 1//FORMULARIOS//que ejecutan los formularios
-
-
-
+#aplicacion 1
 if st.session_state.registro_crias: 
     vaca = st.text_input("ID de la vaca").lower()
     fn = st.date_input("Fecha nacimiento")
@@ -126,10 +159,11 @@ if st.session_state.registro_crias:
         nacimientos.nacimiento(buscar,vaca,fn,sexo,finca,observaciones,toro,raza)
         nacimientos.guardar()
         st.success("Guardado")
-
-#aplicacion 2
-if st.session_state.informe_nacimientos:
+        st.session_state.registro_crias=False
+        st.rerun()
     
+#aplicacion 2
+if st.session_state.informe_nacimientos:  
     fecha=st.date_input("A partir de que fecha desea el informe")
     fincas=[]
     for i in range(len(df_fincas)):
@@ -141,6 +175,7 @@ if st.session_state.informe_nacimientos:
     col1, col2= st.columns(2)
     with col1:
         if st.button("Generar informe",use_container_width=True):
+            st.session_state.informe_nacimientos=False
             df_cria=buscar.ordenar_fecha_df(df_cria)
             informe=buscar.informe_crias(df_cria,filtros)
             texto="En este informe se muestran todas las crias nacidas a partir de la fecha: "+informe[0].strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe[1]))
@@ -148,7 +183,8 @@ if st.session_state.informe_nacimientos:
             generar_informe.generar_pdf( texto,informe[1],nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
-                st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True)
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):     
+                    st.rerun()
 
 #aplicacion 3
 if st.session_state.informe_vacas:
@@ -159,15 +195,62 @@ if st.session_state.informe_vacas:
     col1, col2= st.columns(2)
     with col1:
         if st.button("Generar informe",use_container_width=True):
+            st.session_state.informe_vacas=False
             df=buscar.informe_crias_v(df_cria,id_vaca)
             informacion=buscar.informacion("VACA",df[0],df[1]) 
             nombre_pdf = ("Informe_Vaca_"+ str(informacion[2].replace("/", "_")))
             generar_informe.generar_pdf(informacion[0],informacion[1],nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
-                st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True)
-        
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+                    st.rerun()
 
+#aplicacio 4
+
+if st.session_state.modificar_df:
+    modificar=[]
+
+    for i in range(len(df_ganado_puro)):
+        b=""
+        contador=0
+        for j in df_ganado_puro.iloc[i]:       
+            if contador<(len(df_ganado_puro.iloc[i])):
+                b=b+" | "+df_ganado_puro.columns[contador]+": "+str(j)
+            contador+=1
+
+        modificar.append(b)
+    filtro = st.selectbox("Animal",modificar)
+    id_animal = st.text_input("ID nuevo").lower()
+    registro = st.text_input("Registro nuevo").lower()
+    if st.button("Guardar",use_container_width=True):
+        posicion=modificar.index(filtro)
+        df_ganado_puro=buscar.modificar_df(df_ganado_puro,id_animal,registro,posicion)
+        nacimientos.guardar()   
+        st.success("Guardado") 
+        st.session_state.modificar_df=False
+        st.rerun()
+
+        
+            
+        
+        
+   
+
+    
+
+    #df_ganado_puro=buscar.modificar_df(df_ganado_puro)
+
+if st.session_state.registros:
+    df_ganado_puro=df_ganado_puro[df_ganado_puro.iloc[:,3]!="pendiente"]
+    registro=[]
+    for i in df_ganado_puro.iloc[:,0]:
+        registro.append(i)
+    filtro = st.selectbox("Animal",registro)
+    posicion=registro.index(filtro)
+    filtrado=df_ganado_puro.iloc[posicion]["REGISTRO"]
+    if st.button("BUSCAR REGISTRO",use_container_width=True):
+        registros(filtrado)
+        st.session_state.registros=False
 
 
 

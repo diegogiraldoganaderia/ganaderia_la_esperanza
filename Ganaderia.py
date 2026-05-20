@@ -7,6 +7,14 @@ from dateutil.relativedelta import relativedelta
 #para generar pdfs
 from fpdf import FPDF
 import math
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+
 # se crean los DataFrame
 df_Animal=pd.read_excel("DATA.xlsx",sheet_name=0)
 df_partos=pd.read_excel("DATA.xlsx",sheet_name=1)
@@ -15,9 +23,9 @@ df_embriones=pd.read_excel("DATA.xlsx",sheet_name=3)
 df_inseminacion=pd.read_excel("DATA.xlsx",sheet_name=4)
 df_fincas=pd.read_excel("DATA.xlsx",sheet_name=5)
 df_razas=pd.read_excel("DATA.xlsx",sheet_name=6)
+df_ganado_puro=pd.read_excel("DATA.xlsx",sheet_name=7)
 df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
 df_informe_vaca=pd.DataFrame(columns=["INFORME"])
-df_ganado_puro=pd.DataFrame(columns=["ID","REGISTRO","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
 
 class informes():
  def generar_pdf(self,texto,df,nombre_archivo):
@@ -77,6 +85,7 @@ class Agregar_Eliminar:
          df_inseminacion.to_excel(writer,index=False, sheet_name='INSEMINACION')
          df_fincas.to_excel(writer,index=False, sheet_name='FINCAS')
          df_razas.to_excel(writer,index=False, sheet_name='RAZAS')
+         df_ganado_puro.to_excel(writer,index=False, sheet_name='GANADO_PURO')
       
      
       
@@ -95,7 +104,11 @@ class Agregar_Eliminar:
       elif tc == "TE":
         df = df_embriones.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
         toro = df[df["RECEPTORA"] == vaca].iloc[0, 6]
+        donadora=df[df["RECEPTORA"] == vaca].iloc[0, 5]
         raza = df[df["RECEPTORA"] == vaca].iloc[0, 7]
+        registro="pendiente"
+        id_tc="pendiente"
+        df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,fn]
       elif tc == "IA":
         df = df_inseminacion.sort_values(by='FECHA',ascending=False).reset_index(drop=True)
         toro = df[df["ID"] == vaca].iloc[0, 6]
@@ -119,6 +132,7 @@ class Agregar_Eliminar:
       
       df_cria.loc[len(df_cria)] = [finca,toro,vaca,fn,raza,sexo,tc]
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones   ]
+      
 
 
 #creamos un buscador que tiene variable buscada el id del animal   
@@ -264,4 +278,43 @@ class Buscador:
             texto="La Vaca identificada "+str(id)+" de la raza "+str(show_raza)+" "+str(show_edad)+" no tiene partos registrados"
          
       return texto,df,id
+
+   def modificar_df(self,df,id,registro,posicion):
+      nuevo_id=id
+      nuevo_registro=registro  
+      salir=1    
+      if  not nuevo_id:
+         df.iloc[posicion,0]=df.iloc[posicion,0]
+      else:
+         df.iloc[posicion,0]=[nuevo_id]
+
+      if not nuevo_registro :
+         df.iloc[posicion,3]=df.iloc[posicion,2]
+      else:
+         df.iloc[posicion,3]=[nuevo_registro]
+      return df
+   #def buscar_registro():
+ 
+
+# Entrar a la página
+def registros(registro):
+   driver = webdriver.Chrome()
+   driver.get("https://sir.asocebu.com.co/Genealogias/")
+   wait = WebDriverWait(driver, 20)
+# Input
+   input_texto = wait.until(EC.presence_of_element_located((By.XPATH, '//input[@formcontrolname="Registro"]')))
+
+   input_texto.send_keys(registro)
+
+# Botón consultar
+   boton = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[contains(text(),"Consultar")]')))
+   boton.click()
+# Esperar que cargue
+   time.sleep(3)
+   icono = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[.//mat-icon[contains(@fonticon,"search")]]')))
+   icono.click()
+   input("Presiona Enter para cerrar...")
+   driver.quit()
+
+
 
