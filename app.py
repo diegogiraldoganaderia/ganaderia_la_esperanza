@@ -138,7 +138,7 @@ with col5:
 
 #//FORMULARIOS//que ejecutan los formularios
 
-
+prueba()
 #aplicacion 1
 if st.session_state.registro_crias: 
     vaca = st.text_input("ID de la vaca").lower()
