@@ -8,27 +8,26 @@ from dateutil.relativedelta import relativedelta
 from fpdf import FPDF
 import math
 
-
-
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-import time
 
 options = Options()
 
-options.add_argument("--headless=new")
+options.add_argument("--headless")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--disable-gpu")
 options.add_argument("--window-size=1920,1080")
 
 
-# se crean los DataFrame
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
 df_Animal=pd.read_excel("DATA.xlsx",sheet_name=0)
 df_partos=pd.read_excel("DATA.xlsx",sheet_name=1)
 df_cria=pd.read_excel("DATA.xlsx",sheet_name=2)
@@ -310,10 +309,55 @@ class Buscador:
  
 
 # Entrar a la página
+
 def registros(registro):
-   driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
+
+    options = Options()
+
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
+
+    driver = webdriver.Chrome(options=options)
+
+    wait = WebDriverWait(driver, 20)
+
+    driver.get("https://sir.asocebu.com.co/Genealogias/")
+
+    # Input
+    input_texto = wait.until(
+        EC.presence_of_element_located(
+            (By.XPATH, '//input[@formcontrolname="Registro"]')
+        )
+    )
+
+    input_texto.send_keys(registro)
+
+    # Botón consultar
+    boton = wait.until(
+        EC.element_to_be_clickable(
+            (By.XPATH, '//button[contains(text(),"Consultar")]')
+        )
+    )
+
+    boton.click()
+
+    time.sleep(3)
+
+    # Botón search
+    icono = wait.until(
+        EC.element_to_be_clickable(
+            (By.XPATH, '//button[.//mat-icon[contains(@fonticon,"search")]]')
+        )
+    )
+
+    icono.click()
+    driver.quit()
+"""def registros(registro):
    
-   driver.get("https://sir.asocebu.com.co/Genealogias/")
+   driver = webdriver.Chrome(options=options)
    wait = WebDriverWait(driver, 20)
 # Input
    input_texto = wait.until(EC.presence_of_element_located((By.XPATH, '//input[@formcontrolname="Registro"]')))
@@ -328,7 +372,6 @@ def registros(registro):
    icono = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[.//mat-icon[contains(@fonticon,"search")]]')))
    icono.click()
    input("Presiona Enter para cerrar...")
-   driver.quit()
-
+   driver.quit()"""
 
 
