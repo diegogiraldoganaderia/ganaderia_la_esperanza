@@ -8,11 +8,24 @@ from dateutil.relativedelta import relativedelta
 from fpdf import FPDF
 import math
 
+
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 import time
+
+options = Options()
+
+options.add_argument("--headless=new")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--disable-gpu")
+options.add_argument("--window-size=1920,1080")
 
 
 # se crean los DataFrame
@@ -298,7 +311,8 @@ class Buscador:
 
 # Entrar a la página
 def registros(registro):
-   driver = webdriver.Chrome()
+   driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
+   
    driver.get("https://sir.asocebu.com.co/Genealogias/")
    wait = WebDriverWait(driver, 20)
 # Input
