@@ -147,6 +147,7 @@ from selenium.webdriver.support import expected_conditions as EC
 def prueba():
 
     try:
+        wait = WebDriverWait(driver, 20)
 
         options = Options()
 
