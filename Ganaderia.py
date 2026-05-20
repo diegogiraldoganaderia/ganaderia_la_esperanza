@@ -374,3 +374,38 @@ def registros(registro):
    driver.quit()"""
 
 
+def prueba():
+
+    try:
+
+        options = Options()
+
+        options.binary_location = "/usr/bin/chromium"
+
+        options.add_argument("--headless=new")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+
+        service = Service("/usr/bin/chromedriver")
+
+        st.write("antes driver")
+
+        driver = webdriver.Chrome(
+            service=service,
+            options=options
+        )
+
+        st.write("driver iniciado")
+
+        driver.get("https://google.com")
+
+        st.write(driver.title)
+
+        driver.quit()
+
+    except Exception as e:
+
+        st.write("ERROR:")
+        st.write(str(e))
+
+prueba()
