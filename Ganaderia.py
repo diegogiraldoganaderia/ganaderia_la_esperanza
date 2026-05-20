@@ -11,6 +11,9 @@ import math
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+print(os.path.exists("/usr/bin/chromium"))
+print(os.path.exists("/usr/bin/chromium-browser"))
+print(os.path.exists("/usr/bin/chromedriver"))
 options = Options()
 
 options.add_argument("--headless")
@@ -324,8 +327,7 @@ def registros(registro):
    options.add_argument("--window-size=1920,1080")
 
    from selenium.webdriver.chrome.service import Service
-
-   options.binary_location = "/usr/bin/chromium"
+   options.binary_location = "/usr/bin/chromium-browser"
 
    service = Service("/usr/bin/chromedriver")
 
@@ -351,7 +353,7 @@ def registros(registro):
    icono = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[.//mat-icon[contains(@fonticon,"search")]]')))
 
    icono.click()
-   input("enter para salir")
+   
 """def registros(registro):
    
    driver = webdriver.Chrome(options=options)
