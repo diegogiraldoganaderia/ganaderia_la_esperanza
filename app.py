@@ -137,6 +137,7 @@ with col5:
 
 
 #//FORMULARIOS//que ejecutan los formularios
+import time
 def prueba():
 
     try:
@@ -170,6 +171,35 @@ def prueba():
 
         st.write("ERROR:")
         st.write(str(e))
+    st.write("1")
+
+    driver.get("https://sir.asocebu.com.co/Genealogias/")
+
+    st.write("2")
+
+    input_texto = wait.until(
+        EC.presence_of_element_located(
+        (By.XPATH, '//input[@formcontrolname="Registro"]')
+    )
+)
+
+    st.write("3")
+
+    input_texto.send_keys(registro)
+
+    st.write("4")
+
+    boton = wait.until(
+        EC.element_to_be_clickable(
+        (By.XPATH, '//button[contains(text(),"Consultar")]')
+    )
+)
+
+    st.write("5")
+
+    boton.click()
+
+    st.write("6")
 
 
 prueba()
