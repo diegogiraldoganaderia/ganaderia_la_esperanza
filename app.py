@@ -1,8 +1,8 @@
 import streamlit as st
 import base64
 from Ganaderia import *
-
-import streamlit as st
+import os
+import time
 
 st.markdown(
     """
@@ -69,6 +69,8 @@ if "informe_vacas" not in st.session_state:
     st.session_state.informe_vacas = False
 if "modificar_df" not in st.session_state:
     st.session_state.modificar_df = False
+if "subir_pdf_registro" not in st.session_state:
+    st.session_state.subir_pdf_registro=False
 
 #Botones 
 
@@ -89,8 +91,9 @@ if st.button("Inicio",use_container_width=True):
     st.session_state.informe_vacas = False
     st.session_state.modificar_df = False
     st.session_state.registros=False
+    st.session_state.subir_pdf_registro=False
 
-col1, col2, col3 ,col4,col5= st.columns(5)     
+col1, col2, col3= st.columns(3)     
 
 with col1:
     if st.button("REGISTRO NACIMIENTOS",use_container_width=True): 
@@ -99,6 +102,7 @@ with col1:
         st.session_state.informe_vacas = False
         st.session_state.modificar_df = False
         st.session_state.registros=False
+        st.session_state.subir_pdf_registro=False
 
 #      BOTON 2
 with col2:
@@ -108,6 +112,7 @@ with col2:
         st.session_state.informe_vacas = False
         st.session_state.modificar_df = False
         st.session_state.registros=False
+        st.session_state.subir_pdf_registro=False
 
 #      BOTON 3 
 with col3:
@@ -117,99 +122,61 @@ with col3:
         st.session_state.informe_nacimientos= False
         st.session_state.modificar_df = False
         st.session_state.registros=False
-with col4:
-    if st.button("AÑADIR REGISTRO",use_container_width=True):
+        st.session_state.subir_pdf_registro=False
+with col1:
+    if st.button("MODIFICAR ID PUROS",use_container_width=True):
         st.session_state.modificar_df = True
         st.session_state.registro_crias=False
         st.session_state.informe_nacimientos= False
         st.session_state.informe_vacas = False
         st.session_state.registros=False
+        st.session_state.subir_pdf_registro=False
 
-with col5:
+with col2:
     if st.button("REGISTROS",use_container_width=True):
         st.session_state.registro_crias=False
         st.session_state.informe_nacimientos= False
         st.session_state.informe_vacas = False
         st.session_state.modificar_df = False
         st.session_state.registros=True
+        st.session_state.subir_pdf_registro=False
 
-    
+with col3:
+    if st.button("AÑADIR REGISTROS",use_container_width=True):
+        st.session_state.subir_pdf_registro=True
+        st.session_state.registro_crias=False
+        st.session_state.informe_nacimientos= False
+        st.session_state.informe_vacas = False
+        st.session_state.modificar_df = False
+        st.session_state.registros=False
+        
+
 
 
 #//FORMULARIOS//que ejecutan los formularios
-import time
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-def prueba():
 
-    try:
-        
-
-        options = Options()
-
-        options.binary_location = "/usr/bin/chromium"
-
-        options.add_argument("--headless=new")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-
-        service = Service("/usr/bin/chromedriver")
-
-        st.write("antes driver")
-
-        driver = webdriver.Chrome(
-            service=service,
-            options=options
-        )
-
-        st.write("driver iniciado")
-
-        driver.get("https://google.com")
-
-        st.write(driver.title)
-
-        driver.quit()
-
-    except Exception as e:
-
-        st.write("ERROR:")
-        st.write(str(e))
-    st.write("1")
-
-    driver.get("https://sir.asocebu.com.co/Genealogias/")
-
-    st.write("2")
-    wait = WebDriverWait(driver, 20)
-    input_texto = wait.until(
-        EC.presence_of_element_located(
-        (By.XPATH, '//input[@formcontrolname="Registro"]')
-    )
-)
-
-    st.write("3")
-
-    input_texto.send_keys(registro)
-
-    st.write("4")
-
-    boton = wait.until(
-        EC.element_to_be_clickable(
-        (By.XPATH, '//button[contains(text(),"Consultar")]')
-    )
-)
-
-    st.write("5")
-
-    boton.click()
-
-    st.write("6")
+if st.session_state.subir_pdf_registro:
+    st.title("Subir PDF a carpeta")
+# Carpeta destino
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, "registros")
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    archivo = st.file_uploader("Sube PDF", type=["pdf"])
+    if archivo:
+        ruta_guardado = os.path.join(UPLOAD_FOLDER, archivo.name)
+        with open(ruta_guardado, "wb") as f:
+            f.write(archivo.getbuffer())
+        if st.success("Guardado correctamente"):
+            st.session_state.subir_pdf_registro=False
+            st.rerun()
 
 
-prueba()
+
+            
+
+
+
+
 #aplicacion 1
 if st.session_state.registro_crias: 
     vaca = st.text_input("ID de la vaca").lower()
@@ -319,11 +286,13 @@ if st.session_state.registros:
     filtro = st.selectbox("Animal",registro)
     posicion=registro.index(filtro)
     filtrado=df_ganado_puro.iloc[posicion]["REGISTRO"]
+    
     if st.button("BUSCAR REGISTRO",use_container_width=True):
-        registros(filtrado)
         st.session_state.registros=False
-
-
+        nombre_pdf=generar_informe.registros(filtrado.upper())
+        with open(nombre_pdf, "rb") as file:pdf_bytes = file.read()
+        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+            st.rerun()
 
 
 
