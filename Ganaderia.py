@@ -25,6 +25,7 @@ class informes():
  def registros(self,registro):
    pdf_path  = "registros/"+str(registro)+".pdf"
    return pdf_path
+ 
  def generar_pdf(self,texto,df,nombre_archivo):
       if df.empty:
          df=pd.DataFrame(columns=["Mensaje"])
@@ -72,7 +73,6 @@ class informes():
       return pdf.output(str(nombre_archivo+".pdf"))
 
 class Agregar_Eliminar:
-   
    def guardar(self):
       with pd.ExcelWriter("DATA.xlsx") as writer:
          df_Animal.to_excel(writer,index=False, sheet_name='ANIMAL')
@@ -276,10 +276,11 @@ class Buscador:
          
       return texto,df,id
 
-   def modificar_df(self,df,id,registro,posicion):
+   def modificar_df(self,df,id,registro,posicion,confirmacion_preñez):
       nuevo_id=id
-      nuevo_registro=registro  
-      salir=1    
+      nuevo_registro=registro 
+      nueva_confirmacion=confirmacion_preñez 
+      
       if  not nuevo_id:
          df.iloc[posicion,0]=df.iloc[posicion,0]
       else:
@@ -289,7 +290,13 @@ class Buscador:
          df.iloc[posicion,3]=df.iloc[posicion,2]
       else:
          df.iloc[posicion,3]=[nuevo_registro]
+      
+      if not nueva_confirmacion :
+         df.iloc[posicion][4]=df.iloc[posicion][4]
+      else:
+         df.iloc[posicion,4]=[nueva_confirmacion]
       return df
+   
    #def buscar_registro():
  
 
