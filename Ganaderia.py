@@ -292,14 +292,9 @@ class Buscador:
          df.iloc[posicion,3]=[nuevo_registro]
       
       if not nueva_confirmacion :
-         df.iloc[posicion][4]=df.iloc[posicion][4]
+         df.iloc[posicion][4]=df.iloc[posicion,4]
       else:
          df.iloc[posicion,4]=[nueva_confirmacion]
       return df
    
    #def buscar_registro():
- 
-
-# Entrar a la página
-
-   

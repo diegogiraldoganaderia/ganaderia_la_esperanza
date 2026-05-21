@@ -231,42 +231,63 @@ if st.session_state.informe_vacas:
                     st.rerun()
 #aplicacio 4
 if st.session_state.modificar_df:
-    modificar=[]
+   
     modificar_que=st.selectbox("Datos",["GANADO PURO","INSEMINACION"])
     if modificar_que=="GANADO PURO":
-        df=df_ganado_puro
+        modificar=[]
+        lista_id=[]
+        lista_registro=[]
+        df=df_ganado_puro 
         for i in range(len(df_ganado_puro)):
             b=""
             contador=0
             for j in df_ganado_puro.iloc[i]:       
-                if contador<(len(df_ganado_puro.iloc[i])):
-                    b=b+" | "+df_ganado_puro.columns[contador]+": "+str(j)
+                if contador==6:
+                    b=b+" | "+df_ganado_puro.columns[contador]+": "+str(j) 
+                elif contador==8:
+                    b=b+" | "+df_ganado_puro.columns[contador]+": "+str(j.date())  
+                elif contador==0:
+                    lista_id.append(j)
+                elif contador==3:
+                    lista_registro.append(j)
                 contador+=1
             modificar.append(b)
+            
     #
         filtro = st.selectbox("Animal",modificar)
-        id_animal = st.text_input("ID nuevo").lower()
-        registro = st.text_input("Registro nuevo").lower()
+        id_animal = st.text_input("ID: "+str(lista_id[modificar.index(filtro)])).lower()
+        registro = st.text_input("Registro: "+str(lista_registro[modificar.index(filtro)])).lower()
         confirmacion_preñez=""
+        
 
     elif modificar_que=="INSEMINACION":
+        modificar=[]
         df=df_inseminacion
         for i in range(len(df_inseminacion)):
             b=""
             contador=0
-            for j in df_inseminacion.iloc[i]:           
-                if contador<=1 or contador==4:
+            for j in df_inseminacion.iloc[i]: 
+                if contador==0:
+                
+                    jj=j.date()
+                    
+                    b=b+" | "+df_inseminacion.columns[contador]+": "+str(jj)          
+                elif (contador==1 or contador==4):
                     b=b+" | "+df_inseminacion.columns[contador]+": "+str(j)
-                    contador+=1             
+
+                contador+=1             
             modificar.append(b)
             
         filtro = st.selectbox("Animal",modificar)
-        confirmacion_preñez = st.selectbox("Estado",["pendiete","p+","v"])
+        confirmacion_preñez = st.selectbox("Estado",["pendiente","p+","v"])
         registro =""
         id_animal=""
     if st.button("Guardar",use_container_width=True):
         posicion=modificar.index(filtro)
-        df_ganado_puro=buscar.modificar_df(df,id_animal,registro,posicion,confirmacion_preñez)
+        if modificar_que=="GANADO PURO":
+            df_ganado_puro=buscar.modificar_df(df,id_animal,registro,posicion,confirmacion_preñez)
+        elif modificar_que=="INSEMINACION":
+            df_inseminacion=buscar.modificar_df(df,id_animal,registro,posicion,confirmacion_preñez)
         nacimientos.guardar()   
         st.success("Guardado") 
         st.session_state.modificar_df=False
