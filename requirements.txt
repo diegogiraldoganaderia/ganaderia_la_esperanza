@@ -1,0 +1,7 @@
+pandas
+openpyxl
+fpdf2
+python-dateutil
+webdriver-manager
+streamlit==1.45.1
+selenium==4.21.0
