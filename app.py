@@ -3,6 +3,20 @@ import base64
 from Ganaderia import *
 import os
 import time
+df_animal=pd.read_excel("DATA.xlsx",sheet_name=0)
+df_partos=pd.read_excel("DATA.xlsx",sheet_name=1)
+df_cria=pd.read_excel("DATA.xlsx",sheet_name=2)
+df_embriones=pd.read_excel("DATA.xlsx",sheet_name=3)
+df_inseminacion=pd.read_excel("DATA.xlsx",sheet_name=4)
+df_fincas=pd.read_excel("DATA.xlsx",sheet_name=5)
+df_razas=pd.read_excel("DATA.xlsx",sheet_name=6)
+df_ganado_puro=pd.read_excel("DATA.xlsx",sheet_name=7)
+df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
+df_informe_vaca=pd.DataFrame(columns=["INFORME"])
+
+
+
+
 #Titulo
 st.markdown(
     """
@@ -25,7 +39,9 @@ st.markdown(
 #objetos
 buscar = Buscador()
 nacimientos = Agregar_Eliminar()
-generar_informe=informes()
+generar_informe=Informes()
+
+
 #fondo
 def set_local_bg(image_path):
     with open(image_path, "rb") as image_file:
@@ -65,6 +81,7 @@ if "modificar_df" not in st.session_state:
 if "subir_pdf_registro" not in st.session_state:
     st.session_state.subir_pdf_registro=False
 
+
 #Botones 
 #estilo de botone
 st.html("""
@@ -85,6 +102,7 @@ if st.button("Inicio",use_container_width=True):
     st.session_state.modificar_df = False
     st.session_state.registros=False
     st.session_state.subir_pdf_registro=False
+    
 
 
 #columnas para botones
@@ -147,6 +165,8 @@ with col3:
         st.session_state.registros=False
         
 
+    st.session_state.tablas_de_datos=True
+    
 
 
 #//FORMULARIOS// QUE HACEN LOS BOTONES
@@ -214,8 +234,8 @@ if st.session_state.informe_nacimientos:
 #aplicacion 3
 if st.session_state.informe_vacas:
     id_vacas=[]
-    for i in range(len(df_Animal)):
-        id_vacas.append(df_Animal.iloc[i,0]) 
+    for i in range(len(df_animal)):
+        id_vacas.append(df_animal.iloc[i,0]) 
     id_vaca = st.selectbox("Vaca",id_vacas)
     col1, col2= st.columns(2)
     with col1:
@@ -229,72 +249,8 @@ if st.session_state.informe_vacas:
             with col2:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
                     st.rerun()
+
 #aplicacio 4
-if st.session_state.modificar_df:
-   
-    modificar_que=st.selectbox("Datos",["GANADO PURO","INSEMINACION"])
-    if modificar_que=="GANADO PURO":
-        modificar=[]
-        lista_id=[]
-        lista_registro=[]
-        df=df_ganado_puro 
-        for i in range(len(df_ganado_puro)):
-            b=""
-            contador=0
-            for j in df_ganado_puro.iloc[i]:       
-                if contador==6:
-                    b=b+" | "+df_ganado_puro.columns[contador]+": "+str(j) 
-                elif contador==8:
-                    b=b+" | "+df_ganado_puro.columns[contador]+": "+str(j.date())  
-                elif contador==0:
-                    lista_id.append(j)
-                elif contador==3:
-                    lista_registro.append(j)
-                contador+=1
-            modificar.append(b)
-            
-    #
-        filtro = st.selectbox("Animal",modificar)
-        id_animal = st.text_input("ID: "+str(lista_id[modificar.index(filtro)])).lower()
-        registro = st.text_input("Registro: "+str(lista_registro[modificar.index(filtro)])).lower()
-        confirmacion_preñez=""
-        
-
-    elif modificar_que=="INSEMINACION":
-        modificar=[]
-        df=df_inseminacion
-        for i in range(len(df_inseminacion)):
-            b=""
-            contador=0
-            for j in df_inseminacion.iloc[i]: 
-                if contador==0:
-                
-                    jj=j.date()
-                    
-                    b=b+" | "+df_inseminacion.columns[contador]+": "+str(jj)          
-                elif (contador==1 or contador==4):
-                    b=b+" | "+df_inseminacion.columns[contador]+": "+str(j)
-
-                contador+=1             
-            modificar.append(b)
-            
-        filtro = st.selectbox("Animal",modificar)
-        confirmacion_preñez = st.selectbox("Estado",["pendiente","p+","v"])
-        registro =""
-        id_animal=""
-    if st.button("Guardar",use_container_width=True):
-        posicion=modificar.index(filtro)
-        if modificar_que=="GANADO PURO":
-            df_ganado_puro=buscar.modificar_df(df,id_animal,registro,posicion,confirmacion_preñez)
-        elif modificar_que=="INSEMINACION":
-            df_inseminacion=buscar.modificar_df(df,id_animal,registro,posicion,confirmacion_preñez)
-        nacimientos.guardar()   
-        st.success("Guardado") 
-        st.session_state.modificar_df=False
-        st.rerun()
-
-        
-#aplicacio 5
 if st.session_state.registros:
     df_ganado_puro=df_ganado_puro[df_ganado_puro.iloc[:,3]!="pendiente"]
     registro=[]
@@ -312,6 +268,43 @@ if st.session_state.registros:
             st.rerun()
 
 
+#aplicacion 5
+if st.session_state.modificar_df:
+    dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES","INSEMINACION","FINCAS","RAZAS","GANADO PURO"])
+    if dato =="ANIMAL":
+        df_animal=st.data_editor(df_animal,num_rows="dynamic")
+    elif dato =="PARTOS":
+        df_partos=st.data_editor(df_partos,num_rows="dynamic")
+    elif dato =="CRIAS":
+        df_cria=st.data_editor(df_cria,num_rows="dynamic")
+    elif dato =="EMBRIONES":
+        df_embriones=st.data_editor(df_embriones,num_rows="dynamic")
+    elif dato =="INSEMINACION":
+        df_inseminacion=st.data_editor(df_inseminacion,num_rows="dynamic")
+    elif dato =="FINCAS":
+        df_fincas=st.data_editor(fincas,num_rows="dynamic")
+    elif dato =="RAZAS":
+        df_razas=st.data_editor(df_razas,num_rows="dynamic")
+    elif dato =="GANADO PURO":
+        df_ganado_puro=st.data_editor(df_ganado_puro,num_rows="dynamic")
 
+    if st.button("GUARDAR CAMBIOS",use_container_width=True):
+        st.success("Guardado correctamente")
+        with pd.ExcelWriter("DATA.xlsx") as writer:
+         df_animal.to_excel(writer,index=False, sheet_name='ANIMAL')
+         df_partos.to_excel(writer,index=False, sheet_name='PARTOS')
+         df_cria.to_excel(writer,index=False, sheet_name='CRIA')
+         df_embriones.to_excel(writer,index=False, sheet_name='EMBRIONES')
+         df_inseminacion.to_excel(writer,index=False, sheet_name='INSEMINACION')
+         df_fincas.to_excel(writer,index=False, sheet_name='FINCAS')
+         df_razas.to_excel(writer,index=False, sheet_name='RAZAS')
+         df_ganado_puro.to_excel(writer,index=False, sheet_name='GANADO_PURO')  
+        time.sleep(2)
+        st.session_state.tablas_de_datos=False
+        st.rerun()
+
+       
+        
+    
 
 #   py -m streamlit run app.py
