@@ -7,10 +7,9 @@ from dateutil.relativedelta import relativedelta
 #para generar pdfs
 from fpdf import FPDF
 import math
+import streamlit as st
 
-
-
-df_Animal=pd.read_excel("DATA.xlsx",sheet_name=0)
+df_animal=pd.read_excel("DATA.xlsx",sheet_name=0)
 df_partos=pd.read_excel("DATA.xlsx",sheet_name=1)
 df_cria=pd.read_excel("DATA.xlsx",sheet_name=2)
 df_embriones=pd.read_excel("DATA.xlsx",sheet_name=3)
@@ -21,7 +20,7 @@ df_ganado_puro=pd.read_excel("DATA.xlsx",sheet_name=7)
 df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
 df_informe_vaca=pd.DataFrame(columns=["INFORME"])
 
-class informes():
+class Informes():
  def registros(self,registro):
    pdf_path  = "registros/"+str(registro)+".pdf"
    return pdf_path
@@ -75,7 +74,7 @@ class informes():
 class Agregar_Eliminar:
    def guardar(self):
       with pd.ExcelWriter("DATA.xlsx") as writer:
-         df_Animal.to_excel(writer,index=False, sheet_name='ANIMAL')
+         df_animal.to_excel(writer,index=False, sheet_name='ANIMAL')
          df_partos.to_excel(writer,index=False, sheet_name='PARTOS')
          df_cria.to_excel(writer,index=False, sheet_name='CRIA')
          df_embriones.to_excel(writer,index=False, sheet_name='EMBRIONES')
@@ -83,7 +82,6 @@ class Agregar_Eliminar:
          df_fincas.to_excel(writer,index=False, sheet_name='FINCAS')
          df_razas.to_excel(writer,index=False, sheet_name='RAZAS')
          df_ganado_puro.to_excel(writer,index=False, sheet_name='GANADO_PURO')
-      
      
       
    
@@ -131,6 +129,7 @@ class Agregar_Eliminar:
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones   ]
       
 
+     
 
 #creamos un buscador que tiene variable buscada el id del animal   
 
@@ -298,3 +297,6 @@ class Buscador:
       return df
    
    #def buscar_registro():
+
+
+   
