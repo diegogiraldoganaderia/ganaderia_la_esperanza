@@ -3,6 +3,10 @@ import base64
 from Ganaderia import *
 import os
 import time
+import plotly.express as px
+import plotly.graph_objects as go
+import numpy as np
+os.system ("cls")
 df_animal=pd.read_excel("DATA.xlsx",sheet_name=0)
 df_partos=pd.read_excel("DATA.xlsx",sheet_name=1)
 df_cria=pd.read_excel("DATA.xlsx",sheet_name=2)
@@ -13,9 +17,6 @@ df_razas=pd.read_excel("DATA.xlsx",sheet_name=6)
 df_ganado_puro=pd.read_excel("DATA.xlsx",sheet_name=7)
 df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
 df_informe_vaca=pd.DataFrame(columns=["INFORME"])
-
-
-
 
 #Titulo
 st.markdown(
@@ -81,7 +82,8 @@ if "modificar_df" not in st.session_state:
 if "subir_pdf_registro" not in st.session_state:
     st.session_state.subir_pdf_registro=False
 
-
+if "graficos" not in st.session_state:
+    st.session_state.graficos=False
 #Botones 
 #estilo de botone
 st.html("""
@@ -102,8 +104,8 @@ if st.button("Inicio",use_container_width=True):
     st.session_state.modificar_df = False
     st.session_state.registros=False
     st.session_state.subir_pdf_registro=False
+    st.session_state.graficos=False
     
-
 
 #columnas para botones
 col1, col2, col3= st.columns(3)     
@@ -167,6 +169,9 @@ with col3:
 
     st.session_state.tablas_de_datos=True
     
+#   BOTON 5
+if st.button("GRÁFICOS",use_container_width=True):
+    st.session_state.graficos=True
 
 
 #//FORMULARIOS// QUE HACEN LOS BOTONES
@@ -300,11 +305,83 @@ if st.session_state.modificar_df:
          df_razas.to_excel(writer,index=False, sheet_name='RAZAS')
          df_ganado_puro.to_excel(writer,index=False, sheet_name='GANADO_PURO')  
         time.sleep(2)
-        st.session_state.tablas_de_datos=False
+        st.session_state.modificar_df=False
         st.rerun()
 
-       
-        
+#graficos
+if st.session_state.graficos:
+    dfg1=df_cria
+    st.markdown(
+    """
+    <style>
+    .titulo-ganaderia {
+        background-color: rgba(0, 0, 0, 0.5); /* Fondo negro 80% opacidad */
+        color: white;                        /* Texto blanco */
+        text-align: center;                  /* Centra el texto */
+        font-family: sans-serif;             /* Letra moderna de Streamlit */
+        font-weight: bold;                   /* Texto en negrita */
+        padding: 20px;                       /* Espacio interno */
+        border-radius: 8px;                  /* Bordes redondeados */
+        font-size: 30px;                     /* Tamaño del título */
+    }
+    </style>
+    <div class='titulo-ganaderia'>SEXO DE LAS CRIAS</div>
+    """,
+    unsafe_allow_html=True
+)
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1,col2=st.columns([3.7,1])
     
+    with col2:
+        st.html("""
+    <style>
+        /* Modifica la altura del contenedor principal del selector */
+    [data-testid="stSelectbox"] div[data-baseweb="select"] > div:first-child {
+    height: 60px !important; /* Ajusta la altura a tu gusto */
+    align-items: center;     /* Centra verticalmente el texto y la flecha */
+    }
+    </style>
+    """)
+        filtro_finca=st.selectbox("FINCA",df_fincas)
+        años=dfg1["FECHA_NACIMIENTO"].dt.year.unique()
+        años=np.append(años,"incluir todos")
+        filtro_año=st.selectbox("AÑO",años)
+    if filtro_finca!="incluir todos" and filtro_año!="incluir todos":
+        dfg1=dfg1[(dfg1["FINCA"]==filtro_finca)&(dfg1["FECHA_NACIMIENTO"].dt.year==int(filtro_año))]
+    elif filtro_finca=="incluir todos" and filtro_año!="incluir todos":
+        dfg1=dfg1[dfg1["FECHA_NACIMIENTO"].dt.year==int(filtro_año)]
+    elif filtro_finca!="incluir todos" and filtro_año=="incluir todos":
+        dfg1=df_cria[dfg1["FINCA"]==filtro_finca]
+    
+    with col1:
+        sexo=px.pie(dfg1,values=dfg1["SEXO"].replace({"macho":1,"hembra":1}),
+                names="SEXO",title="HAY UN TOTAL DE "+str(len(dfg1))+" ANIMALES",hole=0.3)
+        sexo.update_traces(texttemplate="<br>%{value}<br>%{percent:.0%}", textfont_size=25,
+                  marker=dict( line=dict(color="#FFFFFF", width=2)),textfont=dict(color="white")) 
+        sexo.update_layout(legend=dict(font=dict(size=25)))
+        sexo.update_layout(title={"x":0.38,"xanchor":"center"})
+        st.plotly_chart(sexo,use_container_width=True)
+
+# grafico de barras
+    meses_espanol={1:"ENERO",2:"FEBRERO",3:"MARZO",4:"ABRIL",
+                   5:"MAYO",6:"JUNIO",7:"JULIO",8:"AGOSTO",
+                   9:"SEPTIEMBRE",10:"OCTUBRE",11:"NOVIEMBRE",12:"DICIEMBRE"}
+    dfg2=pd.DataFrame(columns=["MES","CANTIDAD","AÑO"])
+    contar=0
+    for i in (df_cria["FECHA_NACIMIENTO"].dt.month.unique()): 
+        for j in (df_cria["FECHA_NACIMIENTO"].dt.year.unique()):
+            dfg2.loc[contar]=[meses_espanol[i],
+                  len(df_cria[(df_cria["FECHA_NACIMIENTO"].dt.month==i)&(df_cria["FECHA_NACIMIENTO"].dt.year==j)])
+                  ,str(j)]
+            contar+=1  
+   
+    nacimientos = px.bar(dfg2,x="MES",y="CANTIDAD",color="AÑO",title="NACIMIENTOS MENSUALES")
+    nacimientos.update_layout(title={"x":0.5,"xanchor":"center"})
+    nacimientos.update_traces(texttemplate="%{value}",textangle=0,marker=dict(line=dict(color="#FFFFFF", width=2)),textfont=dict(color="white",size=25), insidetextanchor="middle")
+    nacimientos.update_layout(uniformtext_minsize=15, height=600,uniformtext_mode='show')
+    nacimientos.update_layout(legend=dict(font=dict(size=25)))
+    nacimientos.update_yaxes( title_font=dict(size=25),showticklabels=False,showgrid=True,visible=True)
+
+    st.plotly_chart(nacimientos, use_container_width=True)
 
 #   py -m streamlit run app.py
