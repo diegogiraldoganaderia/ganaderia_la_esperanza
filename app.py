@@ -359,7 +359,7 @@ if st.session_state.graficos:
                   marker=dict( line=dict(color="#FFFFFF", width=2)),textfont=dict(color="white")) 
     sexo.update_layout(legend=dict(font=dict(size=25)))
     sexo.update_layout(title={"x":0.38,"xanchor":"center"})
-    st.plotly_chart(sexo,use_container_width=True)
+    st.plotly_chart(sexo,use_container_width=True,config={"displayModeBar": False})
 
 # grafico de barras
     meses_espanol={1:"ENERO",2:"FEBRERO",3:"MARZO",4:"ABRIL",
@@ -381,7 +381,7 @@ if st.session_state.graficos:
     nacimientos.update_layout(legend=dict(font=dict(size=15)))
     nacimientos.update_layout(xaxis=dict(tickfont=dict(size=15)))
     nacimientos.update_yaxes( title_font=dict(size=15),showticklabels=False,showgrid=True,visible=True)
-    st.plotly_chart(nacimientos, use_container_width=True)
+    st.plotly_chart(nacimientos, use_container_width=True,config={"displayModeBar": False})
 
 #  recuento nacimientos
     
@@ -416,7 +416,7 @@ if st.session_state.graficos:
     recuento_nacimientos.update_layout(legend=dict(font=dict(size=15)))
     recuento_nacimientos.update_layout(xaxis=dict(tickfont=dict(size=15)))
     recuento_nacimientos.update_yaxes( title_font=dict(size=15),showticklabels=False,showgrid=True,visible=True)
-    st.plotly_chart(recuento_nacimientos, use_container_width=True)
+    st.plotly_chart(recuento_nacimientos, use_container_width=True,config={"displayModeBar": False})
     
 
 #   py -m streamlit run app.py
