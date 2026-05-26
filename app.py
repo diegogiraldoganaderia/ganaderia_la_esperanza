@@ -172,11 +172,8 @@ with col3:
 #   BOTON 5
 if st.button("GRÁFICOS",use_container_width=True):
     st.session_state.graficos=True
-
-
+#boton 6
 #//FORMULARIOS// QUE HACEN LOS BOTONES
-
-
 if st.session_state.subir_pdf_registro:
     st.title("Subir PDF a carpeta")
 # Carpeta destino
@@ -330,7 +327,7 @@ if st.session_state.graficos:
     unsafe_allow_html=True
 )
     st.markdown("<br>", unsafe_allow_html=True)
-    col1,col2=st.columns([3.7,1])
+    col1,col2=st.columns([3,1])
     
     with col2:
         st.html("""
@@ -342,40 +339,49 @@ if st.session_state.graficos:
     }
     </style>
     """)
-        filtro_finca=st.selectbox("FINCA",df_fincas)
-        años=dfg1["FECHA_NACIMIENTO"].dt.year.unique()
-        años=np.append(años,"incluir todos")
-        filtro_año=st.selectbox("AÑO",años)
-    if filtro_finca!="incluir todos" and filtro_año!="incluir todos":
-        dfg1=dfg1[(dfg1["FINCA"]==filtro_finca)&(dfg1["FECHA_NACIMIENTO"].dt.year==int(filtro_año))]
-    elif filtro_finca=="incluir todos" and filtro_año!="incluir todos":
-        dfg1=dfg1[dfg1["FECHA_NACIMIENTO"].dt.year==int(filtro_año)]
-    elif filtro_finca!="incluir todos" and filtro_año=="incluir todos":
-        dfg1=df_cria[dfg1["FINCA"]==filtro_finca]
-    
+        dfg1=df_cria
+        filtro_finca=st.multiselect("FINCA",df_fincas)
+        #años=dfg1["FECHA_NACIMIENTO"].dt.year.unique()
+        #años=np.append(años,"incluir todos")
+        filtro_año=st.multiselect("AÑO",dfg1["FECHA_NACIMIENTO"].dt.year.unique())
+
+    dfg=df_cria
+    l1=[]
+    for i in range(len(filtro_año)):
+        l1.append(dfg[dfg["FECHA_NACIMIENTO"].dt.year==filtro_año[i]])
+    if l1:   
+        dfg1=pd.concat(l1)
+
+    l2=[]
+    for i in range(len(filtro_finca)):
+        l2.append(dfg1[dfg1["FINCA"]==filtro_finca[i]])
+    if l2:
+        dfg2=pd.concat(l2)
+
     with col1:
-        sexo=px.pie(dfg1,values=dfg1["SEXO"].replace({"macho":1,"hembra":1}),
-                names="SEXO",title="HAY UN TOTAL DE "+str(len(dfg1))+" ANIMALES",hole=0.3)
-        sexo.update_traces(texttemplate="<br>%{value}<br>%{percent:.0%}", textfont_size=25,
+        if l2:
+            sexo=px.pie(dfg2,values=dfg2["SEXO"].replace({"macho":1,"hembra":1}),
+                names="SEXO",title="HAY UN TOTAL DE "+str(len(dfg2))+" ANIMALES",hole=0.3)
+            sexo.update_traces(texttemplate="<br>%{value}<br>%{percent:.0%}", textfont_size=25,
                   marker=dict( line=dict(color="#FFFFFF", width=2)),textfont=dict(color="white")) 
-        sexo.update_layout(legend=dict(font=dict(size=25)))
-        sexo.update_layout(title={"x":0.38,"xanchor":"center"})
-        st.plotly_chart(sexo,use_container_width=True)
+            sexo.update_layout(legend=dict(font=dict(size=25)))
+            sexo.update_layout(title={"x":0.38,"xanchor":"center"})
+            st.plotly_chart(sexo,use_container_width=True)
 
 # grafico de barras
     meses_espanol={1:"ENERO",2:"FEBRERO",3:"MARZO",4:"ABRIL",
                    5:"MAYO",6:"JUNIO",7:"JULIO",8:"AGOSTO",
                    9:"SEPTIEMBRE",10:"OCTUBRE",11:"NOVIEMBRE",12:"DICIEMBRE"}
-    dfg2=pd.DataFrame(columns=["MES","CANTIDAD","AÑO"])
+    dfg3=pd.DataFrame(columns=["MES","CANTIDAD","AÑO"])
     contar=0
     for i in (df_cria["FECHA_NACIMIENTO"].dt.month.unique()): 
         for j in (df_cria["FECHA_NACIMIENTO"].dt.year.unique()):
-            dfg2.loc[contar]=[meses_espanol[i],
+            dfg3.loc[contar]=[meses_espanol[i],
                   len(df_cria[(df_cria["FECHA_NACIMIENTO"].dt.month==i)&(df_cria["FECHA_NACIMIENTO"].dt.year==j)])
                   ,str(j)]
             contar+=1  
    
-    nacimientos = px.bar(dfg2,x="MES",y="CANTIDAD",color="AÑO",title="NACIMIENTOS MENSUALES")
+    nacimientos = px.bar(dfg3,x="MES",y="CANTIDAD",color="AÑO",title="NACIMIENTOS MENSUALES")
     nacimientos.update_layout(title={"x":0.5,"xanchor":"center"})
     nacimientos.update_traces(texttemplate="%{value}",textangle=0,marker=dict(line=dict(color="#FFFFFF", width=2)),textfont=dict(color="white",size=25), insidetextanchor="middle")
     nacimientos.update_layout(uniformtext_minsize=15, height=600,uniformtext_mode='show')
