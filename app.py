@@ -319,7 +319,6 @@ if st.session_state.modificar_df:
 
 #graficos
 if st.session_state.graficos:
-    dfg1=df_cria
     st.markdown(
     """
     <style>
@@ -338,47 +337,29 @@ if st.session_state.graficos:
     """,
     unsafe_allow_html=True
 )
-    st.markdown("<br>", unsafe_allow_html=True)
-    col1,col2=st.columns([3,1])
-    
-    with col2:
-        st.html("""
-    <style>
-        /* Modifica la altura del contenedor principal del selector */
-    [data-testid="stSelectbox"] div[data-baseweb="select"] > div:first-child {
-    height: 60px !important; /* Ajusta la altura a tu gusto */
-    align-items: center;     /* Centra verticalmente el texto y la flecha */
-    }
-    </style>
-    """)
-        dfg1=df_cria
-        filtro_finca=st.multiselect("FINCA",df_fincas)
-        #años=dfg1["FECHA_NACIMIENTO"].dt.year.unique()
-        #años=np.append(años,"incluir todos")
-        filtro_año=st.multiselect("AÑO",dfg1["FECHA_NACIMIENTO"].dt.year.unique())
-
+    st.markdown("<br>", unsafe_allow_html=True)  
+    dfg1=df_cria
+    filtro_finca=st.multiselect("FINCA",df_fincas)    
+    filtro_año=st.multiselect("AÑO",dfg1["FECHA_NACIMIENTO"].dt.year.unique())
     dfg=df_cria
     l1=[]
     for i in range(len(filtro_año)):
         l1.append(dfg[dfg["FECHA_NACIMIENTO"].dt.year==filtro_año[i]])
     if l1:   
-        dfg1=pd.concat(l1)
-
+        dfg=pd.concat(l1)
     l2=[]
     for i in range(len(filtro_finca)):
-        l2.append(dfg1[dfg1["FINCA"]==filtro_finca[i]])
+        l2.append(dfg[dfg["FINCA"]==filtro_finca[i]])
     if l2:
-        dfg2=pd.concat(l2)
-
-    with col1:
-        if l2:
-            sexo=px.pie(dfg2,values=dfg2["SEXO"].replace({"macho":1,"hembra":1}),
-                names="SEXO",title="HAY UN TOTAL DE "+str(len(dfg2))+" ANIMALES",hole=0.3)
-            sexo.update_traces(texttemplate="<br>%{value}<br>%{percent:.0%}", textfont_size=25,
+        dfg=pd.concat(l2)
+    
+    sexo=px.pie(dfg,values=dfg["SEXO"].replace({"macho":1,"hembra":1}),
+                names="SEXO",title="HAY UN TOTAL DE "+str(len(dfg))+" ANIMALES",hole=0.3,color_discrete_sequence=px.colors.qualitative.Set1)
+    sexo.update_traces(texttemplate="<br>%{value}<br>%{percent:.0%}", textfont_size=25,
                   marker=dict( line=dict(color="#FFFFFF", width=2)),textfont=dict(color="white")) 
-            sexo.update_layout(legend=dict(font=dict(size=25)))
-            sexo.update_layout(title={"x":0.38,"xanchor":"center"})
-            st.plotly_chart(sexo,use_container_width=True)
+    sexo.update_layout(legend=dict(font=dict(size=25)))
+    sexo.update_layout(title={"x":0.38,"xanchor":"center"})
+    st.plotly_chart(sexo,use_container_width=True)
 
 # grafico de barras
     meses_espanol={1:"ENERO",2:"FEBRERO",3:"MARZO",4:"ABRIL",
@@ -393,13 +374,49 @@ if st.session_state.graficos:
                   ,str(j)]
             contar+=1  
    
-    nacimientos = px.bar(dfg3,x="MES",y="CANTIDAD",color="AÑO",title="NACIMIENTOS MENSUALES")
+    nacimientos = px.bar(dfg3,x="MES",y="CANTIDAD",color="AÑO",title="HISTORIAL NACIMIENTOS",color_discrete_sequence=px.colors.qualitative.Set1)
     nacimientos.update_layout(title={"x":0.5,"xanchor":"center"})
     nacimientos.update_traces(texttemplate="%{value}",textangle=0,marker=dict(line=dict(color="#FFFFFF", width=2)),textfont=dict(color="white",size=25), insidetextanchor="middle")
     nacimientos.update_layout(uniformtext_minsize=15, height=600,uniformtext_mode='show')
     nacimientos.update_layout(legend=dict(font=dict(size=25)))
+    nacimientos.update_layout(xaxis=dict(tickfont=dict(size=25)))
     nacimientos.update_yaxes( title_font=dict(size=25),showticklabels=False,showgrid=True,visible=True)
-
     st.plotly_chart(nacimientos, use_container_width=True)
+
+#  recuento nacimientos
+    
+    contar=0
+    mes_filtrado=st.multiselect("MES",dfg3["MES"].unique())
+    meses_a_numeros = {
+    'ENERO': 1, 'FEBRERO': 2, 'MARZO': 3, 'ABRIL': 4,
+    'MAYO': 5, 'JUNIO': 6, 'JULIO': 7, 'AGOSTO': 8,
+    'SEPTIEMBRE': 9, 'OCTUBRE': 10, 'NOVIEMBRE': 11, 'DICIEMBRE': 12
+}
+    numeros = [meses_a_numeros[mes] for mes in mes_filtrado]
+    dfg4=df_cria
+    l3=[]
+    for i in range(len(mes_filtrado)):
+        l3.append(dfg4[dfg4["FECHA_NACIMIENTO"].dt.month==numeros[i]])
+    if l3:
+        dfg4=pd.concat(l3)
+
+    dfg5=pd.DataFrame(columns=["FINCA","CANTIDAD","AÑO"])
+    for i in (dfg4["FINCA"].unique()):
+        for j in (dfg4["FECHA_NACIMIENTO"].dt.year.unique()):
+            dfg5.loc[contar]=[i,
+                  len(dfg4[(dfg4["FINCA"]==i)&(dfg4["FECHA_NACIMIENTO"].dt.year==j)])
+                  ,str(j)]
+            contar+=1
+   
+    
+    recuento_nacimientos = px.bar(dfg5,x="FINCA",y="CANTIDAD",color="AÑO",barmode="group",title="RECUENTO NACIMIENTOS POR MES",color_discrete_sequence=px.colors.qualitative.Set1)
+    recuento_nacimientos.update_layout(title={"x":0.5,"xanchor":"center"})
+    recuento_nacimientos.update_traces(texttemplate="%{value}",textangle=0,marker=dict(line=dict(color="#FFFFFF", width=2)),textfont=dict(color="white",size=25), insidetextanchor="middle")
+    recuento_nacimientos.update_layout(uniformtext_minsize=15,uniformtext_mode='show')
+    recuento_nacimientos.update_layout(legend=dict(font=dict(size=25)))
+    recuento_nacimientos.update_layout(xaxis=dict(tickfont=dict(size=25)))
+    recuento_nacimientos.update_yaxes( title_font=dict(size=25),showticklabels=False,showgrid=True,visible=True)
+    st.plotly_chart(recuento_nacimientos, use_container_width=True)
+    
 
 #   py -m streamlit run app.py
