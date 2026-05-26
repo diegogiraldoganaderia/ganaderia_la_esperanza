@@ -284,7 +284,7 @@ if st.session_state.modificar_df:
     elif dato =="INSEMINACION":
         df_inseminacion=st.data_editor(df_inseminacion,num_rows="dynamic")
     elif dato =="FINCAS":
-        df_fincas=st.data_editor(fincas,num_rows="dynamic")
+        df_fincas=st.data_editor(df_fincas,num_rows="dynamic")
     elif dato =="RAZAS":
         df_razas=st.data_editor(df_razas,num_rows="dynamic")
     elif dato =="GANADO PURO":
