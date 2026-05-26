@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from fpdf import FPDF
 import math
 import streamlit as st
-
+os.system ("cls")
 df_animal=pd.read_excel("DATA.xlsx",sheet_name=0)
 df_partos=pd.read_excel("DATA.xlsx",sheet_name=1)
 df_cria=pd.read_excel("DATA.xlsx",sheet_name=2)
@@ -81,16 +81,12 @@ class Agregar_Eliminar:
          df_inseminacion.to_excel(writer,index=False, sheet_name='INSEMINACION')
          df_fincas.to_excel(writer,index=False, sheet_name='FINCAS')
          df_razas.to_excel(writer,index=False, sheet_name='RAZAS')
-         df_ganado_puro.to_excel(writer,index=False, sheet_name='GANADO_PURO')
-     
-      
-   
+         df_ganado_puro.to_excel(writer,index=False, sheet_name='GANADO_PURO')    
    def generar_consecutivo(self):
       consecutivo="0000"+str(df_cria["FINCA"].count()+1)
       l=len(consecutivo)
       consecutivo=str(consecutivo[l-3])+str(consecutivo[l-2])+str(consecutivo[l-1])
-      return str(consecutivo)
-      
+      return str(consecutivo)      
    def nacimiento(self,buscar,vaca,fn,sexo,finca,observaciones,toro=None,raza=None):
       tc = buscar.comprobar_tc(vaca, fn)
       if tc == "CN":
@@ -127,23 +123,12 @@ class Agregar_Eliminar:
       
       df_cria.loc[len(df_cria)] = [finca,toro,vaca,fn,raza,sexo,tc]
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones   ]
-      
-
-     
-
-#creamos un buscador que tiene variable buscada el id del animal   
-
+ 
 class Buscador:
-   
-
    def ordenar_fecha_df(self,df):
       df_new=df.sort_values(by='FECHA_NACIMIENTO',kind="stable")
       return df_new
-
-
 #genera un informe sobre las crias apartir de una fecha ingresada por el usuario
-
-
    def informe_crias_v(self,df,id_vaca):
       df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])#Se crea el data frame que se va a retornar para que se limpie al ejecutar la funcion
       prueba_datos=df[df["VACA"]==id_vaca]
@@ -184,13 +169,16 @@ class Buscador:
       
       return df_informe_crias,id_vaca
    
-   def informe_crias(self,df,filtros):
+   def informe_crias(self,df,filtros,dfgp): 
+      
 #Se crea el data frame que se va a retornar para que se limpie al ejecutar la funcion
       df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])  
 #Se crean los ID 
       contador_te=0
       contador_antes_2026=0
       # pide filtros para el informe
+      contador_total=0
+      contador_TE_antes_2026=0
       for i in range(len(df)):
          consecutivo="0000"
          fecha=df.iloc[i]["FECHA_NACIMIENTO"]
@@ -203,14 +191,16 @@ class Buscador:
          else:
             mes=mes
          #como se empezaron los numeros a partir del 2026 debo restar los animales anteriores a este año
-         if int(año)<2026 and (df.iloc[i]["T_C"]=="CN" or df.iloc[i]["T_C"]=="CN"):
-            contador_antes_2026+=1 #se crea para restar al consecutivo las crias antes del 2026
-
-         if df.iloc[i]["T_C"]=="TE":
-            id="id_pendiente"
+         if int(año)<2026 and df.iloc[i]["T_C"]=="CN" :
+            contador_antes_2026+=1 
+            #se crea para restar al consecutivo las crias antes del 2026
+         
+         if df.iloc[i]["T_C"]=="TE" and contador_te<len(dfgp):
+            id=dfgp.iloc[contador_te]["ID"]
             contador_te+=1 #se crea para restar al consecutivo las crias por TE
          elif (df.iloc[i]["T_C"]=="CN" and int(año)>=2026) or (df.iloc[i]["T_C"]=="IA" and int(año)>=2026):
-            consecutivo=consecutivo+str(i+1-contador_te-contador_antes_2026)
+            contador_total+=1
+            consecutivo=consecutivo+str(i+1-contador_antes_2026-contador_te)
             consecutivo=consecutivo[-3]+consecutivo[-2]+consecutivo[-1]
             id=consecutivo+"/"+mes+año[-1]
          elif(df.iloc[i]["T_C"]=="CN" and int(año)<2026) or (df.iloc[i]["T_C"]=="IA" and int(año)<2026):
@@ -219,13 +209,19 @@ class Buscador:
             id="error_revisa el codigo aqui nunca deberia entrar"
 #se  llena un nuevo df ya filtrado con todos los valores requeridos
          
-         if df.iloc[i]["FECHA_NACIMIENTO"]>=filtros[0] and (df.iloc[i]["FINCA"]==filtros[1] or filtros[1]=="incluir todos") and (df.iloc[i]["T_C"]==filtros[2]or filtros[2]=="incluir todos"):
-            edad=self.calcular_edad(df_cria.iloc[i,3])
+         if df.iloc[i]["FECHA_NACIMIENTO"]>=filtros[0]:
+            edad=self.calcular_edad(df.iloc[i,3])
             df_informe_crias.loc[i]=[id,df.iloc[i,0],df.iloc[i,1],df.iloc[i,2],df.iloc[i,3],edad,df.iloc[i,4],df.iloc[i,5],df.iloc[i,6]]
+      l1=[]
+      for j in range(len(filtros[1])):
+         l1.append(df_informe_crias[df_informe_crias["FINCA"]==filtros[1][j]])
+      df_informe_crias=pd.concat(l1)
+      l2=[]
+      for k in range(len(filtros[2])):
+         l2.append(df_informe_crias[df_informe_crias["T_C"]==filtros[2][k]])
+      df_informe_crias=pd.concat(l2)
+      
       return filtros[0],df_informe_crias
-
-
-
 
    def calcular_edad(self,fecha):
       edad = relativedelta(datetime.today(),fecha)
@@ -248,7 +244,6 @@ class Buscador:
       elif abs((fecha_te - fecha_parto).days)<=45:
          tc="TE"
       return tc
-
 
    #aqui se van a realizar diferentes funciones dependienod que se busca
    def informacion(self,tipo_animal,df_entrada,id):
@@ -295,8 +290,4 @@ class Buscador:
       else:
          df.iloc[posicion,4]=[nueva_confirmacion]
       return df
-   
-   #def buscar_registro():
-
-
    

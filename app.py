@@ -235,10 +235,12 @@ if st.session_state.informe_nacimientos:
         if st.button("Generar informe",use_container_width=True):
             st.session_state.informe_nacimientos=False
             df_cria=buscar.ordenar_fecha_df(df_cria)
-            informe=buscar.informe_crias(df_cria,filtros)
+            df_ganado_puro=buscar.ordenar_fecha_df(df_ganado_puro)
+            informe=buscar.informe_crias(df_cria,filtros,df_ganado_puro)
             texto="En este informe se muestran todas las crias nacidas a partir de la fecha: "+informe[0].strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe[1]))
             nombre_pdf = ("Informe_Nacimientos")
-            generar_informe.generar_pdf( texto,informe[1],nombre_pdf)
+            informe=buscar.ordenar_fecha_df(informe[1])
+            generar_informe.generar_pdf( texto,informe,nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):     
