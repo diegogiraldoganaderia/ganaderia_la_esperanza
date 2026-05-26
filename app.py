@@ -378,9 +378,9 @@ if st.session_state.graficos:
     nacimientos.update_layout(title={"x":0.5,"xanchor":"center"})
     nacimientos.update_traces(texttemplate="%{value}",textangle=0,marker=dict(line=dict(color="#FFFFFF", width=2)),textfont=dict(color="white",size=25), insidetextanchor="middle")
     nacimientos.update_layout(uniformtext_minsize=15, height=600,uniformtext_mode='show')
-    nacimientos.update_layout(legend=dict(font=dict(size=25)))
-    nacimientos.update_layout(xaxis=dict(tickfont=dict(size=25)))
-    nacimientos.update_yaxes( title_font=dict(size=25),showticklabels=False,showgrid=True,visible=True)
+    nacimientos.update_layout(legend=dict(font=dict(size=15)))
+    nacimientos.update_layout(xaxis=dict(tickfont=dict(size=15)))
+    nacimientos.update_yaxes( title_font=dict(size=15),showticklabels=False,showgrid=True,visible=True)
     st.plotly_chart(nacimientos, use_container_width=True)
 
 #  recuento nacimientos
@@ -413,9 +413,9 @@ if st.session_state.graficos:
     recuento_nacimientos.update_layout(title={"x":0.5,"xanchor":"center"})
     recuento_nacimientos.update_traces(texttemplate="%{value}",textangle=0,marker=dict(line=dict(color="#FFFFFF", width=2)),textfont=dict(color="white",size=25), insidetextanchor="middle")
     recuento_nacimientos.update_layout(uniformtext_minsize=15,uniformtext_mode='show')
-    recuento_nacimientos.update_layout(legend=dict(font=dict(size=25)))
-    recuento_nacimientos.update_layout(xaxis=dict(tickfont=dict(size=25)))
-    recuento_nacimientos.update_yaxes( title_font=dict(size=25),showticklabels=False,showgrid=True,visible=True)
+    recuento_nacimientos.update_layout(legend=dict(font=dict(size=15)))
+    recuento_nacimientos.update_layout(xaxis=dict(tickfont=dict(size=15)))
+    recuento_nacimientos.update_yaxes( title_font=dict(size=15),showticklabels=False,showgrid=True,visible=True)
     st.plotly_chart(recuento_nacimientos, use_container_width=True)
     
 
