@@ -119,6 +119,7 @@ with col1:
         st.session_state.modificar_df = False
         st.session_state.registros=False
         st.session_state.subir_pdf_registro=False
+        st.session_state.graficos=False
 
 #      BOTON 2
 with col2:
@@ -129,6 +130,7 @@ with col2:
         st.session_state.modificar_df = False
         st.session_state.registros=False
         st.session_state.subir_pdf_registro=False
+        st.session_state.graficos=False
 
 #      BOTON 3 
 with col3:
@@ -139,6 +141,7 @@ with col3:
         st.session_state.modificar_df = False
         st.session_state.registros=False
         st.session_state.subir_pdf_registro=False
+        st.session_state.graficos=False
 with col1:
     if st.button("MODIFICAR DATOS",use_container_width=True):
         st.session_state.modificar_df = True
@@ -147,6 +150,7 @@ with col1:
         st.session_state.informe_vacas = False
         st.session_state.registros=False
         st.session_state.subir_pdf_registro=False
+        st.session_state.graficos=False
 
 with col2:
     if st.button("REGISTROS",use_container_width=True):
@@ -156,6 +160,7 @@ with col2:
         st.session_state.modificar_df = False
         st.session_state.registros=True
         st.session_state.subir_pdf_registro=False
+        st.session_state.graficos=False
 
 with col3:
     if st.button("AÑADIR REGISTROS",use_container_width=True):
@@ -165,13 +170,17 @@ with col3:
         st.session_state.informe_vacas = False
         st.session_state.modificar_df = False
         st.session_state.registros=False
-        
-
-    st.session_state.tablas_de_datos=True
-    
-#   BOTON 5
+        st.session_state.graficos=False
+      
+    #   BOTON 5
 if st.button("GRÁFICOS",use_container_width=True):
     st.session_state.graficos=True
+    st.session_state.registro_crias=False
+    st.session_state.informe_nacimientos= False
+    st.session_state.informe_vacas = False
+    st.session_state.modificar_df = False
+    st.session_state.registros=False
+    st.session_state.subir_pdf_registro=False
 #boton 6
 #//FORMULARIOS// QUE HACEN LOS BOTONES
 if st.session_state.subir_pdf_registro:
@@ -216,10 +225,11 @@ if st.session_state.informe_nacimientos:
     fincas=[]
     for i in range(len(df_fincas)):
         fincas.append(df_fincas.iloc[i,0]) 
-    finca = st.selectbox("Finca",fincas)
-    tc=st.selectbox("Tipo_concepcion",["TE","CN","IA","incluir todos"])
+    finca = st.multiselect("Finca",fincas)
+    tc=st.multiselect("Tipo_concepcion",["TE","CN","IA"])
     fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
     filtros=[fecha,finca,tc]
+    
     col1, col2= st.columns(2)
     with col1:
         if st.button("Generar informe",use_container_width=True):
