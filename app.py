@@ -6,17 +6,12 @@ import time
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
-os.system ("cls")
-df_animal=pd.read_excel("DATA.xlsx",sheet_name=0)
-df_partos=pd.read_excel("DATA.xlsx",sheet_name=1)
-df_cria=pd.read_excel("DATA.xlsx",sheet_name=2)
-df_embriones=pd.read_excel("DATA.xlsx",sheet_name=3)
-df_inseminacion=pd.read_excel("DATA.xlsx",sheet_name=4)
-df_fincas=pd.read_excel("DATA.xlsx",sheet_name=5)
-df_razas=pd.read_excel("DATA.xlsx",sheet_name=6)
-df_ganado_puro=pd.read_excel("DATA.xlsx",sheet_name=7)
-df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
-df_informe_vaca=pd.DataFrame(columns=["INFORME"])
+
+from supabase import create_client
+
+url ="https://soyjodguzmbiggwymfdn.supabase.co"
+key ="sb_publishable_2rsYfiqDckypRhCIgUgG0Q__6DJkp-c"
+supabase = create_client(url, key)
 
 #Titulo
 st.markdown(
@@ -215,7 +210,7 @@ if st.session_state.registro_crias:
     
     if st.button("Guardar",use_container_width=True):
         nacimientos.nacimiento(buscar,vaca,fn,sexo,finca,observaciones,toro,raza)
-        nacimientos.guardar()
+        nacimientos.guardar(df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro)
         st.success("Guardado")
         st.session_state.registro_crias=False
         st.rerun()   
@@ -302,18 +297,10 @@ if st.session_state.modificar_df:
     elif dato =="GANADO PURO":
         df_ganado_puro=st.data_editor(df_ganado_puro,num_rows="dynamic")
 
-    if st.button("GUARDAR CAMBIOS",use_container_width=True):
+    if st.button("GUARDAR CAMBIOS",use_container_width=True):  
+        nacimientos.guardar(df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro)
+        time.sleep(1)
         st.success("Guardado correctamente")
-        with pd.ExcelWriter("DATA.xlsx") as writer:
-         df_animal.to_excel(writer,index=False, sheet_name='ANIMAL')
-         df_partos.to_excel(writer,index=False, sheet_name='PARTOS')
-         df_cria.to_excel(writer,index=False, sheet_name='CRIA')
-         df_embriones.to_excel(writer,index=False, sheet_name='EMBRIONES')
-         df_inseminacion.to_excel(writer,index=False, sheet_name='INSEMINACION')
-         df_fincas.to_excel(writer,index=False, sheet_name='FINCAS')
-         df_razas.to_excel(writer,index=False, sheet_name='RAZAS')
-         df_ganado_puro.to_excel(writer,index=False, sheet_name='GANADO_PURO')  
-        time.sleep(2)
         st.session_state.modificar_df=False
         st.rerun()
 
@@ -419,4 +406,4 @@ if st.session_state.graficos:
     st.plotly_chart(recuento_nacimientos, use_container_width=True,config={"displayModeBar": False,"staticPlot": True})
     
 
-#   py -m streamlit run app.py
+#   py -3.12 -m streamlit run app.py

@@ -7,18 +7,30 @@ from dateutil.relativedelta import relativedelta
 #para generar pdfs
 from fpdf import FPDF
 import math
+from supabase import create_client
 import streamlit as st
+import time
+url ="https://soyjodguzmbiggwymfdn.supabase.co"
+key ="sb_publishable_2rsYfiqDckypRhCIgUgG0Q__6DJkp-c"
+supabase = create_client(url, key)
 os.system ("cls")
-df_animal=pd.read_excel("DATA.xlsx",sheet_name=0)
-df_partos=pd.read_excel("DATA.xlsx",sheet_name=1)
-df_cria=pd.read_excel("DATA.xlsx",sheet_name=2)
-df_embriones=pd.read_excel("DATA.xlsx",sheet_name=3)
-df_inseminacion=pd.read_excel("DATA.xlsx",sheet_name=4)
-df_fincas=pd.read_excel("DATA.xlsx",sheet_name=5)
-df_razas=pd.read_excel("DATA.xlsx",sheet_name=6)
-df_ganado_puro=pd.read_excel("DATA.xlsx",sheet_name=7)
+df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
+df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
+df_partos=df_partos.drop(columns=["index"])
+df_cria=pd.DataFrame(supabase.table("CRIA").select("*").execute().data)
+df_cria=df_cria.drop(columns=["index"])
+df_embriones=pd.DataFrame(supabase.table("EMBRIONES").select("*").execute().data)
+df_embriones=df_embriones.drop(columns=["index"])
+df_inseminacion=pd.DataFrame(supabase.table("INSEMINACION").select("*").execute().data)
+df_inseminacion=df_inseminacion.drop(columns=["index"])
+df_fincas=pd.DataFrame(supabase.table("FINCAS").select("*").execute().data)
+df_fincas=df_fincas.drop(columns=["index"])
+df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
+df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
+df_ganado_puro=df_ganado_puro.drop(columns=["index"])
 df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
 df_informe_vaca=pd.DataFrame(columns=["INFORME"])
+
 
 class Informes():
  def registros(self,registro):
@@ -72,16 +84,53 @@ class Informes():
       return pdf.output(str(nombre_archivo+".pdf"))
 
 class Agregar_Eliminar:
-   def guardar(self):
-      with pd.ExcelWriter("DATA.xlsx") as writer:
-         df_animal.to_excel(writer,index=False, sheet_name='ANIMAL')
-         df_partos.to_excel(writer,index=False, sheet_name='PARTOS')
-         df_cria.to_excel(writer,index=False, sheet_name='CRIA')
-         df_embriones.to_excel(writer,index=False, sheet_name='EMBRIONES')
-         df_inseminacion.to_excel(writer,index=False, sheet_name='INSEMINACION')
-         df_fincas.to_excel(writer,index=False, sheet_name='FINCAS')
-         df_razas.to_excel(writer,index=False, sheet_name='RAZAS')
-         df_ganado_puro.to_excel(writer,index=False, sheet_name='GANADO_PURO')    
+   def guardar(self,df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro):
+
+      
+      df_animal=df_animal.dropna()
+      supabase.table("ANIMAL").delete().neq("ID",-1).execute()
+      supabase.table("ANIMAL").insert(df_animal.to_dict(orient="records")).execute()
+
+      df_partos=df_partos.reset_index()
+      df_partos=df_partos.dropna()
+      supabase.table("PARTOS").delete().neq("index",-1).execute()
+      supabase.table("PARTOS").insert(df_partos.to_dict(orient="records")).execute()
+
+      
+
+      df_cria=df_cria.reset_index()
+      df_cria=df_cria.dropna()
+      supabase.table("CRIA").delete().neq("index",-1).execute()
+      supabase.table("CRIA").insert(df_cria.to_dict(orient="records")).execute()
+   
+      df_embriones=df_embriones.reset_index()
+      df_embriones=df_embriones.dropna()
+      supabase.table("EMBRIONES").delete().neq("index",-1).execute()
+      supabase.table("EMBRIONES").insert(df_embriones.to_dict(orient="records")).execute()
+
+
+      df_inseminacion=df_inseminacion.reset_index()
+      df_inseminacion=df_inseminacion.dropna()
+      supabase.table("INSEMINACION").delete().neq("index",-1).execute()
+      supabase.table("INSEMINACION").insert(df_inseminacion.to_dict(orient="records")).execute()
+
+      df_fincas=df_fincas.reset_index()
+      df_fincas=df_fincas.dropna()
+      supabase.table("FINCAS").delete().neq("index",-1).execute()
+      supabase.table("FINCAS").insert(df_fincas.to_dict(orient="records")).execute()
+
+  
+      df_razas=df_razas.dropna()
+      supabase.table("RAZAS").delete().neq("ID",-1).execute()
+      supabase.table("RAZAS").insert(df_razas.to_dict(orient="records")).execute()
+
+      df_ganado_puro=df_ganado_puro.reset_index()
+      df_ganado_puro=df_ganado_puro.dropna()
+      supabase.table("GANADO_PURO").delete().neq("index",-1).execute()
+      supabase.table("GANADO_PURO").insert(df_ganado_puro.to_dict(orient="records")).execute()
+
+
+
    def generar_consecutivo(self):
       consecutivo="0000"+str(df_cria["FINCA"].count()+1)
       l=len(consecutivo)
@@ -123,7 +172,7 @@ class Agregar_Eliminar:
       
       df_cria.loc[len(df_cria)] = [finca,toro,vaca,fn,raza,sexo,tc]
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones   ]
- 
+
 class Buscador:
    def ordenar_fecha_df(self,df):
       df_new=df.sort_values(by='FECHA_NACIMIENTO',kind="stable")
