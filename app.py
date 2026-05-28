@@ -13,6 +13,7 @@ url ="https://soyjodguzmbiggwymfdn.supabase.co"
 key ="sb_publishable_2rsYfiqDckypRhCIgUgG0Q__6DJkp-c"
 supabase = create_client(url, key)
 
+
 #Titulo
 st.markdown(
     """
@@ -196,6 +197,7 @@ if st.session_state.subir_pdf_registro:
 if st.session_state.registro_crias: 
     vaca = st.text_input("ID de la vaca").lower()
     fn = st.date_input("Fecha nacimiento")
+    fn=pd.to_datetime(fn,format="%d/%m/%Y")
     sexo = st.selectbox("Sexo",["macho", "hembra"])
     fincas=[]
     for i in range(len(df_fincas)):
@@ -209,8 +211,8 @@ if st.session_state.registro_crias:
     observaciones = st.text_area("Observaciones")
     
     if st.button("Guardar",use_container_width=True):
-        nacimientos.nacimiento(buscar,vaca,fn,sexo,finca,observaciones,toro,raza)
-        nacimientos.guardar(df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro)
+        registro_cria=nacimientos.nacimiento(buscar,vaca,fn,sexo,finca,observaciones,toro,raza)
+        nacimientos.guardar(df_inseminacion,df_animal,registro_cria[1],registro_cria[0],df_embriones,df_fincas,df_razas,df_ganado_puro)
         st.success("Guardado")
         st.session_state.registro_crias=False
         st.rerun()   
@@ -224,6 +226,7 @@ if st.session_state.informe_nacimientos:
     tc=st.multiselect("Tipo_concepcion",["TE","CN","IA"])
     fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
     filtros=[fecha,finca,tc]
+
     
     col1, col2= st.columns(2)
     with col1:
@@ -251,9 +254,10 @@ if st.session_state.informe_vacas:
         if st.button("Generar informe",use_container_width=True):
             st.session_state.informe_vacas=False
             df=buscar.informe_crias_v(df_cria,id_vaca)
-            informacion=buscar.informacion("VACA",df[0],df[1]) 
+            informacion=buscar.informacion("VACA",df[0],df[1])
             nombre_pdf = ("Informe_Vaca_"+ str(informacion[2].replace("/", "_")))
             generar_informe.generar_pdf(informacion[0],informacion[1],nombre_pdf)
+           
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
@@ -279,6 +283,29 @@ if st.session_state.registros:
 
 #aplicacion 5
 if st.session_state.modificar_df:
+
+    df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
+    df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
+    df_partos=df_partos.drop(columns=["index"])
+    df_cria=pd.DataFrame(supabase.table("CRIA").select("*").execute().data)
+    df_cria=df_cria.drop(columns=["index"])
+    df_embriones=pd.DataFrame(supabase.table("EMBRIONES").select("*").execute().data)
+    df_embriones=df_embriones.drop(columns=["index"])
+    df_inseminacion=pd.DataFrame(supabase.table("INSEMINACION").select("*").execute().data)
+    df_inseminacion=df_inseminacion.drop(columns=["index"])
+    df_fincas=pd.DataFrame(supabase.table("FINCAS").select("*").execute().data)
+    df_fincas=df_fincas.drop(columns=["index"])
+    df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
+    df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
+    df_ganado_puro=df_ganado_puro.drop(columns=["index"])
+
+
+
+
+
+
+
+
     dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES","INSEMINACION","FINCAS","RAZAS","GANADO PURO"])
     if dato =="ANIMAL":
         df_animal=st.data_editor(df_animal,num_rows="dynamic")
@@ -297,7 +324,7 @@ if st.session_state.modificar_df:
     elif dato =="GANADO PURO":
         df_ganado_puro=st.data_editor(df_ganado_puro,num_rows="dynamic")
 
-    if st.button("GUARDAR CAMBIOS",use_container_width=True):  
+    if st.button("GUARDAR CAMBIOS",use_container_width=True):
         nacimientos.guardar(df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro)
         time.sleep(1)
         st.success("Guardado correctamente")
@@ -327,11 +354,12 @@ if st.session_state.graficos:
     st.markdown("<br>", unsafe_allow_html=True)  
     dfg1=df_cria
     filtro_finca=st.multiselect("FINCA",df_fincas)    
-    filtro_año=st.multiselect("AÑO",dfg1["FECHA_NACIMIENTO"].dt.year.unique())
+   
+    filtro_año=st.multiselect("AÑO",pd.to_datetime(dfg1["FECHA_NACIMIENTO"]).dt.year.unique())
     dfg=df_cria
     l1=[]
     for i in range(len(filtro_año)):
-        l1.append(dfg[dfg["FECHA_NACIMIENTO"].dt.year==filtro_año[i]])
+        l1.append(dfg[pd.to_datetime(dfg["FECHA_NACIMIENTO"]).dt.year==filtro_año[i]])
     if l1:   
         dfg=pd.concat(l1)
     l2=[]
@@ -354,10 +382,10 @@ if st.session_state.graficos:
                    9:"SEPTIEMBRE",10:"OCTUBRE",11:"NOVIEMBRE",12:"DICIEMBRE"}
     dfg3=pd.DataFrame(columns=["MES","CANTIDAD","AÑO"])
     contar=0
-    for i in (df_cria["FECHA_NACIMIENTO"].dt.month.unique()): 
-        for j in (df_cria["FECHA_NACIMIENTO"].dt.year.unique()):
+    for i in (pd.to_datetime(df_cria["FECHA_NACIMIENTO"]).dt.month.unique()): 
+        for j in (pd.to_datetime(df_cria["FECHA_NACIMIENTO"]).dt.year.unique()):
             dfg3.loc[contar]=[meses_espanol[i],
-                  len(df_cria[(df_cria["FECHA_NACIMIENTO"].dt.month==i)&(df_cria["FECHA_NACIMIENTO"].dt.year==j)])
+                  len(df_cria[(pd.to_datetime(df_cria["FECHA_NACIMIENTO"]).dt.month==i)&(pd.to_datetime(df_cria["FECHA_NACIMIENTO"]).dt.year==j)])
                   ,str(j)]
             contar+=1  
    
@@ -383,15 +411,15 @@ if st.session_state.graficos:
     dfg4=df_cria
     l3=[]
     for i in range(len(mes_filtrado)):
-        l3.append(dfg4[dfg4["FECHA_NACIMIENTO"].dt.month==numeros[i]])
+        l3.append(dfg4[pd.to_datetime(dfg4["FECHA_NACIMIENTO"]).dt.month==numeros[i]])
     if l3:
         dfg4=pd.concat(l3)
 
     dfg5=pd.DataFrame(columns=["FINCA","CANTIDAD","AÑO"])
     for i in (dfg4["FINCA"].unique()):
-        for j in (dfg4["FECHA_NACIMIENTO"].dt.year.unique()):
+        for j in (pd.to_datetime(dfg4["FECHA_NACIMIENTO"]).dt.year.unique()):
             dfg5.loc[contar]=[i,
-                  len(dfg4[(dfg4["FINCA"]==i)&(dfg4["FECHA_NACIMIENTO"].dt.year==j)])
+                  len(dfg4[(dfg4["FINCA"]==i)&(pd.to_datetime(dfg4["FECHA_NACIMIENTO"]).dt.year==j)])
                   ,str(j)]
             contar+=1
    
