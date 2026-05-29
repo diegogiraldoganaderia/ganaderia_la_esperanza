@@ -78,6 +78,9 @@ if "modificar_df" not in st.session_state:
 if "subir_pdf_registro" not in st.session_state:
     st.session_state.subir_pdf_registro=False
 
+if "informe_embriones" not in st.session_state:
+    st.session_state.informe_embriones=False
+
 if "graficos" not in st.session_state:
     st.session_state.graficos=False
 #Botones 
@@ -169,6 +172,17 @@ with col3:
         st.session_state.graficos=False
       
     #   BOTON 5
+
+if  st.button("INFORME EMBRIONES"):
+    st.session_state.informe_embriones=True
+    st.session_state.graficos=False
+    st.session_state.registro_crias=False
+    st.session_state.informe_nacimientos= False
+    st.session_state.informe_vacas = False
+    st.session_state.modificar_df = False
+    st.session_state.registros=False
+    st.session_state.subir_pdf_registro=False
+
 if st.button("GRÁFICOS",use_container_width=True):
     st.session_state.graficos=True
     st.session_state.registro_crias=False
@@ -178,6 +192,7 @@ if st.button("GRÁFICOS",use_container_width=True):
     st.session_state.registros=False
     st.session_state.subir_pdf_registro=False
 #boton 6
+
 #//FORMULARIOS// QUE HACEN LOS BOTONES
 if st.session_state.subir_pdf_registro:
     st.title("Subir PDF a carpeta")
@@ -218,6 +233,7 @@ if st.session_state.registro_crias:
         st.rerun()   
 #aplicacion 2
 if st.session_state.informe_nacimientos:  
+    
     fecha=st.date_input("A partir de que fecha desea el informe")
     fincas=[]
     for i in range(len(df_fincas)):
@@ -330,6 +346,29 @@ if st.session_state.modificar_df:
         st.success("Guardado correctamente")
         st.session_state.modificar_df=False
         st.rerun()
+
+#aplicacion 6
+if st.session_state.informe_embriones:
+    fecha=st.date_input("A partir de que fecha desea el informe")
+    finca=st.multiselect("finca",df_fincas)
+    compania=st.multiselect("Compañia",df_embriones["COMPANIA"].unique())
+    x1=st.multiselect("X1",df_embriones["X1"].unique())
+    x3=st.multiselect("X3",df_embriones["X3"].unique())
+    raza=st.multiselect("raza",df_embriones["RAZA"].unique())
+    if st.button("Generar informe",use_container_width=True):
+        st.session_state.informe_embriones=False
+        informe=Buscador.informe_embriones(df_embriones,raza,fecha,finca,compania,x1,x3)
+        #st.session_state.informe_embriones=False
+        texto="En este informe se muestran tods los procesos de embrion a partir de la fecha: "+str(fecha)
+        nombre_pdf = ("Informe_Embriones")
+        generar_informe.generar_pdf(texto,informe,nombre_pdf)
+        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+            st.rerun()     
+            
+
+    
+
 
 #graficos
 if st.session_state.graficos:

@@ -13,7 +13,7 @@ import time
 url ="https://soyjodguzmbiggwymfdn.supabase.co"
 key ="sb_publishable_2rsYfiqDckypRhCIgUgG0Q__6DJkp-c"
 supabase = create_client(url, key)
-os.system ("cls")
+
 df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
 df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
 df_partos=df_partos.drop(columns=["index"])
@@ -341,3 +341,35 @@ class Buscador:
          df.iloc[posicion,4]=[nueva_confirmacion]
       return df
    
+   def informe_embriones(df,raza,fecha,finca,compania,x1,x3):
+      
+      df=df[pd.to_datetime(df["FECHA_SINCRONIZACION"])>=pd.to_datetime(fecha)]
+      
+      l_finca=[]
+      for i in finca:
+         l_finca.append(df[df["FINCA"]==i])
+      df=pd.concat(l_finca)
+      l_compania=[]
+      for i in compania:
+         l_compania.append(df[df["COMPANIA"]==i])
+      df=pd.concat(l_compania)
+   
+      l_x1=[]
+      for i in x1:
+         l_x1.append(df[df["X1"]==i])
+      df=pd.concat(l_x1)
+
+      l_x3=[]
+      for i in x3:
+         l_x3.append(df[df["X3"]==i])
+      df=pd.concat(l_x3)
+
+      l_raza=[]
+      
+      for i in raza:
+         l_raza.append(df[df["RAZA"]==i])
+      df=pd.concat(l_raza)
+      return df
+   
+
+
