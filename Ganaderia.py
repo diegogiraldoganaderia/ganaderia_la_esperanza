@@ -342,27 +342,32 @@ class Buscador:
       return df
    
    def informe_embriones(df,raza,fecha,finca,compania,x1,x3):
-      
-      df=df[pd.to_datetime(df["FECHA_SINCRONIZACION"])>=pd.to_datetime(fecha)]
+      if x1=="x1":
+         df=df[pd.to_datetime(df["FECHA_NACIMIENTO"])>=pd.to_datetime(fecha)]
+      else:
+         df=df[pd.to_datetime(df["FECHA_SINCRONIZACION"])>=pd.to_datetime(fecha)]
       
       l_finca=[]
       for i in finca:
          l_finca.append(df[df["FINCA"]==i])
       df=pd.concat(l_finca)
-      l_compania=[]
-      for i in compania:
-         l_compania.append(df[df["COMPANIA"]==i])
-      df=pd.concat(l_compania)
-   
-      l_x1=[]
-      for i in x1:
-         l_x1.append(df[df["X1"]==i])
-      df=pd.concat(l_x1)
+      
+      if compania!="compania":
+         l_compania=[]
+         for i in compania:
+            l_compania.append(df[df["COMPANIA"]==i])
+         df=pd.concat(l_compania)
+      if x1!="x1":
+         l_x1=[]
+         for i in x1:
+            l_x1.append(df[df["X1"]==i])
+         df=pd.concat(l_x1)
 
-      l_x3=[]
-      for i in x3:
-         l_x3.append(df[df["X3"]==i])
-      df=pd.concat(l_x3)
+      if x3!="x3":
+         l_x3=[]
+         for i in x3:
+            l_x3.append(df[df["X3"]==i])
+         df=pd.concat(l_x3)
 
       l_raza=[]
       
