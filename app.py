@@ -11,7 +11,6 @@ from supabase import create_client
 
 url ="https://soyjodguzmbiggwymfdn.supabase.co"
 key ="sb_secret_bB5UAtzbkyxob7xu_8O4Mw_vwbEkb4K"
-#"sb_publishable_2rsYfiqDckypRhCIgUgG0Q__6DJkp-c"
 
 supabase = create_client(url, key)
 
@@ -109,7 +108,7 @@ if st.button("Inicio",use_container_width=True):
     st.session_state.registros=False
     st.session_state.subir_pdf_registro=False
     st.session_state.graficos=False
-    st.session_state.informe_embriones=True
+    st.session_state.informe_embriones=False
     st.session_state.informe_ganado_puro=False
     
 
@@ -126,7 +125,7 @@ with col1:
         st.session_state.registros=False
         st.session_state.subir_pdf_registro=False
         st.session_state.graficos=False
-        st.session_state.informe_embriones=True
+        st.session_state.informe_embriones=False
         st.session_state.informe_ganado_puro=False
 
 #      BOTON 2
@@ -139,7 +138,7 @@ with col2:
         st.session_state.registros=False
         st.session_state.subir_pdf_registro=False
         st.session_state.graficos=False
-        st.session_state.informe_embriones=True
+        st.session_state.informe_embriones=False
         st.session_state.informe_ganado_puro=False
 
 #      BOTON 3 
@@ -152,7 +151,7 @@ with col3:
         st.session_state.registros=False
         st.session_state.subir_pdf_registro=False
         st.session_state.graficos=False
-        st.session_state.informe_embriones=True
+        st.session_state.informe_embriones=False
         st.session_state.informe_ganado_puro=False
 with col1:
     if st.button("MODIFICAR DATOS",use_container_width=True):
