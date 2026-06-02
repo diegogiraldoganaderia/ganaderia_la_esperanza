@@ -278,21 +278,37 @@ class Buscador:
       return f"tiene una edad de {edad.years} años, {edad.months} meses y {edad.days} dias"
 
    def  comprobar_tc(self,id,fecha_parto):
-      p_embriones=df_embriones[df_embriones["RECEPTORA"]==id]
-      fecha_ia=df_inseminacion[df_inseminacion["ID"]==id].iloc[:,0].max()+pd.Timedelta(days=285)
-      fecha_ia=fecha_ia.date()
-      fecha_te=df_embriones[df_embriones["RECEPTORA"]==id].iloc[:,2].max()+pd.Timedelta(days=285)
-      fecha_te=fecha_te.date()
-      if p_embriones.empty or abs((fecha_te - fecha_parto).days)>45:
-         p_inseminacion=df_inseminacion[df_inseminacion["ID"]==id]
-         if p_inseminacion.empty:
+      datos_embriones=df_embriones[df_embriones["RECEPTORA"]==id]
+      datos_inseminacion=df_inseminacion[df_inseminacion["ID"]==id]
+      if datos_embriones.empty and datos_inseminacion.empty:
+         tc="CN"
+
+      elif not datos_embriones.empty and not datos_inseminacion.empty:
+         if abs((fecha_ia - fecha_parto).days)<=45:
+            tc="IA"
+         elif abs((fecha_te - fecha_parto).days)<=45:
+            tc="TE"
+         else:
             tc="CN"
-         elif abs((fecha_ia - fecha_parto).days)<=45:
+
+      elif not datos_embriones.empty:
+         fecha_ia=df_inseminacion[df_inseminacion["ID"]==id].iloc[:,0].max()+pd.Timedelta(days=285)
+         fecha_ia=fecha_ia.date()
+         if abs((fecha_ia - fecha_parto).days)<=45:
             tc="IA"
          else:
             tc="CN"
-      elif abs((fecha_te - fecha_parto).days)<=45:
-         tc="TE"
+      
+      elif not datos_inseminacion.empty:
+         fecha_te=df_embriones[df_embriones["RECEPTORA"]==id].iloc[:,2].max()+pd.Timedelta(days=285)
+         fecha_te=fecha_te.date()
+         if abs((fecha_te - fecha_parto).days)<=45:
+            tc="TE"
+         else:
+            tc="CN"
+      
+      
+
       return tc
 
    #aqui se van a realizar diferentes funciones dependienod que se busca
