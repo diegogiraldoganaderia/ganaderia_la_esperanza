@@ -6,14 +6,43 @@ import time
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
-
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from supabase import create_client
 
 url ="https://soyjodguzmbiggwymfdn.supabase.co"
 key ="sb_secret_bB5UAtzbkyxob7xu_8O4Mw_vwbEkb4K"
 
 supabase = create_client(url, key)
+#Alerta de correo díario
+def enviar_correo_diario():
+   remitente = "diegogiraldo1304@gmail.com"
+   destinatario = "andres-1304@hotmail.com"
+   contrasenia = os.environ.get("EMAIL_PASSWORD")
 
+# 2. Creación del mensaje
+   mensaje = MIMEMultipart()
+   mensaje["From"] = remitente
+   mensaje["To"] = destinatario
+   mensaje["Subject"] = "Reporte Diario Palpación animales por monta natural 🚀"
+   cuerpo =buscar.informar_servicios(df_servicios)
+   mensaje.attach(MIMEText(cuerpo, "plain"))
+   try:
+    # 3. Conexión con el servidor de Gmail (SMTP)
+      servidor = smtplib.SMTP("smtp.office365.com", 587)
+      servidor.starttls() # Conexión segura
+    # Iniciar sesión y enviar
+      servidor.login(remitente, contrasenia)
+      servidor.sendmail(remitente, destinatario, mensaje.as_string())
+   except Exception as e:
+      print(f"Hubo un error: {e}")
+   finally:
+      servidor.quit() # Cerrar la conexión
+
+# Esto permite que GitHub ejecute la función desde la consola
+if __name__ == "__main__":
+    enviar_correo_diario()
 
 #Titulo
 st.markdown(
@@ -240,8 +269,7 @@ if st.session_state.subir_pdf_registro:
         if st.success("Guardado correctamente"):
             st.session_state.subir_pdf_registro=False
             st.rerun()
-
-    
+ 
 #aplicacion 1
 if st.session_state.registro_crias: 
     vaca = st.text_input("ID de la vaca").lower()
@@ -347,6 +375,8 @@ if st.session_state.modificar_df:
     df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
     df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
     df_ganado_puro=df_ganado_puro.drop(columns=["index"])
+    df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
+    df_servicios=df_servicios.drop(columns=["index"])
 
 
 
@@ -355,7 +385,7 @@ if st.session_state.modificar_df:
 
 
 
-    dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES","INSEMINACION","FINCAS","RAZAS","GANADO PURO"])
+    dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES","INSEMINACION","FINCAS","RAZAS","GANADO PURO","REPORTE SERVICIOS"])
     if dato =="ANIMAL":
         df_animal=st.data_editor(df_animal,num_rows="dynamic")
     elif dato =="PARTOS":
@@ -372,6 +402,8 @@ if st.session_state.modificar_df:
         df_razas=st.data_editor(df_razas,num_rows="dynamic")
     elif dato =="GANADO PURO":
         df_ganado_puro=st.data_editor(df_ganado_puro,num_rows="dynamic")
+    elif dato =="REPORTE SERVICIOS":
+        df_servicios=st.data_editor(df_servicios,num_rows="dynamic")
 
     if st.button("GUARDAR CAMBIOS",use_container_width=True):
         nacimientos.guardar(df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro)

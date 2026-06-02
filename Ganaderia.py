@@ -10,6 +10,10 @@ import math
 from supabase import create_client
 import streamlit as st
 import time
+
+
+
+
 url ="https://soyjodguzmbiggwymfdn.supabase.co"
 key ="sb_publishable_2rsYfiqDckypRhCIgUgG0Q__6DJkp-c"
 supabase = create_client(url, key)
@@ -28,9 +32,10 @@ df_fincas=df_fincas.drop(columns=["index"])
 df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
 df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
 df_ganado_puro=df_ganado_puro.drop(columns=["index"])
+df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
+df_servicios=df_servicios.drop(columns=["index"])
 df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
 df_informe_vaca=pd.DataFrame(columns=["INFORME"])
-
 
 class Informes():
  def registros(self,registro):
@@ -88,6 +93,8 @@ class Informes():
       
 # 5. Guardar el archivo final
       return pdff.output(str(nombre_archivo+".pdf"))
+ 
+
 
 class Agregar_Eliminar:
    def guardar(self,df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro):
@@ -122,6 +129,11 @@ class Agregar_Eliminar:
       df_ganado_puro=df_ganado_puro.dropna()
       supabase.table("GANADO_PURO").delete().neq("index",-1).execute()
       supabase.table("GANADO_PURO").insert(df_ganado_puro.to_dict(orient="records")).execute()
+
+      df_servicios=df_servicios.reset_index()
+      df_servicios=df_servicios.dropna()
+      supabase.table("SERVICIO").delete().neq("index",-1).execute()
+      supabase.table("SERVICIO").insert(df_servicios.to_dict(orient="records")).execute()
 
 
 
@@ -392,5 +404,12 @@ class Buscador:
       df=pd.concat(l_raza)
       return df
    
-
-
+   def informar_servicios(df):
+      fecha_actual=datetime.now()
+      dic_texto=[]
+      texto=""
+      for i in range(len(df)):        
+         if((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days)>=30:
+            texto="La vaca "+df.iloc[i]["VACA"]+" Tuvo un servicio del el toro "+df.iloc[i]["TORO"]+" el día "+str(df.iloc[i]["FECHA_SERVICIO"])+" ya han pasado "+str(((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days))+" días y aún está pendiente la palpación.\n\n"+texto
+      return texto
+#Informes.enviar_correo()
