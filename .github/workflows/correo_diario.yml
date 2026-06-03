@@ -1,10 +1,11 @@
 name: Envió de Correo Diario
 
 on:
+  workflow_dispatch:
   schedule:
     # Se ejecuta a las 13:00 UTC (8:00 AM hora de Colombia/CDMX, por ejemplo)
     # De lunes (1) a sábado (6)
-    - cron: '0 16 * * 1-6'
+    - cron: '0 17 * * 1-6'
 
 jobs:
   enviar-correo:
