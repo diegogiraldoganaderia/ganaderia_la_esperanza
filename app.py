@@ -6,9 +6,6 @@ import time
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from supabase import create_client
 
 url ="https://soyjodguzmbiggwymfdn.supabase.co"
@@ -23,49 +20,11 @@ nacimientos = Agregar_Eliminar()
 generar_informe=Informes()
 
 #Alerta de correo díario
-def enviar_correo_diario():
-    df=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
-    df=df.drop(columns=["index"])
-    df=df[df["ESTADO"]=="pendiente"]
-    remitente = "diegogiraldo1304@gmail.com"
-    destinatario = "diegogiraldo1304@gmail.com"
-    contrasenia = os.environ.get("EMAIL_PASSWORD")
 
-# 2. Creación del mensaje
-    mensaje = MIMEMultipart()
-    mensaje["From"] = remitente
-    mensaje["To"] = destinatario
-    mensaje["Subject"] = "Reporte Diario Palpación animales por monta natural 🚀"
-    fecha_actual=datetime.now()
-    cuerpo=""
-    contador_servicios=0
-    
-    for i in range(len(df)):
-        if((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days)>=30:
-            contador_servicios+=1   
-            cuerpo="La vaca "+df.iloc[i]["VACA"]+" Tuvo un servicio del el toro "+df.iloc[i]["TORO"]+" el día "+str(df.iloc[i]["FECHA_SERVICIO"])+" ya han pasado "+str(((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days))+" días y aún está pendiente la palpación.\n\n"+cuerpo
-    mensaje.attach(MIMEText(cuerpo, "plain"))
-    
-    if contador_servicios>0:
-        try:
-    # 3. Conexión con el servidor de Gmail (SMTP)
-            servidor = smtplib.SMTP("smtp.gmail.com", 587)#smtp.office365.com
-            servidor.starttls() # Conexión segura
-    # Iniciar sesión y enviar
-            servidor.login(remitente, contrasenia)
-            servidor.sendmail(remitente, destinatario, mensaje.as_string())
-        except Exception as e:
-            print(f"Hubo un error: {e}")
-        finally:
-            servidor.quit() # Cerrar la conexión
-    else:
-        pass
 # Esto permite que GitHub ejecute la función desde la consola
 
 
 
-if __name__ == "__main__":
-    enviar_correo_diario()
 
 #Titulo
 st.markdown(
