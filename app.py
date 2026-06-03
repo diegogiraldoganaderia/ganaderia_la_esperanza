@@ -24,6 +24,9 @@ generar_informe=Informes()
 
 #Alerta de correo díario
 def enviar_correo_diario():
+   df=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
+   df=df_servicios.drop(columns=["index"])
+
    remitente = "diegogiraldo1304@gmail.com"
    destinatario = "andres-1304@hotmail.com"
    contrasenia = os.environ.get("EMAIL_PASSWORD")
@@ -33,7 +36,12 @@ def enviar_correo_diario():
    mensaje["From"] = remitente
    mensaje["To"] = destinatario
    mensaje["Subject"] = "Reporte Diario Palpación animales por monta natural 🚀"
-   cuerpo =buscar.informar_servicios(df_servicios)
+   fecha_actual=datetime.now()
+   cuerpo=""
+   for i in range(len(df)):        
+    if((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days)>=30:
+        cuerpo="La vaca "+df.iloc[i]["VACA"]+" Tuvo un servicio del el toro "+df.iloc[i]["TORO"]+" el día "+str(df.iloc[i]["FECHA_SERVICIO"])+" ya han pasado "+str(((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days))+" días y aún está pendiente la palpación.\n\n"+cuerpo
+
    mensaje.attach(MIMEText(cuerpo, "plain"))
    try:
     # 3. Conexión con el servidor de Gmail (SMTP)
