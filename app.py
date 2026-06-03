@@ -15,6 +15,13 @@ url ="https://soyjodguzmbiggwymfdn.supabase.co"
 key ="sb_secret_bB5UAtzbkyxob7xu_8O4Mw_vwbEkb4K"
 
 supabase = create_client(url, key)
+
+
+#objetos
+buscar = Buscador()
+nacimientos = Agregar_Eliminar()
+generar_informe=Informes()
+
 #Alerta de correo díario
 def enviar_correo_diario():
    remitente = "diegogiraldo1304@gmail.com"
@@ -63,10 +70,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-#objetos
-buscar = Buscador()
-nacimientos = Agregar_Eliminar()
-generar_informe=Informes()
 
 
 #fondo
