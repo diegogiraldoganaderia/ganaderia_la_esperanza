@@ -404,12 +404,3 @@ class Buscador:
       df=pd.concat(l_raza)
       return df
    
-   def informar_servicios(df):
-      fecha_actual=datetime.now()
-      dic_texto=[]
-      texto=""
-      for i in range(len(df)):        
-         if((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days)>=30:
-            texto="La vaca "+df.iloc[i]["VACA"]+" Tuvo un servicio del el toro "+df.iloc[i]["TORO"]+" el día "+str(df.iloc[i]["FECHA_SERVICIO"])+" ya han pasado "+str(((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days))+" días y aún está pendiente la palpación.\n\n"+texto
-      return texto
-#Informes.enviar_correo()
