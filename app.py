@@ -25,7 +25,7 @@ generar_informe=Informes()
 #Alerta de correo díario
 def enviar_correo_diario():
    df=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
-   df=df_servicios.drop(columns=["index"])
+   df=df.drop(columns=["index"])
 
    remitente = "diegogiraldo1304@gmail.com"
    destinatario = "andres-1304@hotmail.com"
