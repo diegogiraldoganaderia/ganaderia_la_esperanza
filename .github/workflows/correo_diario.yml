@@ -24,4 +24,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Ejecutar el script del correo
-        run: python app.py
+        run: python -c "import app; app.enviar_correo_diario()"
