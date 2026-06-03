@@ -5,7 +5,7 @@ on:
   schedule:
     # Se ejecuta a las 13:00 UTC (8:00 AM hora de Colombia/CDMX, por ejemplo)
     # De lunes (1) a sábado (6)
-    - cron: '29 17 * * 1-6'
+    - cron: '0 13* * 1-6'
 
 jobs:
   enviar-correo:
