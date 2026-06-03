@@ -267,7 +267,7 @@ if st.session_state.registro_crias:
     
     if st.button("Guardar",use_container_width=True):
         registro_cria=nacimientos.nacimiento(buscar,vaca,fn,sexo,finca,observaciones,toro,raza)
-        nacimientos.guardar(df_inseminacion,df_animal,registro_cria[1],registro_cria[0],df_embriones,df_fincas,df_razas,df_ganado_puro)
+        nacimientos.guardar(df_inseminacion,df_animal,registro_cria[1],registro_cria[0],df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios)
         st.success("Guardado")
         st.session_state.registro_crias=False
         st.rerun()   
@@ -384,7 +384,7 @@ if st.session_state.modificar_df:
         df_servicios=st.data_editor(df_servicios,num_rows="dynamic")
 
     if st.button("GUARDAR CAMBIOS",use_container_width=True):
-        nacimientos.guardar(df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro)
+        nacimientos.guardar(df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios)
         time.sleep(1)
         st.success("Guardado correctamente")
         st.session_state.modificar_df=False

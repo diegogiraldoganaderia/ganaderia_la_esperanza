@@ -97,7 +97,7 @@ class Informes():
 
 
 class Agregar_Eliminar:
-   def guardar(self,df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro):
+   def guardar(self,df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios):
       df_animal=df_animal.dropna()
       supabase.table("ANIMAL").delete().neq("ID",-1).execute()
       supabase.table("ANIMAL").insert(df_animal.to_dict(orient="records")).execute()
