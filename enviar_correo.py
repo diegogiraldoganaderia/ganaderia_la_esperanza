@@ -13,7 +13,7 @@ def enviar_correo_diario():
     df=df.drop(columns=["index"])
     df=df[df["ESTADO"]=="pendiente"]
     remitente = "diegogiraldo1304@gmail.com"
-    destinatario = "diegogiraldo1304@gmail.com"
+    destinatario = "andres-1304@hotmail.com"
     contrasenia = os.environ.get("EMAIL_PASSWORD")
 
 # 2. Creación del mensaje
@@ -34,7 +34,7 @@ def enviar_correo_diario():
     if contador_servicios>0:
         try:
     # 3. Conexión con el servidor de Gmail (SMTP)
-            servidor = smtplib.SMTP("smtp.gmail.com", 587)#smtp.office365.com
+            servidor = smtplib.SMTP("smtp.office365.com", 587)#smtp.office365.com smtp.gmail.com
             servidor.starttls() # Conexión segura
     # Iniciar sesión y enviar
             servidor.login(remitente, contrasenia)
