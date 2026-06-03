@@ -3,8 +3,7 @@ name: Envió de Correo Diario
 on:
   workflow_dispatch:
   schedule:
-    # Se ejecuta a las 13:00 UTC (8:00 AM hora de Colombia/CDMX, por ejemplo)
-    # De lunes (1) a sábado (6)
+    # Se ejecuta a las 13:00 UTC (8:00 AM hora de Colombia)
     - cron: '0 13 * * 1-6'
 
 jobs:
@@ -19,9 +18,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Instalar dependencias
-        run: |
-          pip install -r requirements.txt
-
       - name: Ejecutar el script del correo
-        run: python -c "import app; app.enviar_correo_diario()"
+        env:
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        run: python enviar_correo.py
