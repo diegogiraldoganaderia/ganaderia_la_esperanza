@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # Se ejecuta a las 13:00 UTC (8:00 AM hora de Colombia) de lunes a sábado
-    - cron: '30 15 * * 1-6'
+    - cron: '36 16 * * 1-6'
 
 jobs:
   enviar-correo:
