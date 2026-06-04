@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # Se ejecuta a las 13:00 UTC (8:00 AM hora de Colombia) de lunes a sábado
-    - cron: '36 16 * * 1-6'
+    - cron: '27 17 * * 1-6'
 
 jobs:
   enviar-correo:
@@ -17,9 +17,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-          
+
       - name: Instalar dependencias del correo
-        run: pip install supabase pandas
+        run: |
+          pip install supabase pandas
 
       - name: Ejecutar el script del correo
         env:
