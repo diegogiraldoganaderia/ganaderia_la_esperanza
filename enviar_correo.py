@@ -4,7 +4,7 @@ from email.mime.multipart import MIMEMultipart
 import os
 from supabase import create_client
 import pandas as pd
-os.system ("cls")
+
 url ="https://soyjodguzmbiggwymfdn.supabase.co"
 key ="sb_secret_bB5UAtzbkyxob7xu_8O4Mw_vwbEkb4K"
 from datetime import datetime
