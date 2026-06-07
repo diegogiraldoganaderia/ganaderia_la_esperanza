@@ -48,7 +48,6 @@ def enviar_correo_diario():
 
 
     cuerpototal=Encabezado1+cuerpo+encabezado2+cuerpo2
-    print(cuerpototal)
     mensaje.attach(MIMEText(cuerpototal, "plain"))
 
     if contador_servicios>0:
