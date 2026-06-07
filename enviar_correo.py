@@ -20,7 +20,7 @@ def enviar_correo_diario():
 
 
     remitente = "diegogiraldo1304@gmail.com"
-    destinatario ="diegogiraldo1304@gmail.com"     #"andres-1304@hotmail.com"
+    destinatario ="andres-1304@hotmail.com"     #"andres-1304@hotmail.com"
     contrasenia = os.environ.get("EMAIL_PASSWORD")
 
 # 2. Creación del mensaje
@@ -29,15 +29,16 @@ def enviar_correo_diario():
     mensaje["To"] = destinatario
     mensaje["Subject"] = "Reporte Diario De Reproducción 🚀"
     fecha_actual=datetime.now()
-    cuerpo="VACAS SERVIDAS POR EL TORO PENDIENTE DE PLAPACIÓN\n"
+    Encabezado1="VACAS SERVIDAS POR EL TORO PENDIENTE DE PLAPACIÓN\n\n"
     contador_servicios=0
-    
+    cuerpo=""
     for i in range(len(df)):
         if((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days)>=30:
             contador_servicios+=1   
             cuerpo="La vaca "+df.iloc[i]["VACA"]+" Tuvo un servicio del toro "+df.iloc[i]["TORO"]+" el día "+str(df.iloc[i]["FECHA_SERVICIO"])+" ya han pasado "+str(((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days))+" días y aún está pendiente la palpación.\n\n"+cuerpo
     
-    cuerpo2=cuerpo+"\nVACAS PARIDAS PENDIENTES DEL PROTOCOLO DE REPRODUCCIÓN\n"
+    encabezado2="\nVACAS PARIDAS PENDIENTES DEL PROTOCOLO DE REPRODUCCIÓN\n\n"
+    cuerpo2=""
     for i in range(len(df2)):
         if((fecha_actual-pd.to_datetime(df2.iloc[i]["FECHA_PARTO"])).days)>=35:
             contador_servicios+=1   
@@ -46,8 +47,9 @@ def enviar_correo_diario():
 
 
 
-
-    mensaje.attach(MIMEText(cuerpo2, "plain"))
+    cuerpototal=Encabezado1+cuerpo+encabezado2+cuerpo2
+    print(cuerpototal)
+    mensaje.attach(MIMEText(cuerpototal, "plain"))
 
     if contador_servicios>0:
         try:
@@ -66,4 +68,4 @@ def enviar_correo_diario():
 
 
 if __name__ == "__main__":
-   enviar_correo_diario()
+    enviar_correo_diario()
