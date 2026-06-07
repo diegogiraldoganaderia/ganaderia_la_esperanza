@@ -53,7 +53,7 @@ def enviar_correo_diario():
     if contador_servicios>0:
         try:
     # 3. Conexión con el servidor de Gmail (SMTP)
-            servidor = smtplib.SMTP("smtp.office365.com", 587)#smtp.office365.com smtp.gmail.com
+            servidor = smtplib.SMTP("smtp.gmail.com", 587)#smtp.office365.com smtp.gmail.com
             servidor.starttls() # Conexión segura
     # Iniciar sesión y enviar
             servidor.login(remitente, contrasenia)
