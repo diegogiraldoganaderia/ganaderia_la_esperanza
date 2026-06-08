@@ -34,6 +34,8 @@ df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().
 df_ganado_puro=df_ganado_puro.drop(columns=["index"])
 df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
 df_servicios=df_servicios.drop(columns=["index"])
+df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data)
+df_protocolo=df_protocolo.drop(columns=["index"])
 df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
 df_informe_vaca=pd.DataFrame(columns=["INFORME"])
 
@@ -95,9 +97,8 @@ class Informes():
       return pdff.output(str(nombre_archivo+".pdf"))
  
 
-
 class Agregar_Eliminar:
-   def guardar(self,df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios):
+   def guardar(self,df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios,df_protocolo):
       df_animal=df_animal.dropna()
       supabase.table("ANIMAL").delete().neq("ID",-1).execute()
       supabase.table("ANIMAL").insert(df_animal.to_dict(orient="records")).execute()
@@ -134,6 +135,11 @@ class Agregar_Eliminar:
       df_servicios=df_servicios.dropna()
       supabase.table("SERVICIO").delete().neq("index",-1).execute()
       supabase.table("SERVICIO").insert(df_servicios.to_dict(orient="records")).execute()
+
+      df_protocolo=df_protocolo.reset_index()
+      df_protocolo=df_protocolo.dropna()
+      supabase.table("PROTOCOLO").delete().neq("index",-1).execute()
+      supabase.table("PROTOCOLO").insert(df_protocolo.to_dict(orient="records")).execute()
 
 
 
@@ -181,7 +187,8 @@ class Agregar_Eliminar:
       df_cria.loc[len(df_cria)] = [finca,toro,vaca,str(fn),raza,sexo,tc]
       
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones]
-      return df_cria,df_partos
+      df_protocolo.loc[len(df_partos)]=[vaca,str(fn),finca,"pendiente"]
+      return df_cria,df_partos,df_protocolo
 
 class Buscador:
    def ordenar_fecha_df(self,df):
