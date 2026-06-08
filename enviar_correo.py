@@ -29,20 +29,20 @@ def enviar_correo_diario():
     mensaje["To"] = destinatario
     mensaje["Subject"] = "Reporte Diario De Reproducción 🚀"
     fecha_actual=datetime.now()
-    Encabezado1="VACAS SERVIDAS POR EL TORO PENDIENTE DE PLAPACIÓN\n\n"
+    Encabezado1="VACAS SERVIDAS POR EL TORO PENDIENTE DE PALPACIÓN\n\n"
     contador_servicios=0
     cuerpo=""
     for i in range(len(df)):
         if((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days)>=30:
             contador_servicios+=1   
-            cuerpo="La vaca "+df.iloc[i]["VACA"]+" Tuvo un servicio del toro "+df.iloc[i]["TORO"]+" el día "+str(df.iloc[i]["FECHA_SERVICIO"])+" ya han pasado "+str(((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days))+" días y aún está pendiente la palpación.\n\n"+cuerpo
+            cuerpo="La vaca "+df.iloc[i]["VACA"]+" Tuvo un servicio en "+df.iloc[i]["FINCA"]+" del toro "+df.iloc[i]["TORO"]+" el día "+str(df.iloc[i]["FECHA_SERVICIO"])+" ya han pasado "+str(((fecha_actual-pd.to_datetime(df.iloc[i]["FECHA_SERVICIO"])).days))+" días y aún está pendiente la palpación.\n\n"+cuerpo
     
     encabezado2="\nVACAS PARIDAS PENDIENTES DEL PROTOCOLO DE REPRODUCCIÓN\n\n"
     cuerpo2=""
     for i in range(len(df2)):
         if((fecha_actual-pd.to_datetime(df2.iloc[i]["FECHA_PARTO"])).days)>=35:
             contador_servicios+=1   
-            cuerpo2="La vaca "+df2.iloc[i]["ID"]+" parió el día "+str(df2.iloc[i]["FECHA_PARTO"])+" ya han pasado "+str(((fecha_actual-pd.to_datetime(df2.iloc[i]["FECHA_PARTO"])).days))+" días y aún está pendiente del protocolo de reprodución.\n\n"+cuerpo2
+            cuerpo2="La vaca "+df2.iloc[i]["ID"]+" parió el día "+str(df2.iloc[i]["FECHA_PARTO"])+"en la finca "+df2.iloc[i]["FINCA"]+" ya han pasado "+str(((fecha_actual-pd.to_datetime(df2.iloc[i]["FECHA_PARTO"])).days))+" días y aún está pendiente del protocolo de reprodución.\n\n"+cuerpo2
     
 
 
