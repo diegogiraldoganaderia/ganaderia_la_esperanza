@@ -267,7 +267,7 @@ if st.session_state.registro_crias:
     
     if st.button("Guardar",use_container_width=True):
         registro_cria=nacimientos.nacimiento(buscar,vaca,fn,sexo,finca,observaciones,toro,raza)
-        nacimientos.guardar(df_inseminacion,df_animal,registro_cria[1],registro_cria[0],df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios)
+        nacimientos.guardar(df_inseminacion,df_animal,registro_cria[1],registro_cria[0],df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios,df_protocolo)
         st.success("Guardado")
         st.session_state.registro_crias=False
         st.rerun()   
@@ -355,15 +355,22 @@ if st.session_state.modificar_df:
     df_ganado_puro=df_ganado_puro.drop(columns=["index"])
     df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
     df_servicios=df_servicios.drop(columns=["index"])
+    df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data)
+    df_protocolo=df_protocolo.drop(columns=["index"])
+    df_protocolo=df_protocolo[df_protocolo["PROTOCOLO"]=="pendiente"]
+    
+    fecha_actual=datetime.now()
+    dias=[]
+    for i in range(len(df_protocolo)):
+        dias.append((fecha_actual-pd.to_datetime(df_protocolo.iloc[i]["FECHA_PARTO"])).days)
+    df_protocolo["DIAS DE PARIDA"]=dias
 
 
 
 
 
 
-
-
-    dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES","INSEMINACION","FINCAS","RAZAS","GANADO PURO","REPORTE SERVICIOS"])
+    dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES","INSEMINACION","FINCAS","RAZAS","GANADO PURO","REPORTE SERVICIOS","PROTOCOLO REPRODUCCION"])
     if dato =="ANIMAL":
         df_animal=st.data_editor(df_animal,num_rows="dynamic")
     elif dato =="PARTOS":
@@ -382,9 +389,12 @@ if st.session_state.modificar_df:
         df_ganado_puro=st.data_editor(df_ganado_puro,num_rows="dynamic")
     elif dato =="REPORTE SERVICIOS":
         df_servicios=st.data_editor(df_servicios,num_rows="dynamic")
+    elif dato =="PROTOCOLO REPRODUCCION":
+        df_protocolo=st.data_editor(df_protocolo,num_rows="dynamic")
 
     if st.button("GUARDAR CAMBIOS",use_container_width=True):
-        nacimientos.guardar(df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios)
+        df_protocolo=df_protocolo.drop(columns=["DIAS DE PARIDA"])
+        nacimientos.guardar(df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios,df_protocolo)
         time.sleep(1)
         st.success("Guardado correctamente")
         st.session_state.modificar_df=False
