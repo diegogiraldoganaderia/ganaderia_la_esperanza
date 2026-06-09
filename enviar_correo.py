@@ -42,7 +42,7 @@ def enviar_correo_diario():
     for i in range(len(df2)):
         if((fecha_actual-pd.to_datetime(df2.iloc[i]["FECHA_PARTO"])).days)>=35:
             contador_servicios+=1   
-            cuerpo2="La vaca "+df2.iloc[i]["ID"]+" parió el día "+str(df2.iloc[i]["FECHA_PARTO"])+"en la finca "+df2.iloc[i]["FINCA"]+" ya han pasado "+str(((fecha_actual-pd.to_datetime(df2.iloc[i]["FECHA_PARTO"])).days))+" días y aún está pendiente del protocolo de reprodución.\n\n"+cuerpo2
+            cuerpo2="La vaca "+df2.iloc[i]["ID"]+" parió el día "+str(df2.iloc[i]["FECHA_PARTO"])+" en la finca "+df2.iloc[i]["FINCA"]+" ya han pasado "+str(((fecha_actual-pd.to_datetime(df2.iloc[i]["FECHA_PARTO"])).days))+" días y aún está pendiente del protocolo de reprodución.\n\n"+cuerpo2
     
 
 
