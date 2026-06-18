@@ -258,7 +258,10 @@ if st.session_state.registro_crias:
     for i in range(len(df_fincas)):
         fincas.append(df_fincas.iloc[i,0]) 
     finca = st.selectbox("Finca",fincas)
-    toro = st.text_input("Toro")
+    toros=[]
+    for i in range(len(df_toros)):
+        toros.append(df_toros.iloc[i,0])
+    toro = st.selectbox("Toro",toros)
     razas=[]
     for i in range(len(df_razas)):
         razas.append(df_razas.iloc[i,0]) 

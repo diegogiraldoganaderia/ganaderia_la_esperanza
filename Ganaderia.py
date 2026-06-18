@@ -29,6 +29,7 @@ df_inseminacion=pd.DataFrame(supabase.table("INSEMINACION").select("*").execute(
 df_inseminacion=df_inseminacion.drop(columns=["index"])
 df_fincas=pd.DataFrame(supabase.table("FINCAS").select("*").execute().data)
 df_fincas=df_fincas.drop(columns=["index"])
+df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
 df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
 df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
 df_ganado_puro=df_ganado_puro.drop(columns=["index"])
