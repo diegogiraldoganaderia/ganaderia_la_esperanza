@@ -411,4 +411,16 @@ class Buscador:
          l_raza.append(df[df["RAZA"]==i])
       df=pd.concat(l_raza)
       return df
-   
+
+   def palpacion_inseminacon(df_inseminacion):
+      fecha_actual=datetime.now()
+      df_fecha_desde_inseminacion=pd.DataFrame(columns=["DIAS TRASNCURRIDOS"])
+      df_inseminacion=df_inseminacion[df_inseminacion["CONFIRMACION"]=="pendiente"]
+      for i in range(len(df_inseminacion)):
+         dias=(fecha_actual-pd.to_datetime(df_inseminacion.iloc[i]["FECHA"])).days
+         df_fecha_desde_inseminacion.loc[len(df_fecha_desde_inseminacion)]=["La vaca "+str(df_inseminacion.iloc[i]["ID"])+
+                              " fue inseminada en la fecha "+df_inseminacion.iloc[i]["FECHA"]+" han pasado "+str(dias)
+                              +" y aún no ha sido palpada"]
+      cantidad=len(df_fecha_desde_inseminacion)
+      return df_fecha_desde_inseminacion,cantidad
+

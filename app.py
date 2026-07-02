@@ -94,6 +94,10 @@ if "informe_ganado_puro" not in st.session_state:
 
 if "graficos" not in st.session_state:
     st.session_state.graficos=False
+
+if "tiempo_inseminacion" not in st.session_state:
+    st.session_state.tiempo_inseminacion=False
+
 #Botones 
 #estilo de botone
 st.html("""
@@ -117,6 +121,7 @@ if st.button("Inicio",use_container_width=True):
     st.session_state.graficos=False
     st.session_state.informe_embriones=False
     st.session_state.informe_ganado_puro=False
+    st.session_state.tiempo_inseminacion=False
     
 
 #columnas para botones
@@ -134,6 +139,7 @@ with col1:
         st.session_state.graficos=False
         st.session_state.informe_embriones=False
         st.session_state.informe_ganado_puro=False
+        st.session_state.tiempo_inseminacion=False
 
 #      BOTON 2
 with col2:
@@ -147,6 +153,7 @@ with col2:
         st.session_state.graficos=False
         st.session_state.informe_embriones=False
         st.session_state.informe_ganado_puro=False
+        st.session_state.tiempo_inseminacion=False
 
 #      BOTON 3 
 with col3:
@@ -160,6 +167,7 @@ with col3:
         st.session_state.graficos=False
         st.session_state.informe_embriones=False
         st.session_state.informe_ganado_puro=False
+        st.session_state.tiempo_inseminacion=False
 with col1:
     if st.button("MODIFICAR DATOS",use_container_width=True):
         st.session_state.modificar_df = True
@@ -171,6 +179,7 @@ with col1:
         st.session_state.informe_embriones=False
         st.session_state.informe_ganado_puro=False
         st.session_state.graficos=False
+        st.session_state.tiempo_inseminacion=False
 
 with col2:
     if st.button("REGISTROS",use_container_width=True):
@@ -183,6 +192,7 @@ with col2:
         st.session_state.graficos=False
         st.session_state.informe_embriones=False
         st.session_state.informe_ganado_puro=False
+        st.session_state.tiempo_inseminacion=False
 
 with col3:
     if st.button("AÑADIR REGISTROS",use_container_width=True):
@@ -193,6 +203,7 @@ with col3:
         st.session_state.modificar_df = False
         st.session_state.registros=False
         st.session_state.graficos=False
+        st.session_state.tiempo_inseminacion=False
       
     #   BOTON 5
 
@@ -207,6 +218,7 @@ with col1:
         st.session_state.registros=False
         st.session_state.subir_pdf_registro=False
         st.session_state.informe_ganado_puro=False
+        st.session_state.tiempo_inseminacion=False
 with col2:
     if  st.button("INFORME GANADO PURO",use_container_width=True):
         st.session_state.informe_ganado_puro=True
@@ -218,6 +230,7 @@ with col2:
         st.session_state.modificar_df = False
         st.session_state.registros=False
         st.session_state.subir_pdf_registro=False
+        st.session_state.tiempo_inseminacion=False
 
 with col3:
     if st.button("GRÁFICOS",use_container_width=True):
@@ -230,8 +243,19 @@ with col3:
         st.session_state.subir_pdf_registro=False
         st.session_state.informe_embriones=False
         st.session_state.informe_ganado_puro=False
+        st.session_state.tiempo_inseminacion=False
 #boton 6
-
+if st.button("INSEMINACION PENDIENTE PALPACION",use_container_width=True):
+        st.session_state.tiempo_inseminacion=True
+        st.session_state.graficos=False
+        st.session_state.registro_crias=False
+        st.session_state.informe_nacimientos= False
+        st.session_state.informe_vacas = False
+        st.session_state.modificar_df = False
+        st.session_state.registros=False
+        st.session_state.subir_pdf_registro=False
+        st.session_state.informe_embriones=False
+        st.session_state.informe_ganado_puro=False
 #//FORMULARIOS// QUE HACEN LOS BOTONES
 if st.session_state.subir_pdf_registro:
     st.write(key[:20])
@@ -537,5 +561,16 @@ if st.session_state.graficos:
     recuento_nacimientos.update_yaxes( title_font=dict(size=15),showticklabels=False,showgrid=True,visible=True)
     st.plotly_chart(recuento_nacimientos, use_container_width=True,config={"displayModeBar": False,"staticPlot": True})
     
-
+if st.session_state.tiempo_inseminacion:
+    if st.button("Generar informe",use_container_width=True):
+        st.session_state.informe_embriones=False
+        informe=Buscador.palpacion_inseminacon(df_inseminacion)
+        
+        texto="En este informe se muestran todos las vacas inseminadas pendientes por palpacion\n"+"Cantidad de animales: "+str(informe[1])
+        nombre_pdf = ("Informe_Timpo_inseminacion")
+        generar_informe.generar_pdf(texto,informe[0],nombre_pdf)
+        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+            st.rerun()  
+    
 #   py -3.12 -m streamlit run app.py
