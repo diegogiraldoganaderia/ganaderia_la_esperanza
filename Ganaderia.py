@@ -412,7 +412,7 @@ class Buscador:
       df=pd.concat(l_raza)
       return df
 
-   def palpacion_inseminacon(df_inseminacion):
+   def palpacion_inseminacion(df_inseminacion):
       fecha_actual=datetime.now()
       df_fecha_desde_inseminacion=pd.DataFrame(columns=["DIAS TRASNCURRIDOS"])
       df_inseminacion=df_inseminacion[df_inseminacion["CONFIRMACION"]=="pendiente"]

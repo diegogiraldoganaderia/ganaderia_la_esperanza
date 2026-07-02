@@ -563,9 +563,8 @@ if st.session_state.graficos:
     
 if st.session_state.tiempo_inseminacion:
     if st.button("Generar informe",use_container_width=True):
-        st.session_state.informe_embriones=False
-        informe=Buscador.palpacion_inseminacon(df_inseminacion)
-        
+        st.session_state.tiempo_inseminacion=False
+        informe=Buscador.palpacion_inseminacion(df_inseminacion)
         texto="En este informe se muestran todos las vacas inseminadas pendientes por palpacion\n"+"Cantidad de animales: "+str(informe[1])
         nombre_pdf = ("Informe_Timpo_inseminacion")
         generar_informe.generar_pdf(texto,informe[0],nombre_pdf)
