@@ -359,10 +359,11 @@ if st.session_state.registros:
         st.session_state.registros=False
         nombre_bucket ="REGISTROS"
         ruta_en_storage =filtrado.upper()+".pdf"
-        data=supabase.storage.from_(nombre_bucket).download(ruta_en_storage)
-        with open(ruta_en_storage, "rb") as file:pdf_bytes = file.read()
+        pdf_bytes=supabase.storage.from_(nombre_bucket).download(ruta_en_storage)
+        with open(ruta_en_storage, "wb") as f:
+            f.write(pdf_bytes)
         if st.download_button("Descargar PDF",pdf_bytes,file_name=ruta_en_storage,mime="application/pdf",use_container_width=True):
-            st.rerun()
+            st.rerun()          
 #aplicacion 5
 if st.session_state.modificar_df:
 
@@ -450,9 +451,10 @@ if st.session_state.informe_ganado_puro:
     finca=st.multiselect("finca",df_fincas)
     raza=st.multiselect("raza",df_ganado_puro["RAZA"].unique())
     if st.button("Generar informe",use_container_width=True):
+        
         st.session_state.informe_embriones=False
         informe=Buscador.informe_embriones(df_ganado_puro,raza,fecha,finca,"compania","x1","x3")
-        
+        informe=buscar.ordenar_fecha_df(informe)
         texto="En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
         nombre_pdf = ("Informe_Ganado_Puro")
         generar_informe.generar_pdf(texto,informe,nombre_pdf)

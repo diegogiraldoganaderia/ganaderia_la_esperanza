@@ -378,6 +378,7 @@ class Buscador:
       return df
    
    def informe_embriones(df,raza,fecha,finca,compania,x1,x3):
+      
       if x1=="x1":
          df=df[pd.to_datetime(df["FECHA_NACIMIENTO"])>=pd.to_datetime(fecha)]
       else:
