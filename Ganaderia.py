@@ -145,7 +145,10 @@ class Agregar_Eliminar:
 
 
    def generar_consecutivo(self):
-      consecutivo="0000"+str(df_cria["FINCA"].count()+1)
+      if df_cria["FINCA"]=="bolanos":
+         consecutivo="9999"+str(df_cria["FINCA"].count()+1)
+      else:
+         consecutivo="0000"+str(df_cria["FINCA"].count()+1)
       l=len(consecutivo)
       consecutivo=str(consecutivo[l-3])+str(consecutivo[l-2])+str(consecutivo[l-1])
       return str(consecutivo)      
@@ -247,6 +250,7 @@ class Buscador:
       # pide filtros para el informe
       contador_total=0
       contador_TE_antes_2026=0
+      contador_compania=0
       for i in range(len(df)):
          consecutivo="0000"
          fecha=df.iloc[i]["FECHA_NACIMIENTO"]
@@ -269,9 +273,13 @@ class Buscador:
             contador_te+=1 #se crea para restar al consecutivo las crias por TE
          elif (df.iloc[i]["T_C"]=="CN" and int(año)>=2026) or (df.iloc[i]["T_C"]=="IA" and int(año)>=2026):
             contador_total+=1
-            consecutivo=consecutivo+str(i+1-contador_antes_2026-contador_te)
+            consecutivo=consecutivo+str(i+1-contador_antes_2026-contador_te-contador_compania)
             consecutivo=consecutivo[-3]+consecutivo[-2]+consecutivo[-1]
-            id=consecutivo+"/"+mes+año[-1]
+            if df.iloc[i]["FINCA"]=="bolanos":
+               contador_compania+=1
+               consecutivo=contador_compania+1021
+               
+            id=str(consecutivo)+"/"+mes+año[-1]
          elif(df.iloc[i]["T_C"]=="CN" and int(año)<2026) or (df.iloc[i]["T_C"]=="IA" and int(año)<2026):
             id="No_Aplica"
          else:
