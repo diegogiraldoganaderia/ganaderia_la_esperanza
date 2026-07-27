@@ -29,29 +29,28 @@ with open("logo.png", "rb") as image_file:
 st.markdown(f"""
 <style>
 .titulo-ganaderia {{
-    background-color: rgba(0,0,0,0.5);
+   
     color: white;
     text-align: ijust;
     display: flex;
     align-items: ijust;
     justify-content: center;
     gap: 5px;
-    padding: 5px;
+    padding: 0px;
     border-radius: 2px;
     font-family: sans-serif;
     font-weight: bold;
-    font-size: 40px;
+    font-size: 1px;
 }}
 
 .logo {{
-    width: 100px;      /* Cambia el tamaño del logo */
-    height: 100px;
+    width: 500px;      /* Cambia el tamaño del logo */
+    height: 500px;
 }}
 </style>
 
 <div class="titulo-ganaderia">
     <img class="logo" src="data:image/png;base64,{logo}">
-    GANADERÍA <br> LA VANGUARDIA
 </div>
 
 
