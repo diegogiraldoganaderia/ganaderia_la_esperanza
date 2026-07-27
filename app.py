@@ -33,14 +33,14 @@ st.markdown(f"""
     color: white;
     
     display: flex;
-    align-items: center;
+    align-items: ijust;
     justify-content:ijust;
-    gap: 20px;
-    padding: 20px;
+    gap: 5px;
+    padding: 5px;
     border-radius: 8px;
     font-family: sans-serif;
     font-weight: bold;
-    font-size: 40px;
+    font-size: 30px;
 }}
 
 .logo {{
