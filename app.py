@@ -34,7 +34,7 @@ st.markdown(f"""
     
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content:ijust;
     gap: 20px;
     padding: 20px;
     border-radius: 8px;
@@ -44,8 +44,8 @@ st.markdown(f"""
 }}
 
 .logo {{
-    width: 100px;      /* Cambia el tamaño del logo */
-    height: 100px;
+    width: 200px;      /* Cambia el tamaño del logo */
+    height: 200px;
 }}
 </style>
 
