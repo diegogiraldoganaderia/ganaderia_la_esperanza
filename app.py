@@ -31,16 +31,16 @@ st.markdown(f"""
 .titulo-ganaderia {{
     background-color: rgba(0,0,0,0.5);
     color: white;
-    
+    text-align: ijust;
     display: flex;
     align-items: ijust;
-    justify-content:center;
-    gap: 5px;
-    padding: 5px;
+    justify-content: ijust;
+    gap: 20px;
+    padding: 20px;
     border-radius: 8px;
     font-family: sans-serif;
     font-weight: bold;
-    font-size: 30px;
+    font-size: 40px;
 }}
 
 .logo {{
@@ -50,11 +50,12 @@ st.markdown(f"""
 </style>
 
 <div class="titulo-ganaderia">
-    <img class="logo" src="data:image/png;base64,{logo}">
-    <span>GANADERÍA <br> LA VANGUARDIA</span>
+    <img class="logo" src="data:image/png;base64,{logo}"><span>GANADERÍA <rb> LA VANGUARDIA</span> 
 </div>
-""", unsafe_allow_html=True)
 
+
+""", unsafe_allow_html=True)
+ 
 #fondo
 def set_local_bg(image_path):
     with open(image_path, "rb") as image_file:
