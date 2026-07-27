@@ -41,6 +41,7 @@ st.markdown(f"""
     font-family: sans-serif;
     font-weight: bold;
     font-size: 1px;
+    margin-bottom: -150px;
 }}
 
 .logo {{
