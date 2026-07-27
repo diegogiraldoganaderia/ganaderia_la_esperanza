@@ -33,7 +33,7 @@ st.markdown(f"""
     color: white;
     text-align: ijust;
     display: flex;
-    align-items: center;
+    align-items: ijust;
     justify-content: center;
     gap: 5px;
     padding: 5px;
