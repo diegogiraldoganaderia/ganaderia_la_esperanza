@@ -33,11 +33,11 @@ st.markdown(f"""
     color: white;
     text-align: ijust;
     display: flex;
-    align-items: ijust;
-    justify-content: ijust;
-    gap: 20px;
-    padding: 20px;
-    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 5px;
+    border-radius: 2px;
     font-family: sans-serif;
     font-weight: bold;
     font-size: 40px;
@@ -50,7 +50,8 @@ st.markdown(f"""
 </style>
 
 <div class="titulo-ganaderia">
-    <img class="logo" src="data:image/png;base64,{logo}"><span>GANADERÍA <rb> LA VANGUARDIA</span> 
+    <img class="logo" src="data:image/png;base64,{logo}">
+    GANADERÍA <br> LA VANGUARDIA
 </div>
 
 
