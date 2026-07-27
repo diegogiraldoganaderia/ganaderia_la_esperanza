@@ -22,30 +22,38 @@ generar_informe=Informes()
 #Alerta de correo díario
 
 # Esto permite que GitHub ejecute la función desde la consola
+#logo
+with open("logo.png", "rb") as image_file:
+        logo = base64.b64encode(image_file.read()).decode()
 
+st.markdown(f"""
+<style>
+.titulo-ganaderia {{
+    background-color: rgba(0,0,0,0.5);
+    color: white;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 40px;
+}}
 
+.logo {{
+    width: 200px;      /* Cambia el tamaño del logo */
+    height: 200px;
+}}
+</style>
 
-
-#Titulo
-st.markdown(
-    """
-    <style>
-    .titulo-ganaderia {
-        background-color: rgba(0, 0, 0, 0.5); /* Fondo negro 50% opacidad */
-        color: white;                        /* Texto blanco */
-        text-align: center;                  /* Centra el texto */
-        font-family: sans-serif;             /* Letra moderna de Streamlit */
-        font-weight: bold;                   /* Texto en negrita */
-        padding: 20px;                       /* Espacio interno */
-        border-radius: 8px;                  /* Bordes redondeados */
-        font-size: 40px;                     /* Tamaño del título */
-    }
-    </style>
-    <div class='titulo-ganaderia'>GANADERIA LA ESPERANZA</div>
-    """,
-    unsafe_allow_html=True
-)
-
+<div class="titulo-ganaderia">
+    <img class="logo" src="data:image/png;base64,{logo}">
+    <span>GANADERÍA <br> LA VANGUARDIA</span>
+</div>
+""", unsafe_allow_html=True)
 
 #fondo
 def set_local_bg(image_path):
@@ -63,7 +71,11 @@ def set_local_bg(image_path):
         """,
         unsafe_allow_html=True
     )
+#fondo
 set_local_bg(r"fondodos.png")
+#logo
+
+
 #menú
 st.header("MENÚ")
 
