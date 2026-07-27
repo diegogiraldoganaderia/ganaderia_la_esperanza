@@ -44,8 +44,8 @@ st.markdown(f"""
 }}
 
 .logo {{
-    width: 200px;      /* Cambia el tamaño del logo */
-    height: 200px;
+    width: 100px;      /* Cambia el tamaño del logo */
+    height: 100px;
 }}
 </style>
 
