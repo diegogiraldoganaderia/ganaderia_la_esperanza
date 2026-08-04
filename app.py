@@ -9,7 +9,7 @@ import numpy as np
 from supabase import create_client
 
 url ="https://soyjodguzmbiggwymfdn.supabase.co"
-key ="sb_secret_bB5UAtzbkyxob7xu_8O4Mw_vwbEkb4K"
+key ="sb_publishable_2rsYfiqDckypRhCIgUgG0Q__6DJkp-c"
 
 supabase = create_client(url, key)
 
