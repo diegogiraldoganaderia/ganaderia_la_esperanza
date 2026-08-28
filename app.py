@@ -489,6 +489,7 @@ if st.session_state.graficos:
         padding: 20px;                       /* Espacio interno */
         border-radius: 8px;                  /* Bordes redondeados */
         font-size: 30px;                     /* Tamaño del título */
+        margin-bottom: 40px;
     }
     </style>
     <div class='titulo-ganaderia'>SEXO DE LAS CRIAS</div>
