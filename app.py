@@ -23,7 +23,7 @@ generar_informe=Informes()
 
 # Esto permite que GitHub ejecute la función desde la consola
 #logo
-with open("logodd.png", "rb") as image_file:
+with open("logo.png", "rb") as image_file:
         logo = base64.b64encode(image_file.read()).decode()
 
 st.markdown(f"""
