@@ -39,6 +39,7 @@ df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data
 df_protocolo=df_protocolo.drop(columns=["index"])
 df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
 df_informe_vaca=pd.DataFrame(columns=["INFORME"])
+df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
 
 class Informes():
  def registros(self,registro):
@@ -51,9 +52,11 @@ class Informes():
          df=pd.DataFrame(columns=["Mensaje"])
          df.loc[0]=[" ----------------- No hay datos para mostrar en este informe ----------------- "]
       pdf = FPDF(unit="mm")
+     
       pdf.set_font("Helvetica", size=11)  
       ancho_columnas=[]
       alto_celda = 10 
+   
       for i in range(len(df.columns)):
          largo1=pdf.get_string_width(df.columns[i])+2
          largo2=pdf.get_string_width(df.iloc[:,i].astype(str).loc[df.iloc[:,i].astype(str).str.len().idxmax()])+6
@@ -73,6 +76,7 @@ class Informes():
       pdff = FPDF(unit="mm",format=(ancho_pagina,alto_pagina))
       pdff.set_font("Helvetica", size=11) 
       pdff.add_page()#format=(ancho_pagina,alto_pagina)
+      pdff.image("logopdf.png", x=ancho_pagina-50, y=10, w=40)#logo
       pdff.multi_cell(0,8,texto,align="J")
       pdff.ln()
 # 3. Dibujar el encabezado de la tabla (Negrita)
@@ -280,6 +284,7 @@ class Buscador:
                consecutivo=contador_compania+1021
                
             id=str(consecutivo)+"/"+mes+año[-1]
+            
          elif(df.iloc[i]["T_C"]=="CN" and int(año)<2026) or (df.iloc[i]["T_C"]=="IA" and int(año)<2026):
             id="No_Aplica"
          else:
@@ -353,7 +358,7 @@ class Buscador:
             df_l1=df_entrada[df_entrada["VACA"]==id].iloc[:,0:3]#muestra Id cria y finca
             df_l2=df_entrada[df_entrada["VACA"]==id].iloc[:,4]#muestra la fecha del nacimiento    
             df_l4=df_entrada[df_entrada["VACA"]==id].iloc[:,6:]#muestra la raza y sexo
-            df_l3=df_partos[df_partos["ID"]==id].iloc[:,2:4]
+            df_l3=df_partos[df_partos["ID"]==id].iloc[:,2:5]#modificado el 5 es 4
 #se crea un nuevo df con las columnas deseadas  
             df=pd.concat([df_l1,df_l2,df_l4,df_l3],axis=1)
             show_partos=show_partos[show_partos.columns[2]].max()

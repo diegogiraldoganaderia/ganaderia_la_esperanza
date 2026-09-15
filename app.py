@@ -9,7 +9,7 @@ import numpy as np
 from supabase import create_client
 
 url ="https://soyjodguzmbiggwymfdn.supabase.co"
-key ="sb_publishable_2rsYfiqDckypRhCIgUgG0Q__6DJkp-c"
+key ="sb_secret_bB5UAtzbkyxob7xu_8O4Mw_vwbEkb4K"
 
 supabase = create_client(url, key)
 
@@ -23,7 +23,7 @@ generar_informe=Informes()
 
 # Esto permite que GitHub ejecute la función desde la consola
 #logo
-with open("logo.png", "rb") as image_file:
+with open("logodd.png", "rb") as image_file:
         logo = base64.b64encode(image_file.read()).decode()
 
 st.markdown(f"""
@@ -42,6 +42,7 @@ st.markdown(f"""
     font-weight: bold;
     font-size: 1px;
     margin-bottom: -150px;
+
 }}
 
 .logo {{
@@ -49,11 +50,9 @@ st.markdown(f"""
     height: 500px;
 }}
 </style>
-
 <div class="titulo-ganaderia">
     <img class="logo" src="data:image/png;base64,{logo}">
 </div>
-
 
 """, unsafe_allow_html=True)
  
@@ -489,18 +488,19 @@ if st.session_state.graficos:
         padding: 20px;                       /* Espacio interno */
         border-radius: 8px;                  /* Bordes redondeados */
         font-size: 30px;                     /* Tamaño del título */
-        margin-bottom: 40px;
-    }
+    
+     margin-bottom: 40px;
+     }
     </style>
     <div class='titulo-ganaderia'>SEXO DE LAS CRIAS</div>
     """,
     unsafe_allow_html=True
 )
-    st.markdown("<br>", unsafe_allow_html=True)  
+    #st.markdown("<br>", unsafe_allow_html=True)  
     dfg1=df_cria
     filtro_finca=st.multiselect("FINCA",df_fincas)    
-   
-    filtro_año=st.multiselect("AÑO",pd.to_datetime(dfg1["FECHA_NACIMIENTO"]).dt.year.unique())
+    ano=pd.to_datetime(dfg1["FECHA_NACIMIENTO"]).dt.year.unique()
+    filtro_año=st.multiselect("AÑO",ano)
     dfg=df_cria
     l1=[]
     for i in range(len(filtro_año)):
@@ -563,7 +563,7 @@ if st.session_state.graficos:
     dfg5=pd.DataFrame(columns=["FINCA","CANTIDAD","AÑO"])
     for i in (dfg4["FINCA"].unique()):
         for j in (pd.to_datetime(dfg4["FECHA_NACIMIENTO"]).dt.year.unique()):
-            dfg5.loc[contar]=[i,
+            dfg5.loc[contar]=[i.upper(),
                   len(dfg4[(dfg4["FINCA"]==i)&(pd.to_datetime(dfg4["FECHA_NACIMIENTO"]).dt.year==j)])
                   ,str(j)]
             contar+=1
@@ -577,6 +577,33 @@ if st.session_state.graficos:
     recuento_nacimientos.update_layout(xaxis=dict(tickfont=dict(size=15)))
     recuento_nacimientos.update_yaxes( title_font=dict(size=15),showticklabels=False,showgrid=True,visible=True)
     st.plotly_chart(recuento_nacimientos, use_container_width=True,config={"displayModeBar": False,"staticPlot": True})
+
+    #crias por toro
+    
+    #filtro_finca=st.multiselect("FINCA",df_fincas)
+    #filtro_ano_crias_toro=st.multiselect("AÑO ",ano)
+    filtro_toro=st.multiselect("TORO",df_toros)
+    df_crias_toro=pd.DataFrame(columns=["TOROS","CANTIDAD DE CRÍAS","AÑO"])
+    contar=0
+    if  not filtro_toro:
+        
+        filtro_toro=df_toros["ID"].to_list()
+    for i in (filtro_toro): 
+            for j in (ano):
+                df_crias_toro.loc[contar]=[i.upper(),
+                      len(df_cria[(df_cria["TORO"]==i)&(pd.to_datetime(df_cria["FECHA_NACIMIENTO"]).dt.year==j)])
+                      ,str(j)]
+                contar+=1
+
+    #grfico de crias por toro
+    recuento_crias_toro= px.bar(df_crias_toro,x="TOROS",y="CANTIDAD DE CRÍAS",color="AÑO",barmode="group",title="RECUENTO CRIAS POR TORO",color_discrete_sequence=px.colors.qualitative.Set1)
+    recuento_crias_toro.update_layout(title={"x":0.5,"xanchor":"center"})
+    recuento_crias_toro.update_traces(texttemplate="%{value}",textangle=0,marker=dict(line=dict(color="#FFFFFF", width=2)),textfont=dict(color="white",size=25), insidetextanchor="middle")
+    recuento_crias_toro.update_layout(uniformtext_minsize=15,uniformtext_mode='show')
+    recuento_crias_toro.update_layout(legend=dict(font=dict(size=15)))
+    recuento_crias_toro.update_layout(xaxis=dict(tickfont=dict(size=15)))
+    recuento_crias_toro.update_yaxes( title_font=dict(size=15),showticklabels=False,showgrid=True,visible=True)
+    st.plotly_chart(recuento_crias_toro, use_container_width=True,config={"displayModeBar": False,"staticPlot": True})    
     
 if st.session_state.tiempo_inseminacion:
     if st.button("Generar informe",use_container_width=True):
@@ -587,6 +614,6 @@ if st.session_state.tiempo_inseminacion:
         generar_informe.generar_pdf(texto,informe[0],nombre_pdf)
         with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
         if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
-            st.rerun()  
+            st.rerun() 
     
 #   py -3.12 -m streamlit run app.py
