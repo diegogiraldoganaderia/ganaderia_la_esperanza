@@ -65,10 +65,10 @@ class Informes():
          else:
             ancho_columnas.append(largo2)
       ancho_pagina=sum(ancho_columnas)+20
-      ancho_texto=ancho_pagina-70
+      ancho_texto=ancho_pagina-20
       ancho_letras = pdf.get_string_width(texto)
       lineas_texto = math.ceil(ancho_letras / ancho_texto)
-      alto_texto = lineas_texto * 10
+      alto_texto = lineas_texto * 10+20
       alto_tabla = (len(df) + 1) * alto_celda
       alto_pagina= (alto_texto+alto_tabla)+50
 
