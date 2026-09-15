@@ -65,7 +65,7 @@ class Informes():
          else:
             ancho_columnas.append(largo2)
       ancho_pagina=sum(ancho_columnas)+20
-      ancho_texto=ancho_pagina-20
+      ancho_texto=ancho_pagina-70
       ancho_letras = pdf.get_string_width(texto)
       lineas_texto = math.ceil(ancho_letras / ancho_texto)
       alto_texto = lineas_texto * 10
