@@ -76,7 +76,8 @@ class Informes():
       pdff = FPDF(unit="mm",format=(ancho_pagina,alto_pagina))
       pdff.set_font("Helvetica", size=11) 
       pdff.add_page()#format=(ancho_pagina,alto_pagina)
-      pdff.image("logopdf.png", x=ancho_pagina-50, y=10, w=40)#logo
+      pdff.image("logopdf.png", x=ancho_pagina-48, y=0, w=40)#logo
+      pdff.set_y(15) 
       pdff.multi_cell(0,8,texto,align="J")
       pdff.ln()
 # 3. Dibujar el encabezado de la tabla (Negrita)
