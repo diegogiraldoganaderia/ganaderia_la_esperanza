@@ -8,10 +8,6 @@ import plotly.graph_objects as go
 import numpy as np
 from supabase import create_client
 
-url ="https://soyjodguzmbiggwymfdn.supabase.co"
-key ="sb_secret_bB5UAtzbkyxob7xu_8O4Mw_vwbEkb4K"
-
-supabase = create_client(url, key)
 
 
 #objetos
@@ -80,18 +76,30 @@ set_local_bg(r"fondodos.png")
 #menú
 st.header("MENÚ")
 
-#FORMULARIOS CERRADOS
+#FORMULARIOS GENERALES CERRADOS
+if "informes" not in st.session_state:
+    st.session_state.informes = False
+if "reproduccion_produccion" not in st.session_state:
+    st.session_state.reproduccion_produccion = False
 if "registros" not in st.session_state:
     st.session_state.registros = False
 
-if "registro_crias" not in st.session_state:
-    st.session_state.registro_crias = False
+
+
+#FORMULARIOS CERRADOS
+if "buscar_registros" not in st.session_state:
+    st.session_state.buscar_registros = False
+
+if "registro_nacimientos" not in st.session_state:
+    st.session_state.registro_nacimientos = False
 
 if "informe_nacimientos" not in st.session_state:
     st.session_state.informe_nacimientos = False
 
 if "informe_vacas" not in st.session_state:
     st.session_state.informe_vacas = False
+if "informe_toros" not in st.session_state:
+    st.session_state.informe_toros = False
 
 if "modificar_df" not in st.session_state:
     st.session_state.modificar_df = False
@@ -122,12 +130,17 @@ st.html("""
     }
     </style>
 """)
-#      BOTON INICIO
 
-if st.button("Inicio",use_container_width=True):
-    st.session_state.registro_crias=False
+
+#  BOTON INICIO, este botón reinicia todos los procesos
+
+if st.button("INICIO",use_container_width=True):
+    st.session_state.informes = False
+    st.session_state.reproduccion_produccion = False
+    st.session_state.registro_nacimientos=False
     st.session_state.informe_nacimientos= False
     st.session_state.informe_vacas = False
+    st.session_state.informe_toros = False
     st.session_state.modificar_df = False
     st.session_state.registros=False
     st.session_state.subir_pdf_registro=False
@@ -135,158 +148,288 @@ if st.button("Inicio",use_container_width=True):
     st.session_state.informe_embriones=False
     st.session_state.informe_ganado_puro=False
     st.session_state.tiempo_inseminacion=False
-    
 
-#columnas para botones
-col1, col2, col3= st.columns(3)     
-#botones menu
-#      BOTON 1
-with col1:
-    if st.button("REGISTRO NACIMIENTOS",use_container_width=True): 
-        st.session_state.registro_crias=True
-        st.session_state.informe_nacimientos= False
-        st.session_state.informe_vacas = False
-        st.session_state.modificar_df = False
-        st.session_state.registros=False
-        st.session_state.subir_pdf_registro=False
-        st.session_state.graficos=False
-        st.session_state.informe_embriones=False
-        st.session_state.informe_ganado_puro=False
-        st.session_state.tiempo_inseminacion=False
 
-#      BOTON 2
-with col2:
-    if st.button("INFORME NACIMIENTOS",use_container_width=True):
-        st.session_state.informe_nacimientos= True
-        st.session_state.registro_crias=False
-        st.session_state.informe_vacas = False
-        st.session_state.modificar_df = False
-        st.session_state.registros=False
-        st.session_state.subir_pdf_registro=False
-        st.session_state.graficos=False
-        st.session_state.informe_embriones=False
-        st.session_state.informe_ganado_puro=False
-        st.session_state.tiempo_inseminacion=False
+#INICIO INFORMES
 
-#      BOTON 3 
-with col3:
-    if st.button("INFORME VACAS",use_container_width=True):
-        st.session_state.informe_vacas = True
-        st.session_state.registro_crias=False
-        st.session_state.informe_nacimientos= False
-        st.session_state.modificar_df = False
-        st.session_state.registros=False
-        st.session_state.subir_pdf_registro=False
-        st.session_state.graficos=False
-        st.session_state.informe_embriones=False
-        st.session_state.informe_ganado_puro=False
-        st.session_state.tiempo_inseminacion=False
-with col1:
-    if st.button("MODIFICAR DATOS",use_container_width=True):
-        st.session_state.modificar_df = True
-        st.session_state.registro_crias=False
-        st.session_state.informe_nacimientos= False
-        st.session_state.informe_vacas = False
-        st.session_state.registros=False
-        st.session_state.subir_pdf_registro=False
-        st.session_state.informe_embriones=False
-        st.session_state.informe_ganado_puro=False
-        st.session_state.graficos=False
-        st.session_state.tiempo_inseminacion=False
-
-with col2:
-    if st.button("REGISTROS",use_container_width=True):
-        st.session_state.registro_crias=False
-        st.session_state.informe_nacimientos= False
-        st.session_state.informe_vacas = False
-        st.session_state.modificar_df = False
-        st.session_state.registros=True
-        st.session_state.subir_pdf_registro=False
-        st.session_state.graficos=False
-        st.session_state.informe_embriones=False
-        st.session_state.informe_ganado_puro=False
-        st.session_state.tiempo_inseminacion=False
-
-with col3:
-    if st.button("AÑADIR REGISTROS",use_container_width=True):
-        st.session_state.subir_pdf_registro=True
-        st.session_state.registro_crias=False
-        st.session_state.informe_nacimientos= False
-        st.session_state.informe_vacas = False
-        st.session_state.modificar_df = False
-        st.session_state.registros=False
-        st.session_state.graficos=False
-        st.session_state.tiempo_inseminacion=False
-      
-    #   BOTON 5
-
-with col1:
-    if  st.button("INFORME EMBRIONES",use_container_width=True):
-        st.session_state.informe_embriones=True
-        st.session_state.graficos=False
-        st.session_state.registro_crias=False
-        st.session_state.informe_nacimientos= False
-        st.session_state.informe_vacas = False
-        st.session_state.modificar_df = False
-        st.session_state.registros=False
-        st.session_state.subir_pdf_registro=False
-        st.session_state.informe_ganado_puro=False
-        st.session_state.tiempo_inseminacion=False
-with col2:
-    if  st.button("INFORME GANADO PURO",use_container_width=True):
-        st.session_state.informe_ganado_puro=True
-        st.session_state.informe_embriones=False
-        st.session_state.graficos=False
-        st.session_state.registro_crias=False
-        st.session_state.informe_nacimientos= False
-        st.session_state.informe_vacas = False
-        st.session_state.modificar_df = False
-        st.session_state.registros=False
-        st.session_state.subir_pdf_registro=False
-        st.session_state.tiempo_inseminacion=False
-
-with col3:
-    if st.button("GRÁFICOS",use_container_width=True):
-        st.session_state.graficos=True
-        st.session_state.registro_crias=False
-        st.session_state.informe_nacimientos= False
-        st.session_state.informe_vacas = False
-        st.session_state.modificar_df = False
-        st.session_state.registros=False
-        st.session_state.subir_pdf_registro=False
-        st.session_state.informe_embriones=False
-        st.session_state.informe_ganado_puro=False
-        st.session_state.tiempo_inseminacion=False
-#boton 6
-if st.button("INSEMINACION PENDIENTE PALPACION",use_container_width=True):
-        st.session_state.tiempo_inseminacion=True
-        st.session_state.graficos=False
-        st.session_state.registro_crias=False
-        st.session_state.informe_nacimientos= False
-        st.session_state.informe_vacas = False
-        st.session_state.modificar_df = False
-        st.session_state.registros=False
-        st.session_state.subir_pdf_registro=False
-        st.session_state.informe_embriones=False
-        st.session_state.informe_ganado_puro=False
-#//FORMULARIOS// QUE HACEN LOS BOTONES
-if st.session_state.subir_pdf_registro:
-    st.write(key[:20])
-    st.title("Subir PDF a carpeta")
-    archivo = st.file_uploader("Sube PDF", type=["pdf"])
-    if archivo is not None:
-        supabase.storage.from_("REGISTROS").upload(
-        path=archivo.name,  # nombre del archivo
-        file=archivo.getvalue(),  # bytes del uploader
-        file_options={
-            "content-type": "application/pdf",
-            "upsert": "true"})
-        if st.success("Guardado correctamente"):
+if st.button("INFORMES",use_container_width=True):
+    st.session_state.informes= True
+if st.session_state.informes:
+    col1, col2, col3= st.columns(3)
+    with col1:
+        if st.button("INFORME NACIMIENTOS",use_container_width=True):
+            st.session_state.informe_nacimientos= True
+            st.session_state.registro_crias=False
+            st.session_state.informe_vacas = False
+            st.session_state.informe_toros = False
+            st.session_state.modificar_df = False
+            st.session_state.registros=False
             st.session_state.subir_pdf_registro=False
-            st.rerun()
- 
-#aplicacion 1
-if st.session_state.registro_crias: 
+            st.session_state.graficos=False
+            st.session_state.informe_embriones=False
+            st.session_state.informe_ganado_puro=False
+            st.session_state.tiempo_inseminacion=False
+    with col2:
+        if st.button("INFORME VACAS",use_container_width=True):
+            st.session_state.informe_vacas = True
+            st.session_state.informe_toros = False
+            st.session_state.registro_crias=False
+            st.session_state.informe_nacimientos= False
+            st.session_state.modificar_df = False
+            st.session_state.registros=False
+            st.session_state.subir_pdf_registro=False
+            st.session_state.graficos=False
+            st.session_state.informe_embriones=False
+            st.session_state.informe_ganado_puro=False
+            st.session_state.tiempo_inseminacion=False
+    with col3:
+        if st.button("INFORME TOROS",use_container_width=True):
+            st.session_state.informe_toros=True
+            st.session_state.tiempo_inseminacion=False
+            st.session_state.graficos=False
+            st.session_state.registro_crias=False
+            st.session_state.informe_nacimientos= False
+            st.session_state.informe_vacas = False
+            st.session_state.modificar_df = False
+            st.session_state.registros=False
+            st.session_state.subir_pdf_registro=False
+            st.session_state.informe_embriones=False
+            st.session_state.informe_ganado_puro=False
+
+    with col1:
+        if st.button("INFORME REPRODUCCION",use_container_width=True):
+            st.session_state.informe_toros=False
+            st.session_state.tiempo_inseminacion=False
+            st.session_state.graficos=False
+            st.session_state.registro_crias=False
+            st.session_state.informe_nacimientos= False
+            st.session_state.informe_vacas = False
+            st.session_state.modificar_df = False
+            st.session_state.registros=False
+            st.session_state.subir_pdf_registro=False
+            st.session_state.informe_embriones=False
+            st.session_state.informe_ganado_puro=False
+    with col2:
+        if  st.button("INFORME EMBRIONES",use_container_width=True):
+            st.session_state.informe_embriones=True
+            st.session_state.graficos=False
+            st.session_state.registro_crias=False
+            st.session_state.informe_nacimientos= False
+            st.session_state.informe_vacas = False
+            st.session_state.informe_toros = False
+            st.session_state.modificar_df = False
+            st.session_state.registros=False
+            st.session_state.subir_pdf_registro=False
+            st.session_state.informe_ganado_puro=False
+            st.session_state.tiempo_inseminacion=False
+    with col3:
+        if  st.button("INFORME GANADO PURO",use_container_width=True):
+            st.session_state.informe_ganado_puro=True
+            st.session_state.informe_embriones=False
+            st.session_state.graficos=False
+            st.session_state.registro_crias=False
+            st.session_state.informe_nacimientos= False
+            st.session_state.informe_vacas = False
+            st.session_state.informe_toros = False
+            st.session_state.modificar_df = False
+            st.session_state.registros=False
+            st.session_state.subir_pdf_registro=False
+            st.session_state.tiempo_inseminacion=False
+if st.session_state.informe_nacimientos:  
+    
+    fecha=st.date_input("A partir de que fecha desea el informe")
+    fincas=[]
+    for i in range(len(df_fincas)):
+        fincas.append(df_fincas.iloc[i,0]) 
+    finca = st.multiselect("Finca",fincas)
+    tc=st.multiselect("Tipo_concepcion",["TE","CN","IA"])
+    fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
+    filtros=[fecha,finca,tc]
+
+    
+    col1, col2= st.columns(2)
+    with col1:
+        if st.button("Generar informe",use_container_width=True):
+            st.session_state.informe_nacimientos=False
+            st.session_state.informes = False
+            df_cria=buscar.ordenar_fecha_df(df_cria)
+           
+            informe=buscar.informe_crias(df_cria,filtros,df_ganado_puro)
+            texto="En este informe se muestran todas las crias nacidas a partir de la fecha: "+informe[0].strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe[1]))
+            nombre_pdf = ("Informe_Nacimientos")
+            informe=buscar.ordenar_fecha_df(informe[1])
+            generar_informe.generar_pdf( texto,informe,nombre_pdf)
+            with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+            with col2:
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):     
+                    st.rerun()
+if st.session_state.informe_vacas:
+    id_vacas=[]
+    for i in range(len(df_animal)):
+        id_vacas.append(df_animal.iloc[i,0]) 
+    id_vaca = st.selectbox("Vaca",id_vacas)
+    col1, col2= st.columns(2)
+    with col1:
+        if st.button("Generar informe",use_container_width=True):
+            st.session_state.informe_vacas=False
+            st.session_state.informes = False
+            df=buscar.informe_crias_v(df_cria,id_vaca)
+            informacion=buscar.informacion("VACA",df[0],df[1])
+            nombre_pdf = ("Informe_Vaca_"+ str(informacion[2].replace("/", "_")))
+            generar_informe.generar_pdf(informacion[0],informacion[1],nombre_pdf)
+           
+            with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+            with col2:
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+                    st.rerun()
+if st.session_state.informe_toros:
+    filtro_toro=st.multiselect("TORO",df_toros)
+    df_crias_toro=pd.DataFrame(columns=["TOROS","CANTIDAD DE CRÍAS","MACHOS","HEMBRAS","AÑO"])
+    contar=0
+    ano=pd.to_datetime(df_cria["FECHA_NACIMIENTO"]).dt.year.unique()
+    filtro_ano=st.multiselect("AÑO",ano)
+    if  not filtro_toro:    
+        filtro_toro=df_toros["ID"].to_list()
+    for i in (filtro_toro): 
+                for j in (filtro_ano):
+                    df_crias_toro.loc[contar]=[i.upper(),
+                          len(df_cria[(df_cria["TORO"]==i)&(pd.to_datetime(df_cria["FECHA_NACIMIENTO"]).dt.year==j)]),
+                          len(df_cria[(df_cria["TORO"]==i)&(pd.to_datetime(df_cria["FECHA_NACIMIENTO"]).dt.year==j)&(df_cria["SEXO"]=="macho")]),
+                          len(df_cria[(df_cria["TORO"]==i)&(pd.to_datetime(df_cria["FECHA_NACIMIENTO"]).dt.year==j)&(df_cria["SEXO"]=="hembra")])
+                          ,str(j)]
+                    contar+=1
+    with col1:
+        if st.button("GENERAR INFORME",use_container_width=True):
+            st.session_state.informe_toros=False
+            st.session_state.informes = False
+            nombre_pdf = ("Informe_Toros")
+            texto1="En este informe se muestan las crias del toro"
+            texto2="En este informe se muestan las crias de los toros,"
+            texto3="en el año"
+            texto4="en los años"
+            texto_toros=""
+            contador_toros=1
+            
+            if len(filtro_toro)>1:  
+                for i in filtro_toro:
+                    if contador_toros-len(filtro_toro)==-1:
+                        texto_toros+=i+" y "
+                    elif contador_toros==len(filtro_toro):
+                                            texto_toros+=i
+                    else:
+                        texto_toros+=i+", "
+                    contador_toros+=1
+                    
+                
+                textof=texto2
+            else:
+                texto_toros=filtro_toro[0]
+                textof=texto1
+            texto_ano=""
+            contador_ano=1
+            if len(filtro_ano)>1:
+                for j in filtro_ano:
+                    if contador_ano-len(filtro_ano)==-1:
+                        texto_ano+=str(j)+" y "
+                    elif contador_ano==len(filtro_ano):
+                        texto_ano+=str(j)
+                    else:
+                        texto_ano+=str(j)+", "
+                    contador_ano+=1
+                textos=texto4
+            else:
+                texto_ano=str(filtro_ano[0])
+                textos=texto3
+            texto=textof+" "+texto_toros+" "+textos+" "+texto_ano
+            generar_informe.generar_pdf(texto,df_crias_toro,nombre_pdf)
+               
+            with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+            with col2:
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+                    st.rerun()
+if st.session_state.informe_ganado_puro:
+    fecha=st.date_input("A partir de que fecha desea el informe")
+    finca=st.multiselect("finca",df_fincas)
+    raza=st.multiselect("raza",df_ganado_puro["RAZA"].unique())
+    if st.button("Generar informe",use_container_width=True):
+        
+        st.session_state.informe_embriones=False
+        st.session_state.informes = False
+        informe=Buscador.informe_embriones(df_ganado_puro,raza,fecha,finca,"compania","x1","x3")
+        informe=buscar.ordenar_fecha_df(informe)
+        texto="En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
+        nombre_pdf = ("Informe_Ganado_Puro")
+        generar_informe.generar_pdf(texto,informe,nombre_pdf)
+        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+            st.rerun()  
+if st.session_state.informe_embriones:
+    fecha=st.selectbox("FECHA SINCRONIZACIÓN",df_embriones["FECHA_SINCRONIZACION"].unique())
+    df=df_embriones[df_embriones["FECHA_SINCRONIZACION"]==fecha]
+    finca=st.multiselect("FINCA",df["FINCA"].unique())
+    if st.button("Generar informe",use_container_width=True):
+        st.session_state.informe_embriones=False
+        st.session_state.informes = False
+        informe=Buscador.informe_embriones(df,fecha,finca)
+        texto=("En este informe se muestran todos los procesos de embrion realizados en la la fecha: "+fecha
+                +", se sincronizaron "+informe[1]+" vacas de las cuales hubo un total de "+informe[2]+" vacas preñadas "+
+                "equivalente al "+informe[3]+"%, un total de "+informe[4]+" vacas vacias equivalente al " 
+                +informe[5]+"%, un total de "+informe[6]+" rechazaron el protocolo, equivalente al "+informe[7]+"%"
+        )
+        nombre_pdf = ("Informe_Embriones")
+        generar_informe.generar_pdf(texto,informe[0],nombre_pdf)
+        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+            st.rerun() 
+
+#FINAL INFORMES
+#-------------------------------------------------------------------------
+#INICIO REPRODUCCIÓN Y PRODUCIÓN
+
+if st.button("REPRODUCIÓN Y PRODUCCIÓN",use_container_width=True):
+   st.session_state.reproduccion_produccion= True
+if st.session_state.reproduccion_produccion:
+    col1, col2, col3= st.columns(3)
+    with col1:
+        if st.button("REGISTRO NACIMIENTOS",use_container_width=True): 
+            st.session_state.registro_crias=True
+            st.session_state.informe_nacimientos= False
+            st.session_state.informe_vacas = False
+            st.session_state.informe_toros = False
+            st.session_state.modificar_df = False
+            st.session_state.registros=False
+            st.session_state.subir_pdf_registro=False
+            st.session_state.graficos=False
+            st.session_state.informe_embriones=False
+            st.session_state.informe_ganado_puro=False
+            st.session_state.tiempo_inseminacion=False
+    with col2:
+        if st.button("INSEMINACION",use_container_width=True):
+            st.session_state.tiempo_inseminacion=True
+            st.session_state.graficos=False
+            st.session_state.registro_crias=False
+            st.session_state.informe_nacimientos= False
+            st.session_state.informe_vacas = False
+            st.session_state.informe_toros = False
+            st.session_state.modificar_df = False
+            st.session_state.registros=False
+            st.session_state.subir_pdf_registro=False
+            st.session_state.informe_embriones=False
+            st.session_state.informe_ganado_puro=False
+    with col3:
+        if st.button("PALPACION",use_container_width=True):
+            st.session_state.tiempo_inseminacion=False
+            st.session_state.graficos=False
+            st.session_state.registro_crias=False
+            st.session_state.informe_nacimientos= False
+            st.session_state.informe_vacas = False
+            st.session_state.informe_toros = False
+            st.session_state.modificar_df = False
+            st.session_state.registros=False
+            st.session_state.subir_pdf_registro=False
+            st.session_state.informe_embriones=False
+            st.session_state.informe_ganado_puro=False 
+if st.session_state.registro_nacimientos: 
     vaca = st.text_input("ID de la vaca").lower()
     fn = st.date_input("Fecha nacimiento")
     fn=pd.to_datetime(fn,format="%d/%m/%Y")
@@ -309,57 +452,66 @@ if st.session_state.registro_crias:
         registro_cria=nacimientos.nacimiento(buscar,vaca,fn,sexo,finca,observaciones,toro,raza)
         nacimientos.guardar(df_inseminacion,df_animal,registro_cria[1],registro_cria[0],df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios,df_protocolo)
         st.success("Guardado")
-        st.session_state.registro_crias=False
-        st.rerun()   
-#aplicacion 2
-if st.session_state.informe_nacimientos:  
-    
-    fecha=st.date_input("A partir de que fecha desea el informe")
-    fincas=[]
-    for i in range(len(df_fincas)):
-        fincas.append(df_fincas.iloc[i,0]) 
-    finca = st.multiselect("Finca",fincas)
-    tc=st.multiselect("Tipo_concepcion",["TE","CN","IA"])
-    fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
-    filtros=[fecha,finca,tc]
+        st.session_state.registro_nacimientos=False
+        st.rerun()
+if st.session_state.tiempo_inseminacion:
+    if st.button("Generar informe",use_container_width=True):
+        st.session_state.tiempo_inseminacion=False
+        informe=Buscador.palpacion_inseminacion(df_inseminacion)
+        texto="En este informe se muestran todos las vacas inseminadas pendientes por palpacion\n"+"Cantidad de animales: "+str(informe[1])
+        nombre_pdf = ("Informe_Timpo_inseminacion")
+        generar_informe.generar_pdf(texto,informe[0],nombre_pdf)
+        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+            st.rerun() 
 
-    
-    col1, col2= st.columns(2)
-    with col1:
-        if st.button("Generar informe",use_container_width=True):
-            st.session_state.informe_nacimientos=False
-            df_cria=buscar.ordenar_fecha_df(df_cria)
-           
-            informe=buscar.informe_crias(df_cria,filtros,df_ganado_puro)
-            texto="En este informe se muestran todas las crias nacidas a partir de la fecha: "+informe[0].strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe[1]))
-            nombre_pdf = ("Informe_Nacimientos")
-            informe=buscar.ordenar_fecha_df(informe[1])
-            generar_informe.generar_pdf( texto,informe,nombre_pdf)
-            with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
-            with col2:
-                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):     
-                    st.rerun()
-#aplicacion 3
-if st.session_state.informe_vacas:
-    id_vacas=[]
-    for i in range(len(df_animal)):
-        id_vacas.append(df_animal.iloc[i,0]) 
-    id_vaca = st.selectbox("Vaca",id_vacas)
-    col1, col2= st.columns(2)
-    with col1:
-        if st.button("Generar informe",use_container_width=True):
-            st.session_state.informe_vacas=False
-            df=buscar.informe_crias_v(df_cria,id_vaca)
-            informacion=buscar.informacion("VACA",df[0],df[1])
-            nombre_pdf = ("Informe_Vaca_"+ str(informacion[2].replace("/", "_")))
-            generar_informe.generar_pdf(informacion[0],informacion[1],nombre_pdf)
-           
-            with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
-            with col2:
-                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
-                    st.rerun()
-#aplicacio 4
+#FINAL REPRODUCCIÓN Y PRODUCCIÓN
+#-------------------------------------------------------------------------
+#INICIO REGISTROS
+
+if st.button("REGISTRO DE ANIMALES",use_container_width=True):
+    st.session_state.registros = True
 if st.session_state.registros:
+    col1, col2= st.columns(2)
+    with col1:
+        if st.button("AÑADIR REGISTROS",use_container_width=True):
+            st.session_state.subir_pdf_registro=True
+            st.session_state.registro_crias=False
+            st.session_state.informe_nacimientos= False
+            st.session_state.informe_vacas = False
+            st.session_state.informe_toros = False
+            st.session_state.modificar_df = False
+            st.session_state.registros=False
+            st.session_state.graficos=False
+            st.session_state.tiempo_inseminacion=False
+    with col2:
+        if st.button("BUSCAR REGISTROS",use_container_width=True):
+            st.session_state.registro_crias=False
+            st.session_state.informe_nacimientos= False
+            st.session_state.informe_vacas = False
+            st.session_state.informe_toros = False
+            st.session_state.modificar_df = False
+            st.session_state.registros=True
+            st.session_state.subir_pdf_registro=False
+            st.session_state.graficos=False
+            st.session_state.informe_embriones=False
+            st.session_state.informe_ganado_puro=False
+            st.session_state.tiempo_inseminacion=False
+if st.session_state.subir_pdf_registro:
+    st.write(key[:20])
+    st.title("Subir PDF a carpeta")
+    archivo = st.file_uploader("Sube PDF", type=["pdf"])
+    if archivo is not None:
+        supabase.storage.from_("REGISTROS").upload(
+        path=archivo.name,  # nombre del archivo
+        file=archivo.getvalue(),  # bytes del uploader
+        file_options={
+            "content-type": "application/pdf",
+            "upsert": "true"})
+        if st.success("Guardado correctamente"):
+            st.session_state.subir_pdf_registro=False
+            st.rerun()
+if st.session_state.buscar_registros:
     df_ganado_puro=df_ganado_puro[df_ganado_puro.iloc[:,3]!="pendiente"]
     registro=[]
     for i in df_ganado_puro.iloc[:,0]:
@@ -369,48 +521,37 @@ if st.session_state.registros:
     filtrado=df_ganado_puro.iloc[posicion]["REGISTRO"]
     
     if st.button("BUSCAR REGISTRO",use_container_width=True):
-        st.session_state.registros=False
+        st.session_state.buscar_registros=False
         nombre_bucket ="REGISTROS"
         ruta_en_storage =filtrado.upper()+".pdf"
         pdf_bytes=supabase.storage.from_(nombre_bucket).download(ruta_en_storage)
         with open(ruta_en_storage, "wb") as f:
             f.write(pdf_bytes)
         if st.download_button("Descargar PDF",pdf_bytes,file_name=ruta_en_storage,mime="application/pdf",use_container_width=True):
-            st.rerun()          
-#aplicacion 5
-if st.session_state.modificar_df:
+            st.rerun()  
 
-    df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
-    df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
-    df_partos=df_partos.drop(columns=["index"])
-    df_cria=pd.DataFrame(supabase.table("CRIA").select("*").execute().data)
-    df_cria=df_cria.drop(columns=["index"])
-    df_embriones=pd.DataFrame(supabase.table("EMBRIONES").select("*").execute().data)
-    df_embriones=df_embriones.drop(columns=["index"])
-    df_inseminacion=pd.DataFrame(supabase.table("INSEMINACION").select("*").execute().data)
-    df_inseminacion=df_inseminacion.drop(columns=["index"])
-    df_fincas=pd.DataFrame(supabase.table("FINCAS").select("*").execute().data)
-    df_fincas=df_fincas.drop(columns=["index"])
-    df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
-    df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
-    df_ganado_puro=df_ganado_puro.drop(columns=["index"])
-    df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
-    df_servicios=df_servicios.drop(columns=["index"])
-    df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data)
-    df_protocolo=df_protocolo.drop(columns=["index"])
-    df_protocolo=df_protocolo[df_protocolo["PROTOCOLO"]=="pendiente"]
-    
+#FINAL REGISTROS
+#------------------------------------------------------------------------
+#INICIO MODIFICAR BASE DE DATOS
+
+if st.button("MODIFICAR BASE DATOS",use_container_width=True):
+        st.session_state.modificar_df = True
+        st.session_state.registro_crias=False
+        st.session_state.informe_nacimientos= False
+        st.session_state.informe_vacas = False
+        st.session_state.informe_toros = False
+        st.session_state.registros=False
+        st.session_state.subir_pdf_registro=False
+        st.session_state.informe_embriones=False
+        st.session_state.informe_ganado_puro=False
+        st.session_state.graficos=False
+        st.session_state.tiempo_inseminacion=False
+if st.session_state.modificar_df:
     fecha_actual=datetime.now()
     dias=[]
     for i in range(len(df_protocolo)):
         dias.append((fecha_actual-pd.to_datetime(df_protocolo.iloc[i]["FECHA_PARTO"])).days)
     df_protocolo["DIAS DE PARIDA"]=dias
-
-
-
-
-
-
     dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES","INSEMINACION","FINCAS","RAZAS","GANADO PURO","REPORTE SERVICIOS","PROTOCOLO REPRODUCCION"])
     if dato =="ANIMAL":
         df_animal=st.data_editor(df_animal,num_rows="dynamic")
@@ -436,45 +577,26 @@ if st.session_state.modificar_df:
     if st.button("GUARDAR CAMBIOS",use_container_width=True):
         df_protocolo=df_protocolo.drop(columns=["DIAS DE PARIDA"])
         nacimientos.guardar(df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios,df_protocolo)
-        time.sleep(1)
         st.success("Guardado correctamente")
         st.session_state.modificar_df=False
         st.rerun()
-#aplicacion 6
-if st.session_state.informe_embriones:
-    fecha=st.date_input("A partir de que fecha desea el informe")
-    finca=st.multiselect("finca",df_fincas)
-    compania=st.multiselect("Compañia",df_embriones["COMPANIA"].unique())
-    x1=st.multiselect("X1",df_embriones["X1"].unique())
-    x3=st.multiselect("X3",df_embriones["X3"].unique())
-    raza=st.multiselect("raza",df_embriones["RAZA"].unique())
-    if st.button("Generar informe",use_container_width=True):
+
+#FINAL MODIFICAR BASE DE DATOS
+#------------------------------------------------------------------------
+#INICO GRACIFICOS
+
+if st.button("GRÁFICOS",use_container_width=True):
+        st.session_state.graficos=True
+        st.session_state.registro_crias=False
+        st.session_state.informe_nacimientos= False
+        st.session_state.informe_vacas = False
+        st.session_state.informe_toros = False
+        st.session_state.modificar_df = False
+        st.session_state.registros=False
+        st.session_state.subir_pdf_registro=False
         st.session_state.informe_embriones=False
-        informe=Buscador.informe_embriones(df_embriones,raza,fecha,finca,compania,x1,x3)
-        
-        texto="En este informe se muestran todos los procesos de embrion a partir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
-        nombre_pdf = ("Informe_Embriones")
-        generar_informe.generar_pdf(texto,informe,nombre_pdf)
-        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
-        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
-            st.rerun()     
-#aplicacion 7       
-if st.session_state.informe_ganado_puro:
-    fecha=st.date_input("A partir de que fecha desea el informe")
-    finca=st.multiselect("finca",df_fincas)
-    raza=st.multiselect("raza",df_ganado_puro["RAZA"].unique())
-    if st.button("Generar informe",use_container_width=True):
-        
-        st.session_state.informe_embriones=False
-        informe=Buscador.informe_embriones(df_ganado_puro,raza,fecha,finca,"compania","x1","x3")
-        informe=buscar.ordenar_fecha_df(informe)
-        texto="En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
-        nombre_pdf = ("Informe_Ganado_Puro")
-        generar_informe.generar_pdf(texto,informe,nombre_pdf)
-        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
-        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
-            st.rerun()     
-#graficos
+        st.session_state.informe_ganado_puro=False
+        st.session_state.tiempo_inseminacion=False
 if st.session_state.graficos:
     st.markdown(
     """
@@ -605,15 +727,10 @@ if st.session_state.graficos:
     recuento_crias_toro.update_yaxes( title_font=dict(size=15),showticklabels=False,showgrid=True,visible=True)
     st.plotly_chart(recuento_crias_toro, use_container_width=True,config={"displayModeBar": False,"staticPlot": True})    
     
-if st.session_state.tiempo_inseminacion:
-    if st.button("Generar informe",use_container_width=True):
-        st.session_state.tiempo_inseminacion=False
-        informe=Buscador.palpacion_inseminacion(df_inseminacion)
-        texto="En este informe se muestran todos las vacas inseminadas pendientes por palpacion\n"+"Cantidad de animales: "+str(informe[1])
-        nombre_pdf = ("Informe_Timpo_inseminacion")
-        generar_informe.generar_pdf(texto,informe[0],nombre_pdf)
-        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
-        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
-            st.rerun() 
+
+#FINAL GRAFICOS 
     
+# FINAL DEL CÓDIGO
+#------------------------------------------------------------------------
+
 #   py -3.12 -m streamlit run app.py

@@ -146,7 +146,7 @@ class Agregar_Eliminar:
       df_protocolo=df_protocolo.dropna()
       supabase.table("PROTOCOLO").delete().neq("index",-1).execute()
       supabase.table("PROTOCOLO").insert(df_protocolo.to_dict(orient="records")).execute()
-
+      
 
 
    def generar_consecutivo(self):
@@ -391,41 +391,20 @@ class Buscador:
          df.iloc[posicion,4]=[nueva_confirmacion]
       return df
    
-   def informe_embriones(df,raza,fecha,finca,compania,x1,x3):
-      
-      if x1=="x1":
-         df=df[pd.to_datetime(df["FECHA_NACIMIENTO"])>=pd.to_datetime(fecha)]
-      else:
-         df=df[pd.to_datetime(df["FECHA_SINCRONIZACION"])>=pd.to_datetime(fecha)]
-      
+   def informe_embriones(df,fecha,finca):
+      df= df[["COMPAÑIA", "FINCA","RECEPTORA","DONADORA","REPRODUCTOR","RAZA","TIPO_EMBRION","X1"]]
       l_finca=[]
       for i in finca:
          l_finca.append(df[df["FINCA"]==i])
       df=pd.concat(l_finca)
-      
-      if compania!="compania":
-         l_compania=[]
-         for i in compania:
-            l_compania.append(df[df["COMPANIA"]==i])
-         df=pd.concat(l_compania)
-      if x1!="x1":
-         l_x1=[]
-         for i in x1:
-            l_x1.append(df[df["X1"]==i])
-         df=pd.concat(l_x1)
-
-      if x3!="x3":
-         l_x3=[]
-         for i in x3:
-            l_x3.append(df[df["X3"]==i])
-         df=pd.concat(l_x3)
-
-      l_raza=[]
-      
-      for i in raza:
-         l_raza.append(df[df["RAZA"]==i])
-      df=pd.concat(l_raza)
-      return df
+      total=len(df)
+      total_prenadas=len(df[df["X1"]=="p+"])
+      porcentaje_p=round((total_prenadas*100/total),1)
+      total_vacias=len(df[df["X1"]=="v"])
+      porcentaje_v=round((total_vacias*100/total),1)
+      total_rp=len(df[df["X1"]=="r/p"])
+      porcentaje_rp=round((total_rp*100/total),1)
+      return df,str(total),str(total_prenadas),str(porcentaje_p),str(total_vacias),str(porcentaje_v),str(total_rp),str(porcentaje_rp)
 
    def palpacion_inseminacion(df_inseminacion):
       fecha_actual=datetime.now()
