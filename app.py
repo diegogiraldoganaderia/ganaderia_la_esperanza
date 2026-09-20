@@ -348,39 +348,56 @@ if st.session_state.informe_toros:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
                     st.rerun()
 if st.session_state.informe_ganado_puro:
+    
     fecha=st.date_input("A partir de que fecha desea el informe")
+    fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
     finca=st.multiselect("finca",df_fincas)
     raza=st.multiselect("raza",df_ganado_puro["RAZA"].unique())
-    if st.button("Generar informe",use_container_width=True):
+    col1, col2= st.columns(2)
+    with col1:
+        if st.button("GENERAR INFORME",use_container_width=True):
+            df=df_ganado_puro
+            df=df[pd.to_datetime(df["FECHA_NACIMIENTO"])>=fecha]
         
-        st.session_state.informe_embriones=False
-        st.session_state.informes = False
-        informe=Buscador.informe_embriones(df_ganado_puro,raza,fecha,finca,"compania","x1","x3")
-        informe=buscar.ordenar_fecha_df(informe)
-        texto="En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
-        nombre_pdf = ("Informe_Ganado_Puro")
-        generar_informe.generar_pdf(texto,informe,nombre_pdf)
-        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
-        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
-            st.rerun()  
+            filtro_raza=df["RAZA"].isin(raza)
+            df=df[filtro_raza]
+            filtro_finca=df["FINCA"].isin(finca)
+            df=df[filtro_finca]
+            st.session_state.informe_ganado_puro=False
+            st.session_state.informes = False
+            
+            informe=buscar.ordenar_fecha_df(df)
+            texto="En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
+            nombre_pdf = ("Informe_Ganado_Puro")
+            generar_informe.generar_pdf(texto,informe,nombre_pdf)
+            with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+            with col2:
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+                    st.rerun() 
+
 if st.session_state.informe_embriones:
+    
     fecha=st.selectbox("FECHA SINCRONIZACIÓN",df_embriones["FECHA_SINCRONIZACION"].unique())
     df=df_embriones[df_embriones["FECHA_SINCRONIZACION"]==fecha]
     finca=st.multiselect("FINCA",df["FINCA"].unique())
-    if st.button("Generar informe",use_container_width=True):
-        st.session_state.informe_embriones=False
-        st.session_state.informes = False
-        informe=Buscador.informe_embriones(df,fecha,finca)
-        texto=("En este informe se muestran todos los procesos de embrion realizados en la la fecha: "+fecha
-                +", se sincronizaron "+informe[1]+" vacas de las cuales hubo un total de "+informe[2]+" vacas preñadas "+
-                "equivalente al "+informe[3]+"%, un total de "+informe[4]+" vacas vacias equivalente al " 
-                +informe[5]+"%, un total de "+informe[6]+" rechazaron el protocolo, equivalente al "+informe[7]+"%"
-        )
-        nombre_pdf = ("Informe_Embriones")
-        generar_informe.generar_pdf(texto,informe[0],nombre_pdf)
-        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
-        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
-            st.rerun() 
+    col1, col2= st.columns(2)
+    with col1:
+        if st.button("Generar informe",use_container_width=True):
+            st.session_state.informe_embriones=False
+            st.session_state.informes = False
+            informe=Buscador.informe_embriones(df,fecha,finca)
+            texto=("En este informe se muestran todos los procesos de embrion realizados en la la fecha: "+fecha
+                    +", se sincronizaron "+informe[1]+" vacas de las cuales hubo un total de "+informe[2]+" vacas preñadas "+
+                    "equivalente al "+informe[3]+"%, un total de "+informe[4]+" vacas vacias equivalente al " 
+                    +informe[5]+"%, un total de "+informe[6]+" rechazaron el protocolo, equivalente al "+informe[7]+"%"
+            )
+
+            nombre_pdf = ("Informe_Embriones")
+            generar_informe.generar_pdf(texto,informe[0],nombre_pdf)
+            with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+            with col2:
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+                    st.rerun() 
 
 #FINAL INFORMES
 #-------------------------------------------------------------------------
@@ -727,7 +744,6 @@ if st.session_state.graficos:
     recuento_crias_toro.update_yaxes( title_font=dict(size=15),showticklabels=False,showgrid=True,visible=True)
     st.plotly_chart(recuento_crias_toro, use_container_width=True,config={"displayModeBar": False,"staticPlot": True})    
     
-
 #FINAL GRAFICOS 
     
 # FINAL DEL CÓDIGO
