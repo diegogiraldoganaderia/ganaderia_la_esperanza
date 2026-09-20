@@ -69,7 +69,7 @@ def set_local_bg(image_path):
         unsafe_allow_html=True
     )
 #fondo
-set_local_bg(r"fondodos.png")
+set_local_bg(r"fondo.png")
 #logo
 
 
