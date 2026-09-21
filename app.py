@@ -140,7 +140,7 @@ st.html("""
     border: 1px solid #806A35 !important;
     border-radius: 14px !important;
 
-    font-size: 35px !important;
+    font-size: 17px !important;
     font-weight: 500 !important;
     letter-spacing: 0.8px;
 
@@ -176,7 +176,7 @@ st.html("""
 }
 
 .stButton > button p {
-    font-size: 35px !important;
+    font-size: 17px !important;
     font-weight: 500 !important;
     margin: 0 !important;
 }
