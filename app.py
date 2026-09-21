@@ -80,7 +80,6 @@ st.header("MENÚ")
 if "informes" not in st.session_state:
     st.session_state.informes = False
 
-
 if "reproduccion_produccion" not in st.session_state:
     st.session_state.reproduccion_produccion = False
 if "registros" not in st.session_state:
@@ -118,6 +117,82 @@ if "graficos" not in st.session_state:
 
 if "tiempo_inseminacion" not in st.session_state:
     st.session_state.tiempo_inseminacion=False
+
+if "palpacion" not in st.session_state:
+    st.session_state.palpacion=False
+
+
+def cerrar(x):
+    
+    if x==1:
+        st.session_state.informes = True
+    else:
+        st.session_state.informes = False
+
+    if x==2:
+        st.session_state.informe_nacimientos = True
+    else:
+        st.session_state.informe_nacimientos = False
+    if x==3:
+        st.session_state.informe_vacas = True
+    else:
+        st.session_state.informe_vacas= False
+    if x==4:
+        st.session_state.informe_toros = True
+    else:
+        st.session_state.informe_toros= False
+    if x==5:
+        st.session_state.informe_ganado_puro = True
+    else:
+        st.session_state.informe_ganado_puro= False
+    if x==6:
+        st.session_state.informe_embriones=True
+    else:
+        st.session_state.informe_embriones=False
+
+    if x==7:
+        st.session_state.reproduccion_produccion = True
+    else:
+        st.session_state.reproduccion_produccion = False
+
+    if x==8:
+        st.session_state.registro_nacimientos=True
+    else:
+        st.session_state.registro_nacimientos=False
+
+    if x==9:
+        st.session_state.tiempo_inseminacion=True
+    else:
+        st.session_state.tiempo_inseminacion=False
+
+    if x==10:
+        st.session_state.palpacion=True
+    else:
+        st.session_state.palpacion=False
+    if x==11:
+        st.session_state.registros=True
+    else:
+        st.session_state.registros=False
+    if x==12:
+        st.session_state.subir_pdf_registro=True
+    else:
+        st.session_state.subir_pdf_registro=False
+
+    if x==13:
+        st.session_state.buscar_registros=True
+    else:
+        st.session_state.buscar_registros=False
+
+    if x==14:
+        st.session_state.modificar_df = True
+    else:
+        st.session_state.modificar_df = False
+
+    if x==15:
+        st.session_state.graficos=True
+    else:
+        st.session_state.graficos=False
+    
 
 #Botones
 st.html("""
@@ -182,121 +257,37 @@ button[kind="secondary"] {
 
 
 if st.button("🚀  INICIO",use_container_width=True,type="primary"):
-    st.session_state.informes = False
-    st.session_state.reproduccion_produccion = False
-    st.session_state.registro_nacimientos=False
-    st.session_state.informe_nacimientos= False
-    st.session_state.informe_vacas = False
-    st.session_state.informe_toros = False
-    st.session_state.modificar_df = False
-    st.session_state.registros=False
-    st.session_state.subir_pdf_registro=False
-    st.session_state.graficos=False
-    st.session_state.informe_embriones=False
-    st.session_state.informe_ganado_puro=False
-    st.session_state.tiempo_inseminacion=False
+   cerrar(0)
 
 
 #INICIO INFORMES
 
 
 if st.button("📋 INFORMES",use_container_width=True,type="primary"):
-    st.session_state.informes= True
+    cerrar(1)
     
 if st.session_state.informes:
 
     col1, col2, col3= st.columns(3)
     with col1:
         if st.button("INFORME NACIMIENTOS",use_container_width=True):
-            st.session_state.informes = False
-            st.session_state.reproduccion_produccion = False
-            st.session_state.registro_nacimientos=False
-            st.session_state.informe_nacimientos= True
-            st.session_state.informe_vacas = False
-            st.session_state.informe_toros = False
-            st.session_state.modificar_df = False
-            st.session_state.registros=False
-            st.session_state.subir_pdf_registro=False
-            st.session_state.graficos=False
-            st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=False
-            st.session_state.tiempo_inseminacion=False    
+            cerrar(2)    
     with col2:
         if st.button("INFORME VACAS",use_container_width=True):
-            st.session_state.informes = False
-            st.session_state.reproduccion_produccion = False
-            st.session_state.registro_nacimientos=False
-            st.session_state.informe_nacimientos= False
-            st.session_state.informe_vacas = True
-            st.session_state.informe_toros = False
-            st.session_state.modificar_df = False
-            st.session_state.registros=False
-            st.session_state.subir_pdf_registro=False
-            st.session_state.graficos=False
-            st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=False
-            st.session_state.tiempo_inseminacion=False
+            cerrar(3)
     with col3:
         if st.button("INFORME TOROS",use_container_width=True):
-            st.session_state.informes = False
-            st.session_state.reproduccion_produccion = False
-            st.session_state.registro_nacimientos=False
-            st.session_state.informe_nacimientos= False
-            st.session_state.informe_vacas = False
-            st.session_state.informe_toros = True
-            st.session_state.modificar_df = False
-            st.session_state.registros=False
-            st.session_state.subir_pdf_registro=False
-            st.session_state.graficos=False
-            st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=False
-            st.session_state.tiempo_inseminacion=False 
+            cerrar(4)
 
     with col1:
         if st.button("INFORME REPRODUCCION",use_container_width=True):
-            st.session_state.informes = False
-            st.session_state.reproduccion_produccion = True
-            st.session_state.registro_nacimientos=False
-            st.session_state.informe_nacimientos= False
-            st.session_state.informe_vacas = False
-            st.session_state.informe_toros = False
-            st.session_state.modificar_df = False
-            st.session_state.registros=False
-            st.session_state.subir_pdf_registro=False
-            st.session_state.graficos=False
-            st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=False
-            st.session_state.tiempo_inseminacion=False
+            cerrar(0)
     with col2:
         if  st.button("INFORME EMBRIONES",use_container_width=True):
-            st.session_state.informes = False
-            st.session_state.reproduccion_produccion = False
-            st.session_state.registro_nacimientos=False
-            st.session_state.informe_nacimientos= False
-            st.session_state.informe_vacas = False
-            st.session_state.informe_toros = False
-            st.session_state.modificar_df = False
-            st.session_state.registros=False
-            st.session_state.subir_pdf_registro=False
-            st.session_state.graficos=False
-            st.session_state.informe_embriones=True     
-            st.session_state.informe_ganado_puro=False
-            st.session_state.tiempo_inseminacion=False
+            cerrar(5)
     with col3:
         if  st.button("INFORME GANADO PURO",use_container_width=True):
-            st.session_state.informes = False
-            st.session_state.reproduccion_produccion = False
-            st.session_state.registro_nacimientos=False
-            st.session_state.informe_nacimientos= False
-            st.session_state.informe_vacas = False
-            st.session_state.informe_toros = False
-            st.session_state.modificar_df = False
-            st.session_state.registros=False
-            st.session_state.subir_pdf_registro=False
-            st.session_state.graficos=False
-            st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=True
-            st.session_state.tiempo_inseminacion=False
+            cerrar(6)
 if st.session_state.informe_nacimientos:  
     
     fecha=st.date_input("A partir de que fecha desea el informe")
@@ -437,7 +428,6 @@ if st.session_state.informe_ganado_puro:
             with col2:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
                     st.rerun() 
-
 if st.session_state.informe_embriones:
     
     fecha=st.selectbox("FECHA SINCRONIZACIÓN",df_embriones["FECHA_SINCRONIZACION"].unique())
@@ -467,55 +457,19 @@ if st.session_state.informe_embriones:
 #INICIO REPRODUCCIÓN Y PRODUCIÓN
 
 if st.button("🤰🐄  REPRODUCCIÓN Y PRODUCCIÓN",use_container_width=True,type="primary"):
-   st.session_state.reproduccion_produccion= True
+    cerrar(7)   
 if st.session_state.reproduccion_produccion:
 
     col1, col2, col3= st.columns(3)
     with col1:
         if st.button("REGISTRO NACIMIENTOS",use_container_width=True): 
-            st.session_state.informes = False
-            st.session_state.reproduccion_produccion = False
-            st.session_state.registro_nacimientos=True
-            st.session_state.informe_nacimientos= False
-            st.session_state.informe_vacas = False
-            st.session_state.informe_toros = False
-            st.session_state.modificar_df = False
-            st.session_state.registros=False
-            st.session_state.subir_pdf_registro=False
-            st.session_state.graficos=False
-            st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=False
-            st.session_state.tiempo_inseminacion=False
+           cerrar(8)
     with col2:
         if st.button("INSEMINACION",use_container_width=True):
-            st.session_state.informes = False
-            st.session_state.reproduccion_produccion = False
-            st.session_state.registro_nacimientos=False
-            st.session_state.informe_nacimientos= False
-            st.session_state.informe_vacas = False
-            st.session_state.informe_toros = False
-            st.session_state.modificar_df = False
-            st.session_state.registros=False
-            st.session_state.subir_pdf_registro=False
-            st.session_state.graficos=False
-            st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=False
-            st.session_state.tiempo_inseminacion=False
+            cerrar(9)
     with col3:
         if st.button("PALPACION",use_container_width=True):
-            st.session_state.informes = False
-            st.session_state.reproduccion_produccion = False
-            st.session_state.registro_nacimientos=False
-            st.session_state.informe_nacimientos= False
-            st.session_state.informe_vacas = False
-            st.session_state.informe_toros = False
-            st.session_state.modificar_df = False
-            st.session_state.registros=False
-            st.session_state.subir_pdf_registro=False
-            st.session_state.graficos=False
-            st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=False
-            st.session_state.tiempo_inseminacion=False
+            cerrar(10)
 if st.session_state.registro_nacimientos: 
     vaca = st.text_input("ID de la vaca").lower()
     fn = st.date_input("Fecha nacimiento")
@@ -557,40 +511,16 @@ if st.session_state.tiempo_inseminacion:
 #INICIO REGISTROS
 
 if st.button("🧬🐂  REGISTRO DE ANIMALES",use_container_width=True,type="primary"):
-    st.session_state.registros = True
+    cerrar(11)
 
 if st.session_state.registros:  
     col1, col2= st.columns(2)
     with col1:
         if st.button("AÑADIR REGISTROS",use_container_width=True):
-            st.session_state.informes = False
-            st.session_state.reproduccion_produccion = False
-            st.session_state.registro_nacimientos=False
-            st.session_state.informe_nacimientos= False
-            st.session_state.informe_vacas = False
-            st.session_state.informe_toros = False
-            st.session_state.modificar_df = False
-            st.session_state.registros=False
-            st.session_state.subir_pdf_registro=True
-            st.session_state.graficos=False
-            st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=False
-            st.session_state.tiempo_inseminacion=False
+            cerrar(12)
     with col2:
         if st.button("BUSCAR REGISTROS",use_container_width=True):
-            st.session_state.informes = False
-            st.session_state.reproduccion_produccion = False
-            st.session_state.registro_nacimientos=False
-            st.session_state.informe_nacimientos= False
-            st.session_state.informe_vacas = False
-            st.session_state.informe_toros = False
-            st.session_state.modificar_df = False
-            st.session_state.buscar_registros=True
-            st.session_state.subir_pdf_registro=False
-            st.session_state.graficos=False
-            st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=False
-            st.session_state.tiempo_inseminacion=False
+            cerrar(13)
 if st.session_state.subir_pdf_registro:
     st.write(key[:20])
     st.title("Subir PDF a carpeta")
@@ -629,17 +559,7 @@ if st.session_state.buscar_registros:
 #INICIO MODIFICAR BASE DE DATOS
 
 if st.button("🗃️ MODIFICAR BASE DATOS",use_container_width=True,type="primary"):
-        st.session_state.modificar_df = True
-        st.session_state.registro_crias=False
-        st.session_state.informe_nacimientos= False
-        st.session_state.informe_vacas = False
-        st.session_state.informe_toros = False
-        st.session_state.registros=False
-        st.session_state.subir_pdf_registro=False
-        st.session_state.informe_embriones=False
-        st.session_state.informe_ganado_puro=False
-        st.session_state.graficos=False
-        st.session_state.tiempo_inseminacion=False
+    cerrar(14)
 if st.session_state.modificar_df:
     fecha_actual=datetime.now()
     dias=[]
@@ -680,17 +600,7 @@ if st.session_state.modificar_df:
 #INICO GRACIFICOS
 
 if st.button("📊   GRÁFICOS",use_container_width=True,type="primary"):
-        st.session_state.graficos=True
-        st.session_state.registro_crias=False
-        st.session_state.informe_nacimientos= False
-        st.session_state.informe_vacas = False
-        st.session_state.informe_toros = False
-        st.session_state.modificar_df = False
-        st.session_state.registros=False
-        st.session_state.subir_pdf_registro=False
-        st.session_state.informe_embriones=False
-        st.session_state.informe_ganado_puro=False
-        st.session_state.tiempo_inseminacion=False
+    cerrar(15)
 if st.session_state.graficos:
     st.markdown(
     """
