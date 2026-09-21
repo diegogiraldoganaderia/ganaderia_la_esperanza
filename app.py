@@ -162,7 +162,7 @@ button[kind="secondary"] {
     background: linear-gradient(
         90deg,
         #5C481F 0%,
-        #29251C 8%,
+        #29258C 8%,
         #15181B 100%
     ) !important;
 
