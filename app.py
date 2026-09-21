@@ -15,7 +15,7 @@ buscar = Buscador()
 nacimientos = Agregar_Eliminar()
 generar_informe=Informes()
 
-
+ 
 #logo
 with open("logo.png", "rb") as image_file:
         logo = base64.b64encode(image_file.read()).decode()
@@ -84,8 +84,6 @@ if "reproduccion_produccion" not in st.session_state:
 if "registros" not in st.session_state:
     st.session_state.registros = False
 
-
-
 #FORMULARIOS CERRADOS
 if "buscar_registros" not in st.session_state:
     st.session_state.buscar_registros = False
@@ -124,6 +122,70 @@ if "tiempo_inseminacion" not in st.session_state:
 
 
 st.html("""
+<style>
+
+.stButton > button {
+    width: 100%;
+    height: 72px !important;
+
+    background: linear-gradient(
+        90deg,
+        #5C481F 0%,
+        #29251C 8%,
+        #15181B 100%
+    ) !important;
+
+    color: #F2E8D0 !important;
+
+    border: 1px solid #806A35 !important;
+    border-radius: 14px !important;
+
+    font-size: 35px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.8px;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+
+    transition: all 0.2s ease-in-out;
+
+    padding: 0 !important;
+}
+
+
+/* Al pasar el mouse */
+.stButton > button:hover {
+
+    background: linear-gradient(
+        90deg,
+        #80652B 0%,
+        #332D20 8%,
+        #1A1B1A 100%
+    ) !important;
+
+    border: 1px solid #B08D3C !important;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 7px 18px rgba(0,0,0,0.35);
+}
+
+
+/* Al presionar */
+.stButton > button:active {
+    transform: translateY(0px);
+}
+
+.stButton > button p {
+    font-size: 35px !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
+}
+
+</style>
+""")
+
+def estilo():
+    st.html("""
 <style>
 
 .stButton > button {
@@ -185,10 +247,9 @@ st.html("""
 
 </style>
 """)
-
 #  BOTON INICIO, este botón reinicia todos los procesos
 
-if st.button("⌂   INICIO",use_container_width=True):
+if st.button("🚀  INICIO",use_container_width=True):
     st.session_state.informes = False
     st.session_state.reproduccion_produccion = False
     st.session_state.registro_nacimientos=False
@@ -206,9 +267,11 @@ if st.button("⌂   INICIO",use_container_width=True):
 
 #INICIO INFORMES
 
-if st.button("▣   INFORMES",use_container_width=True):
+if st.button("📋 INFORMES",use_container_width=True):
     st.session_state.informes= True
+    
 if st.session_state.informes:
+    estilo()
     col1, col2, col3= st.columns(3)
     with col1:
         if st.button("INFORME NACIMIENTOS",use_container_width=True):
@@ -457,9 +520,10 @@ if st.session_state.informe_embriones:
 #-------------------------------------------------------------------------
 #INICIO REPRODUCCIÓN Y PRODUCIÓN
 
-if st.button("↻   REPRODUCCIÓN Y PRODUCCIÓN",use_container_width=True):
+if st.button("🤰🐄  REPRODUCCIÓN Y PRODUCCIÓN",use_container_width=True):
    st.session_state.reproduccion_produccion= True
 if st.session_state.reproduccion_produccion:
+    estilo()
     col1, col2, col3= st.columns(3)
     with col1:
         if st.button("REGISTRO NACIMIENTOS",use_container_width=True): 
@@ -540,9 +604,10 @@ if st.session_state.tiempo_inseminacion:
 #-------------------------------------------------------------------------
 #INICIO REGISTROS
 
-if st.button("♙   REGISTRO DE ANIMALES",use_container_width=True):
+if st.button("🧬🐂  REGISTRO DE ANIMALES",use_container_width=True):
     st.session_state.registros = True
 if st.session_state.registros:
+    estilo()
     col1, col2= st.columns(2)
     with col1:
         if st.button("AÑADIR REGISTROS",use_container_width=True):
@@ -605,7 +670,7 @@ if st.session_state.buscar_registros:
 #------------------------------------------------------------------------
 #INICIO MODIFICAR BASE DE DATOS
 
-if st.button("⚙   MODIFICAR BASE DATOS",use_container_width=True):
+if st.button("🗃️ MODIFICAR BASE DATOS",use_container_width=True):
         st.session_state.modificar_df = True
         st.session_state.registro_crias=False
         st.session_state.informe_nacimientos= False
@@ -656,7 +721,7 @@ if st.session_state.modificar_df:
 #------------------------------------------------------------------------
 #INICO GRACIFICOS
 
-if st.button("▥   GRÁFICOS",use_container_width=True):
+if st.button("📊   GRÁFICOS",use_container_width=True):
         st.session_state.graficos=True
         st.session_state.registro_crias=False
         st.session_state.informe_nacimientos= False
