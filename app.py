@@ -15,11 +15,7 @@ buscar = Buscador()
 nacimientos = Agregar_Eliminar()
 generar_informe=Informes()
 
-#Alerta de correo díario
 
-# Esto permite que GitHub ejecute la función desde la consola
-#banner
-st.image("banner.png", use_container_width=True)
 #logo
 with open("logo.png", "rb") as image_file:
         logo = base64.b64encode(image_file.read()).decode()
