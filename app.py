@@ -208,8 +208,10 @@ if st.session_state.informes:
     col1, col2, col3= st.columns(3)
     with col1:
         if st.button("INFORME NACIMIENTOS",use_container_width=True):
+            st.session_state.informes = False
+            st.session_state.reproduccion_produccion = False
+            st.session_state.registro_nacimientos=False
             st.session_state.informe_nacimientos= True
-            st.session_state.registro_crias=False
             st.session_state.informe_vacas = False
             st.session_state.informe_toros = False
             st.session_state.modificar_df = False
@@ -218,13 +220,15 @@ if st.session_state.informes:
             st.session_state.graficos=False
             st.session_state.informe_embriones=False
             st.session_state.informe_ganado_puro=False
-            st.session_state.tiempo_inseminacion=False
+            st.session_state.tiempo_inseminacion=False    
     with col2:
         if st.button("INFORME VACAS",use_container_width=True):
+            st.session_state.informes = False
+            st.session_state.reproduccion_produccion = False
+            st.session_state.registro_nacimientos=False
+            st.session_state.informe_nacimientos= False
             st.session_state.informe_vacas = True
             st.session_state.informe_toros = False
-            st.session_state.registro_crias=False
-            st.session_state.informe_nacimientos= False
             st.session_state.modificar_df = False
             st.session_state.registros=False
             st.session_state.subir_pdf_registro=False
@@ -234,56 +238,64 @@ if st.session_state.informes:
             st.session_state.tiempo_inseminacion=False
     with col3:
         if st.button("INFORME TOROS",use_container_width=True):
-            st.session_state.informe_toros=True
-            st.session_state.tiempo_inseminacion=False
-            st.session_state.graficos=False
-            st.session_state.registro_crias=False
+            st.session_state.informes = False
+            st.session_state.reproduccion_produccion = False
+            st.session_state.registro_nacimientos=False
             st.session_state.informe_nacimientos= False
             st.session_state.informe_vacas = False
+            st.session_state.informe_toros = True
             st.session_state.modificar_df = False
             st.session_state.registros=False
             st.session_state.subir_pdf_registro=False
+            st.session_state.graficos=False
             st.session_state.informe_embriones=False
             st.session_state.informe_ganado_puro=False
+            st.session_state.tiempo_inseminacion=False 
 
     with col1:
         if st.button("INFORME REPRODUCCION",use_container_width=True):
-            st.session_state.informe_toros=False
-            st.session_state.tiempo_inseminacion=False
-            st.session_state.graficos=False
-            st.session_state.registro_crias=False
-            st.session_state.informe_nacimientos= False
-            st.session_state.informe_vacas = False
-            st.session_state.modificar_df = False
-            st.session_state.registros=False
-            st.session_state.subir_pdf_registro=False
-            st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=False
-    with col2:
-        if  st.button("INFORME EMBRIONES",use_container_width=True):
-            st.session_state.informe_embriones=True
-            st.session_state.graficos=False
-            st.session_state.registro_crias=False
+            st.session_state.informes = False
+            st.session_state.reproduccion_produccion = True
+            st.session_state.registro_nacimientos=False
             st.session_state.informe_nacimientos= False
             st.session_state.informe_vacas = False
             st.session_state.informe_toros = False
             st.session_state.modificar_df = False
             st.session_state.registros=False
             st.session_state.subir_pdf_registro=False
+            st.session_state.graficos=False
+            st.session_state.informe_embriones=False
+            st.session_state.informe_ganado_puro=False
+            st.session_state.tiempo_inseminacion=False
+    with col2:
+        if  st.button("INFORME EMBRIONES",use_container_width=True):
+            st.session_state.informes = False
+            st.session_state.reproduccion_produccion = False
+            st.session_state.registro_nacimientos=False
+            st.session_state.informe_nacimientos= False
+            st.session_state.informe_vacas = False
+            st.session_state.informe_toros = False
+            st.session_state.modificar_df = False
+            st.session_state.registros=False
+            st.session_state.subir_pdf_registro=False
+            st.session_state.graficos=False
+            st.session_state.informe_embriones=True     
             st.session_state.informe_ganado_puro=False
             st.session_state.tiempo_inseminacion=False
     with col3:
         if  st.button("INFORME GANADO PURO",use_container_width=True):
-            st.session_state.informe_ganado_puro=True
-            st.session_state.informe_embriones=False
-            st.session_state.graficos=False
-            st.session_state.registro_crias=False
+            st.session_state.informes = False
+            st.session_state.reproduccion_produccion = False
+            st.session_state.registro_nacimientos=False
             st.session_state.informe_nacimientos= False
             st.session_state.informe_vacas = False
             st.session_state.informe_toros = False
             st.session_state.modificar_df = False
             st.session_state.registros=False
             st.session_state.subir_pdf_registro=False
+            st.session_state.graficos=False
+            st.session_state.informe_embriones=False
+            st.session_state.informe_ganado_puro=True
             st.session_state.tiempo_inseminacion=False
 if st.session_state.informe_nacimientos:  
     
@@ -348,6 +360,7 @@ if st.session_state.informe_toros:
                           len(df_cria[(df_cria["TORO"]==i)&(pd.to_datetime(df_cria["FECHA_NACIMIENTO"]).dt.year==j)&(df_cria["SEXO"]=="hembra")])
                           ,str(j)]
                     contar+=1
+    col1, col2= st.columns(2)
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True):
             st.session_state.informe_toros=False
@@ -460,7 +473,9 @@ if st.session_state.reproduccion_produccion:
     col1, col2, col3= st.columns(3)
     with col1:
         if st.button("REGISTRO NACIMIENTOS",use_container_width=True): 
-            st.session_state.registro_crias=True
+            st.session_state.informes = False
+            st.session_state.reproduccion_produccion = False
+            st.session_state.registro_nacimientos=True
             st.session_state.informe_nacimientos= False
             st.session_state.informe_vacas = False
             st.session_state.informe_toros = False
@@ -473,30 +488,34 @@ if st.session_state.reproduccion_produccion:
             st.session_state.tiempo_inseminacion=False
     with col2:
         if st.button("INSEMINACION",use_container_width=True):
-            st.session_state.tiempo_inseminacion=True
-            st.session_state.graficos=False
-            st.session_state.registro_crias=False
+            st.session_state.informes = False
+            st.session_state.reproduccion_produccion = False
+            st.session_state.registro_nacimientos=False
             st.session_state.informe_nacimientos= False
             st.session_state.informe_vacas = False
             st.session_state.informe_toros = False
             st.session_state.modificar_df = False
             st.session_state.registros=False
             st.session_state.subir_pdf_registro=False
+            st.session_state.graficos=False
             st.session_state.informe_embriones=False
             st.session_state.informe_ganado_puro=False
+            st.session_state.tiempo_inseminacion=False
     with col3:
         if st.button("PALPACION",use_container_width=True):
-            st.session_state.tiempo_inseminacion=False
-            st.session_state.graficos=False
-            st.session_state.registro_crias=False
+            st.session_state.informes = False
+            st.session_state.reproduccion_produccion = False
+            st.session_state.registro_nacimientos=False
             st.session_state.informe_nacimientos= False
             st.session_state.informe_vacas = False
             st.session_state.informe_toros = False
             st.session_state.modificar_df = False
             st.session_state.registros=False
             st.session_state.subir_pdf_registro=False
+            st.session_state.graficos=False
             st.session_state.informe_embriones=False
-            st.session_state.informe_ganado_puro=False 
+            st.session_state.informe_ganado_puro=False
+            st.session_state.tiempo_inseminacion=False
 if st.session_state.registro_nacimientos: 
     vaca = st.text_input("ID de la vaca").lower()
     fn = st.date_input("Fecha nacimiento")
@@ -539,27 +558,34 @@ if st.session_state.tiempo_inseminacion:
 
 if st.button("🧬🐂  REGISTRO DE ANIMALES",use_container_width=True,type="primary"):
     st.session_state.registros = True
+
 if st.session_state.registros:  
     col1, col2= st.columns(2)
     with col1:
         if st.button("AÑADIR REGISTROS",use_container_width=True):
-            st.session_state.subir_pdf_registro=True
-            st.session_state.registro_crias=False
+            st.session_state.informes = False
+            st.session_state.reproduccion_produccion = False
+            st.session_state.registro_nacimientos=False
             st.session_state.informe_nacimientos= False
             st.session_state.informe_vacas = False
             st.session_state.informe_toros = False
             st.session_state.modificar_df = False
             st.session_state.registros=False
+            st.session_state.subir_pdf_registro=True
             st.session_state.graficos=False
+            st.session_state.informe_embriones=False
+            st.session_state.informe_ganado_puro=False
             st.session_state.tiempo_inseminacion=False
     with col2:
         if st.button("BUSCAR REGISTROS",use_container_width=True):
-            st.session_state.registro_crias=False
+            st.session_state.informes = False
+            st.session_state.reproduccion_produccion = False
+            st.session_state.registro_nacimientos=False
             st.session_state.informe_nacimientos= False
             st.session_state.informe_vacas = False
             st.session_state.informe_toros = False
             st.session_state.modificar_df = False
-            st.session_state.registros=True
+            st.session_state.buscar_registros=True
             st.session_state.subir_pdf_registro=False
             st.session_state.graficos=False
             st.session_state.informe_embriones=False
