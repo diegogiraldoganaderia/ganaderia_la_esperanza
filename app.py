@@ -218,7 +218,7 @@ button[kind="primary"] {
     border: 1px solid #806A35 !important;
     border-radius: 14px !important;
 
-    font-size: 17px !important;
+    font-size: 24px !important;
     font-weight: 500 !important;
     letter-spacing: 0.8px;
 
@@ -246,7 +246,7 @@ button[kind="secondary"] {
     border: 1px solid white !important;
     border-radius: 14px !important;
 
-    font-size: 17px !important;
+    font-size: 25px !important;
     font-weight: 500 !important;
 
     box-shadow: 0 4px 12px rgba(0,0,0,0.25);
