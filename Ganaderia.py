@@ -42,11 +42,32 @@ df_informe_vaca=pd.DataFrame(columns=["INFORME"])
 df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
 
 class Informes():
- def registros(self,registro):
-   pdf_path  = "registros/"+str(registro)+".pdf"
-   return pdf_path
+   def informe_receptoras(df):
+      lista_receptoras=df["RECEPTORA"].unique().tolist()
+      df_receptoras=pd.DataFrame(columns=["RECEPTORA","FINCA","#PROTOCOLOS","#p+","%p+","#v","%v","#rp","%"+"rp"])
+      for j in range(len(lista_receptoras)):
+         df_receptoras.loc[j]=[
+            lista_receptoras[j],
+            df["FINCA"].loc[j],
+            len(df[df["RECEPTORA"]==lista_receptoras[j]]),
+            len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="p+")]),
+            round(100*len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="p+")])/len(df[df["RECEPTORA"]==lista_receptoras[j]])),
+            len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="v")]),
+            str(round(100*len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="v")])/len(df[df["RECEPTORA"]==lista_receptoras[j]])))+" %",
+            len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="rp")]),
+            str(round((100*len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="rp")])/len(df[df["RECEPTORA"]==lista_receptoras[j]]))))+" %",
+
+         ]
+
+      df_receptoras =df_receptoras.sort_values(by="%p+", ascending=False)
+      df_receptoras["%p+"]=df_receptoras["%p+"].astype(str) +" %"
+      return df_receptoras
+   
+   def registros(self,registro):
+      pdf_path  = "registros/"+str(registro)+".pdf"
+      return pdf_path
  
- def generar_pdf(self,texto,df,nombre_archivo):
+   def generar_pdf(self,texto,df,nombre_archivo):
       df=df.dropna()
       if df.empty:
          df=pd.DataFrame(columns=["Mensaje"])
@@ -392,10 +413,10 @@ class Buscador:
       return df
    
    def informe_embriones(df,fecha,finca):
-      df= df[["COMPAÑIA", "FINCA","RECEPTORA","DONADORA","REPRODUCTOR","RAZA","TIPO_EMBRION","X1"]]
+      df= df[["PROVEEDOR", "FINCA","RECEPTORA","DONADORA","REPRODUCTOR","RAZA","TIPO_EMBRION","X1"]]
       l_finca=[]
       for i in finca:
-         l_finca.append(df[df["FINCA"]==i])
+         l_finca.append(df[df["FINCA"]==i.lower()])
       df=pd.concat(l_finca)
       total=len(df)
       total_prenadas=len(df[df["X1"]=="p+"])

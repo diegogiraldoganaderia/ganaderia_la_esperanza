@@ -121,6 +121,8 @@ if "tiempo_inseminacion" not in st.session_state:
 if "palpacion" not in st.session_state:
     st.session_state.palpacion=False
 
+if "informe_receptoras" not in st.session_state:
+    st.session_state.informe_receptoras=False
 
 def cerrar(x):
     
@@ -142,13 +144,15 @@ def cerrar(x):
     else:
         st.session_state.informe_toros= False
     if x==5:
+        st.session_state.informe_embriones=True
+    else:
+        st.session_state.informe_embriones=False  
+   
+    if x==6:
         st.session_state.informe_ganado_puro = True
     else:
         st.session_state.informe_ganado_puro= False
-    if x==6:
-        st.session_state.informe_embriones=True
-    else:
-        st.session_state.informe_embriones=False
+   
 
     if x==7:
         st.session_state.reproduccion_produccion = True
@@ -192,8 +196,12 @@ def cerrar(x):
         st.session_state.graficos=True
     else:
         st.session_state.graficos=False
-    
 
+    if x==16:
+        st.session_state.informe_receptoras=True
+    else:
+        st.session_state.informe_receptoras=False
+    
 #Botones
 st.html("""
 <style>
@@ -217,9 +225,9 @@ button[kind="primary"] {
 
     border: 1px solid #806A35 !important;
     border-radius: 14px !important;
-
-    font-size: 24px !important;
-    font-weight: 500 !important;
+    
+    font-size: 20px !important;
+    font-weight: 1000 !important;
     letter-spacing: 0.8px;
 
     box-shadow: 0 4px 12px rgba(0,0,0,0.25);
@@ -246,8 +254,29 @@ button[kind="secondary"] {
     border: 1px solid white !important;
     border-radius: 14px !important;
 
-    font-size: 25px !important;
-    font-weight: 500 !important;
+    font-size: 20px !important;
+    font-weight: 1000 !important;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+button[kind="tertiary"] {
+    width: 100%;
+    height: 72px !important;
+
+    background: linear-gradient(
+        90deg,
+        #4A121A 0%,    /* Vino tinto profundo */
+        #2D0B10 40%,   /* Vino tinto más oscuro */
+        #150507 100%  
+    ) !important;
+
+    color: #F2E8D0 !important;
+
+    border: 1px solid white !important;
+    border-radius: 14px !important;
+
+    font-size: 20px !important;
+    font-weight: 1000 !important;
 
     box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
@@ -255,13 +284,10 @@ button[kind="secondary"] {
 </style>
 """)
 
-
 if st.button("🚀  INICIO",use_container_width=True,type="primary"):
    cerrar(0)
 
-
 #INICIO INFORMES
-
 
 if st.button("📋 INFORMES",use_container_width=True,type="primary"):
     cerrar(1)
@@ -288,6 +314,11 @@ if st.session_state.informes:
     with col3:
         if  st.button("INFORME GANADO PURO",use_container_width=True):
             cerrar(6)
+    with col1:
+        if  st.button("INFORME RECEPTORAS",use_container_width=True):
+            cerrar(16)
+
+
 if st.session_state.informe_nacimientos:  
     
     fecha=st.date_input("A partir de que fecha desea el informe")
@@ -302,7 +333,7 @@ if st.session_state.informe_nacimientos:
     
     col1, col2= st.columns(2)
     with col1:
-        if st.button("Generar informe",use_container_width=True):
+        if st.button("Generar informe",use_container_width=True,type="tertiary"):
             st.session_state.informe_nacimientos=False
             st.session_state.informes = False
             df_cria=buscar.ordenar_fecha_df(df_cria)
@@ -314,7 +345,7 @@ if st.session_state.informe_nacimientos:
             generar_informe.generar_pdf( texto,informe,nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
-                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):     
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):     
                     st.rerun()
 if st.session_state.informe_vacas:
     id_vacas=[]
@@ -323,7 +354,7 @@ if st.session_state.informe_vacas:
     id_vaca = st.selectbox("Vaca",id_vacas)
     col1, col2= st.columns(2)
     with col1:
-        if st.button("Generar informe",use_container_width=True):
+        if st.button("Generar informe",use_container_width=True,type="tertiary"):
             st.session_state.informe_vacas=False
             st.session_state.informes = False
             df=buscar.informe_crias_v(df_cria,id_vaca)
@@ -333,7 +364,7 @@ if st.session_state.informe_vacas:
            
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
-                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun()
 if st.session_state.informe_toros:
     filtro_toro=st.multiselect("TORO",df_toros)
@@ -353,7 +384,7 @@ if st.session_state.informe_toros:
                     contar+=1
     col1, col2= st.columns(2)
     with col1:
-        if st.button("GENERAR INFORME",use_container_width=True):
+        if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
             st.session_state.informe_toros=False
             st.session_state.informes = False
             nombre_pdf = ("Informe_Toros")
@@ -399,7 +430,7 @@ if st.session_state.informe_toros:
                
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
-                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun()
 if st.session_state.informe_ganado_puro:
     
@@ -409,7 +440,7 @@ if st.session_state.informe_ganado_puro:
     raza=st.multiselect("raza",df_ganado_puro["RAZA"].unique())
     col1, col2= st.columns(2)
     with col1:
-        if st.button("GENERAR INFORME",use_container_width=True):
+        if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
             df=df_ganado_puro
             df=df[pd.to_datetime(df["FECHA_NACIMIENTO"])>=fecha]
         
@@ -426,16 +457,19 @@ if st.session_state.informe_ganado_puro:
             generar_informe.generar_pdf(texto,informe,nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
-                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun() 
 if st.session_state.informe_embriones:
-    
-    fecha=st.selectbox("FECHA SINCRONIZACIÓN",df_embriones["FECHA_SINCRONIZACION"].unique())
+    fecha=st.selectbox("FECHA SINCRONIZACIÓN Y PROVEEDOR",
+                       (df_embriones["FECHA_SINCRONIZACION"]+" // "+
+                        df_embriones["PROVEEDOR"].astype(str).str.upper()).unique())
+    fecha=fecha[0:10]
     df=df_embriones[df_embriones["FECHA_SINCRONIZACION"]==fecha]
-    finca=st.multiselect("FINCA",df["FINCA"].unique())
+    finca=st.multiselect("FINCA",df["FINCA"].astype(str).str.upper().unique())
+
     col1, col2= st.columns(2)
     with col1:
-        if st.button("Generar informe",use_container_width=True):
+        if st.button("Generar informe",use_container_width=True,type="tertiary"):
             st.session_state.informe_embriones=False
             st.session_state.informes = False
             informe=Buscador.informe_embriones(df,fecha,finca)
@@ -449,8 +483,26 @@ if st.session_state.informe_embriones:
             generar_informe.generar_pdf(texto,informe[0],nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
-                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun() 
+if st.session_state.informe_receptoras:
+    col1, col2= st.columns(2)
+    with col1:
+        if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
+            
+            st.session_state.informe_receptoras=False
+            st.session_state.informes = False
+            informe=Informes.informe_receptoras(df_embriones)
+            texto="Se muestran todas las receptoras que hay en la ganadería"
+            nombre_pdf=("informe_receptoras")
+            generar_informe.generar_pdf(texto,informe,nombre_pdf)
+            
+            with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+            with col2:
+                if st.download_button("DESCARGAR PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
+                    st.rerun()           
+         
+            
 
 #FINAL INFORMES
 #-------------------------------------------------------------------------
@@ -560,6 +612,7 @@ if st.session_state.buscar_registros:
 
 if st.button("🗃️ MODIFICAR BASE DATOS",use_container_width=True,type="primary"):
     cerrar(14)
+
 if st.session_state.modificar_df:
     fecha_actual=datetime.now()
     dias=[]
@@ -595,7 +648,7 @@ if st.session_state.modificar_df:
         st.session_state.modificar_df=False
         st.rerun()
 
-#FINAL MODIFICAR BASE DE DATOS
+        #FINAL MODIFICAR BASE DE DATOS
 #------------------------------------------------------------------------
 #INICO GRACIFICOS
 
