@@ -469,10 +469,10 @@ if st.session_state.informe_embriones:
 
     col1, col2= st.columns(2)
     with col1:
-        if st.button("Generar informe",use_container_width=True,type="tertiary"):
+        if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
             st.session_state.informe_embriones=False
             st.session_state.informes = False
-            informe=Buscador.informe_embriones(df,fecha,finca)
+            informe=buscar.informe_embriones(df,fecha,finca)
             texto=("En este informe se muestran todos los procesos de embrion realizados en la la fecha: "+fecha
                     +", se sincronizaron "+informe[1]+" vacas de las cuales hubo un total de "+informe[2]+" vacas preñadas "+
                     "equivalente al "+informe[3]+"%, un total de "+informe[4]+" vacas vacias equivalente al " 
@@ -486,14 +486,29 @@ if st.session_state.informe_embriones:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun() 
 if st.session_state.informe_receptoras:
+    df=df_embriones
+    finca=st.multiselect("FINCA",df["FINCA"].astype(str).str.upper().unique())
+    finca = [texto.lower() for texto in finca] #se convirten los datos  aminuscula
+    filtro_finca=df["FINCA"].isin(finca)
+    df1=df[filtro_finca]
+    receptora=st.multiselect("RECEPTORA",df1["RECEPTORA"].unique())
     col1, col2= st.columns(2)
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
-            
             st.session_state.informe_receptoras=False
             st.session_state.informes = False
-            informe=generar_informe.informe_receptoras(df_embriones)
-            texto="Se muestran todas las receptoras que hay en la ganadería"
+            informe=buscar.informe_receptoras(df)
+            filtro_finca=informe["FINCA"].isin(finca)
+            informe=informe[filtro_finca]
+            if not receptora:
+                informe=informe
+            else:
+                filtro_receptora=informe["RECEPTORA"].isin(receptora)
+                informe=informe[filtro_receptora]
+            
+            texto=("Se muestran todas las receptoras que hay en la ganadería\n"
+                   "p+: Preñada\n v: Vacia\n rp: No respondío al protocolo"
+            )
             nombre_pdf=("informe_receptoras")
             generar_informe.generar_pdf(texto,informe,nombre_pdf)
             

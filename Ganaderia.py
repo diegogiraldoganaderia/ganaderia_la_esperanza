@@ -42,26 +42,7 @@ df_informe_vaca=pd.DataFrame(columns=["INFORME"])
 df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
 
 class Informes():
-   def informe_receptoras(df):
-      lista_receptoras=df["RECEPTORA"].unique().tolist()
-      df_receptoras=pd.DataFrame(columns=["RECEPTORA","FINCA","#PROTOCOLOS","#p+","%p+","#v","%v","#rp","%"+"rp"])
-      for j in range(len(lista_receptoras)):
-         df_receptoras.loc[j]=[
-            lista_receptoras[j],
-            df["FINCA"].loc[j],
-            len(df[df["RECEPTORA"]==lista_receptoras[j]]),
-            len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="p+")]),
-            round(100*len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="p+")])/len(df[df["RECEPTORA"]==lista_receptoras[j]])),
-            len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="v")]),
-            str(round(100*len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="v")])/len(df[df["RECEPTORA"]==lista_receptoras[j]])))+" %",
-            len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="rp")]),
-            str(round((100*len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="rp")])/len(df[df["RECEPTORA"]==lista_receptoras[j]]))))+" %",
 
-         ]
-
-      df_receptoras =df_receptoras.sort_values(by="%p+", ascending=False)
-      df_receptoras["%p+"]=df_receptoras["%p+"].astype(str) +" %"
-      return df_receptoras
    
    def registros(self,registro):
       pdf_path  = "registros/"+str(registro)+".pdf"
@@ -91,7 +72,7 @@ class Informes():
       lineas_texto = math.ceil(ancho_letras / ancho_texto)
       alto_texto = lineas_texto * 10
       alto_tabla = (len(df) + 1) * alto_celda
-      alto_pagina= (alto_texto+alto_tabla)+50
+      alto_pagina= (alto_texto+alto_tabla)+60
 
 
       pdff = FPDF(unit="mm",format=(ancho_pagina,alto_pagina))
@@ -423,7 +404,7 @@ class Buscador:
       porcentaje_p=round((total_prenadas*100/total),1)
       total_vacias=len(df[df["X1"]=="v"])
       porcentaje_v=round((total_vacias*100/total),1)
-      total_rp=len(df[df["X1"]=="r/p"])
+      total_rp=len(df[df["X1"]=="rp"])
       porcentaje_rp=round((total_rp*100/total),1)
       return df,str(total),str(total_prenadas),str(porcentaje_p),str(total_vacias),str(porcentaje_v),str(total_rp),str(porcentaje_rp)
 
@@ -439,3 +420,24 @@ class Buscador:
       cantidad=len(df_fecha_desde_inseminacion)
       return df_fecha_desde_inseminacion,cantidad
 
+   def informe_receptoras(self,df):
+      
+      lista_receptoras=df["RECEPTORA"].unique().tolist()
+      df_receptoras=pd.DataFrame(columns=["RECEPTORA","FINCA","#PROTOCOLOS","# p+","% p+","# v","% v","# rp","% "+"rp"])
+      for j in range(len(lista_receptoras)):
+         df_receptoras.loc[j]=[
+            lista_receptoras[j],
+            df.loc[df["RECEPTORA"] ==lista_receptoras[j], "FINCA"].values[0],
+            len(df[df["RECEPTORA"]==lista_receptoras[j]]),
+            len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="p+")]),
+            round(100*len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="p+")])/len(df[df["RECEPTORA"]==lista_receptoras[j]])),
+            len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="v")]),
+            str(round(100*len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="v")])/len(df[df["RECEPTORA"]==lista_receptoras[j]])))+" %",
+            len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="rp")]),
+            str(round((100*len(df[(df["RECEPTORA"]==lista_receptoras[j])&(df["X1"]=="rp")])/len(df[df["RECEPTORA"]==lista_receptoras[j]]))))+" %",
+
+         ]
+
+      df_receptoras =df_receptoras.sort_values(by="%p+", ascending=False)
+      df_receptoras["%p+"]=df_receptoras["%p+"].astype(str) +" %"
+      return df_receptoras
