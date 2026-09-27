@@ -492,7 +492,7 @@ if st.session_state.informe_receptoras:
             
             st.session_state.informe_receptoras=False
             st.session_state.informes = False
-            informe=Informes.informe_receptoras(df_embriones)
+            informe=generar_informe.informe_receptoras(df_embriones)
             texto="Se muestran todas las receptoras que hay en la ganadería"
             nombre_pdf=("informe_receptoras")
             generar_informe.generar_pdf(texto,informe,nombre_pdf)
