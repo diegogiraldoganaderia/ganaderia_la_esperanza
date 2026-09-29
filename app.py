@@ -318,7 +318,6 @@ if st.session_state.informes:
         if  st.button("INFORME RECEPTORAS",use_container_width=True):
             cerrar(16)
 
-
 if st.session_state.informe_nacimientos:  
     
     fecha=st.date_input("A partir de que fecha desea el informe")
@@ -348,19 +347,36 @@ if st.session_state.informe_nacimientos:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):     
                     st.rerun()
 if st.session_state.informe_vacas:
-    id_vacas=[]
-    for i in range(len(df_animal)):
-        id_vacas.append(df_animal.iloc[i,0]) 
-    id_vaca = st.selectbox("Vaca",id_vacas)
+    dfve=df_embriones
+    id_vaca = st.selectbox("Vaca",df_partos["ID"].unique())
+    df_vaca_embriones=buscar.informe_receptoras(dfve)
+    df_vaca_embriones=df_vaca_embriones[df_vaca_embriones["RECEPTORA"]==id_vaca]
+    df_vaca_servicios=df_servicios[df_servicios["VACA"]==id_vaca]
+    df_vaca_inseminacion=df_inseminacion[df_inseminacion["ID"]==id_vaca]
+
+   
     col1, col2= st.columns(2)
     with col1:
-        if st.button("Generar informe",use_container_width=True,type="tertiary"):
+        if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
             st.session_state.informe_vacas=False
             st.session_state.informes = False
             df=buscar.informe_crias_v(df_cria,id_vaca)
             informacion=buscar.informacion("VACA",df[0],df[1])
             nombre_pdf = ("Informe_Vaca_"+ str(informacion[2].replace("/", "_")))
-            generar_informe.generar_pdf(informacion[0],informacion[1],nombre_pdf)
+            numero_intentos_prenez=len(df_vaca_embriones)+len(df_vaca_inseminacion)+len(df_vaca_servicios)
+            
+            numero_prenez=(df_vaca_embriones["# p+"].values[0]
+                           +len(df_vaca_inseminacion[df_vaca_inseminacion["CONFIRMACION"]=="p+"])+
+                           len(df_vaca_servicios[df_vaca_servicios["ESTADO"]=="p+"]))
+            if numero_prenez>0:
+                texto_preñez=" se requieren "+str(round(numero_intentos_prenez/numero_prenez))
+            else:
+                texto_preñez=" no se tienen datos suficientes para determinar cuantos intentos se necesitan para lograr una preñez"
+
+            informe=[informacion[1],df_vaca_embriones,df_vaca_inseminacion.drop(columns=["ID"]),df_vaca_servicios.iloc[:, 1:]]
+            textos=[informacion[0]+texto_preñez+"\nHistorial de partos"
+                    ,"Resumen de procesos de embrion realizados hasta la fecha","Historia inseminación","Historial de servicios"]
+            generar_informe.generar_pdf_multiple(textos,informe,nombre_pdf)
            
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
@@ -516,9 +532,6 @@ if st.session_state.informe_receptoras:
             with col2:
                 if st.download_button("DESCARGAR PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun()           
-         
-            
-
 #FINAL INFORMES
 #-------------------------------------------------------------------------
 #INICIO REPRODUCCIÓN Y PRODUCIÓN
@@ -666,7 +679,6 @@ if st.session_state.modificar_df:
         #FINAL MODIFICAR BASE DE DATOS
 #------------------------------------------------------------------------
 #INICO GRACIFICOS
-
 if st.button("📊   GRÁFICOS",use_container_width=True,type="primary"):
     cerrar(15)
 if st.session_state.graficos:

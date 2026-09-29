@@ -103,7 +103,99 @@ class Informes():
       
 # 5. Guardar el archivo final
       return pdff.output(str(nombre_archivo+".pdf"))
- 
+
+   def generar_pdf_multiple(self,textos,dfs,nombre_archivo):
+      
+      
+      #revisa que los dfs no esten vacios
+      dfss=[]
+      for df in dfs:
+         df=df.dropna()
+         if df.empty:
+            df=pd.DataFrame(columns=["Mensaje"])
+            df.loc[0]=[" ----------------- No hay datos para mostrar en este informe ----------------- "]
+         else:
+            df=df
+         dfss.append(df)
+
+      #texto=textos[0]
+      #se marca como deberiaser la fuente 
+      pdf = FPDF(unit="mm")      
+      pdf.set_font("Helvetica", size=11)
+
+      
+      alto_celda = 10 
+      #sedetermina el tamaño de la hoja
+      lista_ancho_columnas=[]
+
+      for df in dfss:
+         ancho_columnas=[]
+         for i in range(len(df.columns)):
+            largo1=pdf.get_string_width(df.columns[i])+2
+            largo2=pdf.get_string_width(df.iloc[:,i].astype(str).loc[df.iloc[:,i].astype(str).str.len().idxmax()])+6
+            if largo1>largo2:
+               ancho_columnas.append(largo1)
+            else:
+               ancho_columnas.append(largo2)    
+         lista_ancho_columnas.append(ancho_columnas)
+     
+      ancho_pagina=[]
+      for ancho_columnas in lista_ancho_columnas:
+      #se setean los tamños d ela pagina
+         ancho_pagina.append(sum(ancho_columnas)+20)
+      
+      ancho_pagina=max(ancho_pagina)
+      ancho_texto=ancho_pagina-20
+      lineas_texto=[]
+      for texto in textos:
+         ancho_letras = pdf.get_string_width(texto)
+         lineas_texto.append( math.ceil(ancho_letras / ancho_texto))
+      
+      alto_texto = sum(lineas_texto)*10*len(textos)
+      #alto_tabla = (sum(len(df) for df in dfss)) * alto_celda
+      
+      alto_pagina= (alto_texto)
+     
+
+      #primera pagina
+      pdff = FPDF(unit="mm",format=(ancho_pagina,alto_pagina))
+      pdff.set_font("Helvetica", size=11) 
+      pdff.add_page()#format=(ancho_pagina,alto_pagina)
+      pdff.image("logopdf.png", x=ancho_pagina-48, y=0, w=40)#logo
+      pdff.set_y(15) 
+   
+         
+      contador=0
+      for df in dfss:         
+         pdff.set_font("Helvetica", size=11) 
+         pdff.ln()
+         pdff.multi_cell(0,8,textos[contador],align="J")
+         pdff.ln()
+   # 3. Dibujar el encabezado de la tabla (Negrita)
+         pdff.set_font("Helvetica", style="B", size=11)
+         count=0
+         for i in df.columns:
+            pdff.cell(lista_ancho_columnas[contador][count], alto_celda, str(i), border=1, align="C")
+            count+=1
+         pdff.ln()
+   # 4. Dibujar las filas con los datos (Texto normal)
+         pdff.set_font("Helvetica", style="B", size=11)
+         
+         for index, fila in df.iterrows():
+            for i, celda in enumerate(fila):
+               if isinstance(celda ,(datetime, pd.Timestamp)):
+                  pdff.cell(lista_ancho_columnas[contador][i], alto_celda, celda.strftime("%d/%m/%Y"), border=1, align="C")
+               else:
+                  pdff.cell(lista_ancho_columnas[contador][i], alto_celda, str(celda), border=1, align="C")
+         
+            pdff.ln()
+         contador+=1
+      #pdff.ln()
+               
+# 5. Guardar el archivo final
+      return pdff.output(str(nombre_archivo+".pdf"))
+
+
 
 class Agregar_Eliminar:
    def guardar(self,df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios,df_protocolo):
@@ -365,7 +457,7 @@ class Buscador:
 #se crea un nuevo df con las columnas deseadas  
             df=pd.concat([df_l1,df_l2,df_l4,df_l3],axis=1)
             show_partos=show_partos[show_partos.columns[2]].max()
-            texto="La Vaca identificada "+str(id)+" de la raza "+str(show_raza)+" "+str(show_edad)+" ha parido "+str(show_partos)+" veces, en la tabla verá toda la informacion de sus partos"
+            texto="La Vaca identificada "+str(id)+" de la raza "+str(show_raza)+" "+str(show_edad)+" ha parido "+str(show_partos)+" veces, a continuación verá toda la información de sus procesos reproductivos,"
          else:
             df=pd.DataFrame()
             texto="La Vaca identificada "+str(id)+" de la raza "+str(show_raza)+" "+str(show_edad)+" no tiene partos registrados"
@@ -438,6 +530,6 @@ class Buscador:
 
          ]
 
-      df_receptoras =df_receptoras.sort_values(by="%p+", ascending=False)
-      df_receptoras["%p+"]=df_receptoras["%p+"].astype(str) +" %"
+      df_receptoras =df_receptoras.sort_values(by="% p+", ascending=False)
+      df_receptoras["% p+"]=df_receptoras["% p+"].astype(str) +" %"
       return df_receptoras
