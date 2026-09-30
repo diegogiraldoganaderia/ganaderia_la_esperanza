@@ -14,7 +14,7 @@ import time
 
 
 
-url ="https://soyjodguzmbiggwymfdn.supabase.co/rest/v1/"
+url ="https://soyjodguzmbiggwymfdn.supabase.co"
 key ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNveWpvZGd1em1iaWdnd3ltZmRuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTg3NTY2NSwiZXhwIjoyMDk1NDUxNjY1fQ.2K_135LSAyPcL95Ag70pZ8ZT1KYRTspBqKtdWxwUIi4"
 supabase = create_client(url, key)
 
