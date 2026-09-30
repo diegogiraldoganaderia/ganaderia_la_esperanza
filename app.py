@@ -305,9 +305,7 @@ if st.session_state.informes:
         if st.button("INFORME TOROS",use_container_width=True):
             cerrar(4)
 
-    with col1:
-        if st.button("INFORME REPRODUCCION",use_container_width=True):
-            cerrar(0)
+    
     with col2:
         if  st.button("INFORME EMBRIONES",use_container_width=True):
             cerrar(5)
@@ -328,11 +326,13 @@ if st.session_state.informe_nacimientos:
     tc=st.multiselect("Tipo_concepcion",["TE","CN","IA"])
     fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
     filtros=[fecha,finca,tc]
+    solo_numeros=st.selectbox("SOLO NÚMEROS:",["NO","SI"])
 
     
     col1, col2= st.columns(2)
     with col1:
-        if st.button("Generar informe",use_container_width=True,type="tertiary"):
+
+        if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
             st.session_state.informe_nacimientos=False
             st.session_state.informes = False
             df_cria=buscar.ordenar_fecha_df(df_cria)
@@ -341,7 +341,11 @@ if st.session_state.informe_nacimientos:
             texto="En este informe se muestran todas las crias nacidas a partir de la fecha: "+informe[0].strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe[1]))
             nombre_pdf = ("Informe_Nacimientos")
             informe=buscar.ordenar_fecha_df(informe[1])
-            generar_informe.generar_pdf( texto,informe,nombre_pdf)
+            if solo_numeros=="NO":
+                generar_informe.generar_pdf( texto,informe,nombre_pdf)
+            elif solo_numeros=="SI":
+                informe=informe.iloc[:,[0,1,3,7]]
+                generar_informe.generar_pdf( texto,informe,nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):     
@@ -364,8 +368,11 @@ if st.session_state.informe_vacas:
             informacion=buscar.informacion("VACA",df[0],df[1])
             nombre_pdf = ("Informe_Vaca_"+ str(informacion[2].replace("/", "_")))
             numero_intentos_prenez=len(df_vaca_embriones)+len(df_vaca_inseminacion)+len(df_vaca_servicios)
-            
-            numero_prenez=(df_vaca_embriones["# p+"].values[0]
+            if len(df_vaca_embriones)>0:
+                prenez_embriones=df_vaca_embriones["# p+"].values[0]
+            else:
+                prenez_embriones=0
+            numero_prenez=(prenez_embriones
                            +len(df_vaca_inseminacion[df_vaca_inseminacion["CONFIRMACION"]=="p+"])+
                            len(df_vaca_servicios[df_vaca_servicios["ESTADO"]=="p+"]))
             if numero_prenez>0:
@@ -375,7 +382,7 @@ if st.session_state.informe_vacas:
 
             informe=[informacion[1],df_vaca_embriones,df_vaca_inseminacion.drop(columns=["ID"]),df_vaca_servicios.iloc[:, 1:]]
             textos=[informacion[0]+texto_preñez+"\nHistorial de partos"
-                    ,"Resumen de procesos de embrion realizados hasta la fecha","Historia inseminación","Historial de servicios"]
+                    ,"Resumen de procesos de embrion","Historial inseminación","Historial de servicios"]
             generar_informe.generar_pdf_multiple(textos,informe,nombre_pdf)
            
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
