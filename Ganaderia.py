@@ -290,8 +290,8 @@ class Agregar_Eliminar:
       df_cria.loc[len(df_cria)] = [finca,toro,vaca,str(fn),raza,sexo,tc]
       
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones]
-      df_protocolo.loc[len(df_partos)]=[vaca,str(fn),finca,"pendiente"]
-      return df_cria,df_partos,df_protocolo
+      #df_protocolo.loc[len(df_partos)]=[vaca,str(fn),finca,"pendiente"]
+      return df_cria,df_partos
 
 class Buscador:
    def ordenar_fecha_df(self,df):
