@@ -320,12 +320,10 @@ if st.session_state.informe_nacimientos:
     
     fecha=st.date_input("A partir de que fecha desea el informe")
     fincas=[]
-    for i in range(len(df_fincas)):
-        fincas.append(df_fincas.iloc[i,0]) 
-    finca = st.multiselect("Finca",fincas)
+    finca = st.multiselect("Finca",df_fincas["ID"])
     tc=st.multiselect("Tipo_concepcion",["TE","CN","IA"])
     fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
-    filtros=[fecha,finca,tc]
+    #filtros=[fecha,finca,tc]
     solo_numeros=st.selectbox("SOLO NÚMEROS:",["NO","SI"])
 
     
@@ -335,21 +333,31 @@ if st.session_state.informe_nacimientos:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
             st.session_state.informe_nacimientos=False
             st.session_state.informes = False
-            df_cria=buscar.ordenar_fecha_df(df_cria)
-           
-            informe=buscar.informe_crias(df_cria,filtros,df_ganado_puro)
-            texto="En este informe se muestran todas las crias nacidas a partir de la fecha: "+informe[0].strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe[1]))
+            informe=buscar.numeros(df_cria,df_embriones,df_ganado_puro)
+            
+            #filtro la fecha
+            informe=informe[pd.to_datetime(informe["FECHA_NACIMIENTO"])>fecha]
+            #filtro tc
+            filtro_tc=informe["T_C"].isin(tc)
+            informe=informe[filtro_tc]
+            #filtro_finca
+            filtro_finca=informe["FINCA"].isin(finca)
+            informe=informe[filtro_finca]
+            
+            texto="En este informe se muestran todas las crias nacidas a partir de la fecha: "+fecha.strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe))
             nombre_pdf = ("Informe_Nacimientos")
-            informe=buscar.ordenar_fecha_df(informe[1])
+
             if solo_numeros=="NO":
                 generar_informe.generar_pdf( texto,informe,nombre_pdf)
             elif solo_numeros=="SI":
                 informe=informe.iloc[:,[0,1,3,7]]
                 generar_informe.generar_pdf( texto,informe,nombre_pdf)
+
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):     
                     st.rerun()
+
 if st.session_state.informe_vacas:
     dfve=df_embriones
     id_vaca = st.selectbox("Vaca",df_partos["ID"].unique())
@@ -364,9 +372,15 @@ if st.session_state.informe_vacas:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
             st.session_state.informe_vacas=False
             st.session_state.informes = False
-            df=buscar.informe_crias_v(df_cria,id_vaca)
-            informacion=buscar.informacion("VACA",df[0],df[1])
-            nombre_pdf = ("Informe_Vaca_"+ str(informacion[2].replace("/", "_")))
+            #df=buscar.informe_crias_v(df_cria,id_vaca)
+            informacion_vaca = df_animal[df_animal["ID"] == id_vaca].iloc[0]
+            texto_vaca = ( "La Vaca identificada " + str(id_vaca) +
+                          " de la raza " + str(informacion_vaca["RAZA"]) + " " +
+                            buscar.calcular_edad(informacion_vaca["FECHA_NACIMIENTO"])
+                            )
+            informacion_partos=buscar.numeros(df_cria,df_embriones,df_ganado_puro)
+            informacion_partos=informacion_partos[informacion_partos["VACA"]==id_vaca]
+            nombre_pdf = ("Informe_Vaca_"+ str(id_vaca.replace("/", "_")))
             numero_intentos_prenez=len(df_vaca_embriones)+len(df_vaca_inseminacion)+len(df_vaca_servicios)
             if len(df_vaca_embriones)>0:
                 prenez_embriones=df_vaca_embriones["# p+"].values[0]
@@ -380,9 +394,10 @@ if st.session_state.informe_vacas:
             else:
                 texto_preñez=" no se tienen datos suficientes para determinar cuantos intentos se necesitan para lograr una preñez"
 
-            informe=[informacion[1],df_vaca_embriones,df_vaca_inseminacion.drop(columns=["ID"]),df_vaca_servicios.iloc[:, 1:]]
-            textos=[informacion[0]+texto_preñez+"\nHistorial de partos"
+            informe=[informacion_partos,df_vaca_embriones,df_vaca_inseminacion.drop(columns=["ID"]),df_vaca_servicios.iloc[:, 1:]]
+            textos=[texto_vaca+texto_preñez+"\nHistorial de partos"
                     ,"Resumen de procesos de embrion","Historial inseminación","Historial de servicios"]
+            
             generar_informe.generar_pdf_multiple(textos,informe,nombre_pdf)
            
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
@@ -824,3 +839,5 @@ if st.session_state.graficos:
 #------------------------------------------------------------------------
 
 #   py -3.12 -m streamlit run app.py
+
+

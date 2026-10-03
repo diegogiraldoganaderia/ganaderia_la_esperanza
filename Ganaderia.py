@@ -152,9 +152,9 @@ class Informes():
          lineas_texto.append( math.ceil(ancho_letras / ancho_texto))
       
       alto_texto = sum(lineas_texto)*10*len(textos)
-      #alto_tabla = (sum(len(df) for df in dfss)) * alto_celda
+      alto_tabla = (sum(len(df) for df in dfss)) * alto_celda
       
-      alto_pagina= (alto_texto)
+      alto_pagina= (alto_texto+alto_tabla)
      
 
       #primera pagina
@@ -190,7 +190,7 @@ class Informes():
          
             pdff.ln()
          contador+=1
-      #pdff.ln()
+         
                
 # 5. Guardar el archivo final
       return pdff.output(str(nombre_archivo+".pdf"))
@@ -241,8 +241,6 @@ class Agregar_Eliminar:
       supabase.table("PROTOCOLO").delete().neq("index",-1).execute()
       supabase.table("PROTOCOLO").insert(df_protocolo.to_dict(orient="records")).execute()
       
-
-
    def generar_consecutivo(self):
       if df_cria["FINCA"]=="bolanos":
          consecutivo="9999"+str(df_cria["FINCA"].count()+1)
@@ -250,7 +248,8 @@ class Agregar_Eliminar:
          consecutivo="0000"+str(df_cria["FINCA"].count()+1)
       l=len(consecutivo)
       consecutivo=str(consecutivo[l-3])+str(consecutivo[l-2])+str(consecutivo[l-1])
-      return str(consecutivo)      
+      return str(consecutivo)    
+     
    def nacimiento(self,buscar,vaca,fn,sexo,finca,observaciones,toro=None,raza=None):
       
       tc = buscar.comprobar_tc(vaca, fn)
@@ -265,7 +264,7 @@ class Agregar_Eliminar:
         raza = df[df["RECEPTORA"] == vaca].iloc[0, 7]
         registro="pendiente"
         id_tc="pendiente"
-        df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,fn]
+        df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,fn.date()]
       elif tc == "IA":
         df = df_inseminacion.sort_values(by='FECHA',ascending=False).reset_index(drop=True)
         toro = df[df["ID"] == vaca].iloc[0, 6]
@@ -290,7 +289,7 @@ class Agregar_Eliminar:
       df_cria.loc[len(df_cria)] = [finca,toro,vaca,str(fn),raza,sexo,tc]
       
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones]
-      df_protocolo.loc[len(df_partos)]=[vaca,str(fn),finca,"pendiente"]
+      df_protocolo.loc[len(df_protocolo)]=[vaca,str(fn),finca,"pendiente"]
       return df_cria,df_partos,df_protocolo
 
 class Buscador:
@@ -406,40 +405,23 @@ class Buscador:
       return f"tiene una edad de {edad.years} años, {edad.months} meses y {edad.days} dias"
 
    def  comprobar_tc(self,id,fecha_parto):
+      tc="CN"
       datos_embriones=df_embriones[df_embriones["RECEPTORA"]==id]
       datos_inseminacion=df_inseminacion[df_inseminacion["ID"]==id]
-      if datos_embriones.empty and datos_inseminacion.empty:
-         tc="CN"
 
-      elif not datos_embriones.empty and not datos_inseminacion.empty:
-         if abs((fecha_ia - fecha_parto).days)<=45:
-            tc="IA"
-         elif abs((fecha_te - fecha_parto).days)<=45:
+      for fecha_embriones in datos_embriones["FECHA_TRANSFERENCIA"]:
+         if (abs(fecha_parto-pd.to_datetime(fecha_embriones)).days-280)<45:
             tc="TE"
-         else:
-            tc="CN"
 
-      elif not datos_embriones.empty:
-         fecha_ia=df_inseminacion[df_inseminacion["ID"]==id].iloc[:,0].max()+pd.Timedelta(days=285)
-         fecha_ia=fecha_ia.date()
-         if abs((fecha_ia - fecha_parto).days)<=45:
+      for fecha_inseminacion in datos_inseminacion["FECHA"]:
+         if (abs(fecha_parto-pd.to_datetime(fecha_inseminacion)).days-280)<45:
             tc="IA"
-         else:
-            tc="CN"
-      
-      elif not datos_inseminacion.empty:
-         fecha_te=df_embriones[df_embriones["RECEPTORA"]==id].iloc[:,2].max()+pd.Timedelta(days=285)
-         fecha_te=fecha_te.date()
-         if abs((fecha_te - fecha_parto).days)<=45:
-            tc="TE"
-         else:
-            tc="CN"
       
       
-
       return tc
 
    #aqui se van a realizar diferentes funciones dependienod que se busca
+   """
    def informacion(self,tipo_animal,df_entrada,id):
       if tipo_animal=="VACA":   
          show_id = df_partos[df_partos["ID"] == id]
@@ -462,7 +444,7 @@ class Buscador:
             df=pd.DataFrame()
             texto="La Vaca identificada "+str(id)+" de la raza "+str(show_raza)+" "+str(show_edad)+" no tiene partos registrados"
          
-      return texto,df,id
+      return texto,df,id"""
 
    def modificar_df(self,df,id,registro,posicion,confirmacion_preñez):
       nuevo_id=id
@@ -533,3 +515,100 @@ class Buscador:
       df_receptoras =df_receptoras.sort_values(by="% p+", ascending=False)
       df_receptoras["% p+"]=df_receptoras["% p+"].astype(str) +" %"
       return df_receptoras
+
+   def numeros(self,df_crias,df_embrion,df_puro):
+      #id numeros vanguardia
+      #ID FINCA TORO VACA FECHA_NACIMIENTO EDAD RAZA SEXO T_C
+      df_crias=df_crias.sort_values(by="FECHA_NACIMIENTO").reset_index(drop=True)
+      df_resultado=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","RAZA","SEXO","T_C"])  
+      df_numero_puros=df_crias[df_crias["T_C"]=="TE"] #deja solo los animales trasferidos
+      contador=0
+      lista_numeros=[]
+      lista_fecha_nacimientos=[]
+
+      for vaca in df_numero_puros["VACA"]:
+         #detect los procesos de las vacas de otros poveedores 
+         df_otro_proveedor=(df_embrion[(df_embrion["RECEPTORA"]==vaca)
+                                          &(df_embrion["X1"]=="p+")
+                                          &(df_embrion["#PROVEEDOR"]!="vanguardia")])
+         
+         #detecta los procesos de las vacas de vanguardia
+         df_vaca=(df_embrion[(df_embrion["RECEPTORA"]==vaca)
+                           &(df_embrion["X1"]=="p+")
+                           &(df_embrion["#PROVEEDOR"]=="vanguardia")])
+         
+         #busca la fecha de nacimiento de los animales puros de cada vaca
+         fecha_parto=pd.to_datetime(df_numero_puros["FECHA_NACIMIENTO"].values[contador])
+
+         #comprueba la fecha del animal puro con la de las crias registradas como nacidas
+         #para cada vaca y así evitar errores de cuando una vaca pare más d eun puro
+         #esto para animales de proveedores externos
+         for x in range(len(df_otro_proveedor)):
+            fecha=pd.to_datetime(df_otro_proveedor["FECHA_TRANSFERENCIA"].values[x])
+           
+            if abs((fecha-fecha_parto).days+280)>45:
+               df_otro_proveedor.drop(x, inplace=True)
+               
+         for todas in df_otro_proveedor["RECEPTORA"]:
+            id=df_puro[df_puro["RECEPTORA"]==todas]
+            fecha_n=id.iloc[0,8]
+            id=id.iloc[0,0]
+            lista_numeros.append(id)
+            lista_fecha_nacimientos.append(pd.to_datetime(fecha_n))
+            df_resultado.loc[len(df_resultado)]=[id]+df_numero_puros.iloc[contador].tolist()
+
+         #comprueba la fecha del animal puro con la de las crias registradas como nacidas
+         #para cada vaca y así evitar errores de cuando una vaca pare más d eun puro
+         #esto para animales de vanguardia
+            
+         for g in range(len(df_vaca)):
+            fecha=pd.to_datetime(df_vaca["FECHA_TRANSFERENCIA"].values[g])
+            if abs((fecha-fecha_parto).days+280)<45:
+               consecutivo="000"
+               consecutivo=consecutivo+str(g+1)
+               anno=str(fecha_parto)
+               mes={"01":"1","02":"2","03":"3","04":"4"
+                  ,"05":"5","06":"6","07":"7","08":"8"
+                  ,"09":"9","10":"0","11":"N","12":"D"}.get(anno[5:7])
+               if df_vaca["RAZA"].values[g]=="girolando":
+                  id=consecutivo[-3:]+"/"+mes+anno[3]
+                  df_resultado.loc[len(df_resultado)]=[id]+df_vaca.iloc[contador].tolist()
+               else:
+                  id=consecutivo[-3:]+"/"+anno[3]
+                  df_resultado.loc[len(df_resultado)]=[id]+df_vaca.iloc[contador].tolist()
+         #indica el numero de exploracione spara la fecha_parto 
+         contador+=1    
+      #detecta los animales no artificiales de lafinca es decir CN
+      #a partir del 2026 
+      # Xxx para tener en cuenta hay que agregar cuando los papas son purosXXX
+      df_cn=df_crias[(pd.to_datetime(df_crias["FECHA_NACIMIENTO"]).dt.year>=2026)&
+               (df_crias["T_C"]=="CN")&(df_crias["FINCA"]!="compañia")]
+      
+      for contador_comercial in range(len(df_cn)):
+         fecha_parto=pd.to_datetime(df_cn["FECHA_NACIMIENTO"].values[contador_comercial])
+         consecutivo="000"
+         consecutivo=consecutivo+str(contador_comercial+1)
+         anno=str(fecha_parto)
+         mes={"01":"1","02":"2","03":"3","04":"4"
+            ,"05":"5","06":"6","07":"7","08":"8"
+            ,"09":"9","10":"0","11":"N","12":"D"}.get(anno[5:7])
+      
+         id=consecutivo[-3:]+"/"+mes+anno[3]
+         df_resultado.loc[len(df_resultado)]=[id]+df_cn.iloc[contador_comercial].tolist()
+         
+
+      #detecta los animales no artificiales de lafinca es decir CN
+      # antes del 2026
+      df_cn_antes_2026=df_crias[(pd.to_datetime(df_crias["FECHA_NACIMIENTO"]).dt.year<2026)&
+                     (df_crias["T_C"]=="CN")]
+
+      for antes_2026 in range(len(df_cn_antes_2026)):
+         id="no aplica"
+         df_resultado.loc[len(df_resultado)]=[id]+df_cn_antes_2026.iloc[antes_2026].tolist()
+
+         
+      df_resultado=df_resultado.sort_values(by="FECHA_NACIMIENTO").reset_index(drop=True)
+      df_resultado.insert(5,'EDAD',df_resultado["FECHA_NACIMIENTO"].apply(self.calcular_edad))
+      
+      return df_resultado
+   
