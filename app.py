@@ -669,10 +669,6 @@ if st.button("🗃️ MODIFICAR BASE DATOS",use_container_width=True,type="prima
     
 
 if st.session_state.modificar_df:
-    (df_animal,df_partos,df_cria,df_embriones,df_inseminacion
-                 ,df_fincas,df_toros
-                ,df_razas,df_ganado_puro,df_servicios,
-                df_protocolo,df_informe_crias,df_informe_vaca)=abrir_DF()
     fecha_actual=datetime.now()
     dias=[]
     for i in range(len(df_protocolo)):
