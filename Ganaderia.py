@@ -17,29 +17,30 @@ import time
 url ="https://soyjodguzmbiggwymfdn.supabase.co"
 key ="sb_publishable_2rsYfiqDckypRhCIgUgG0Q__6DJkp-c"
 supabase = create_client(url, key)
-
-df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
-df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
-df_partos=df_partos.drop(columns=["index"])
-df_cria=pd.DataFrame(supabase.table("CRIA").select("*").execute().data)
-df_cria=df_cria.drop(columns=["index"])
-df_embriones=pd.DataFrame(supabase.table("EMBRIONES").select("*").execute().data)
-df_embriones=df_embriones.drop(columns=["index"])
-df_inseminacion=pd.DataFrame(supabase.table("INSEMINACION").select("*").execute().data)
-df_inseminacion=df_inseminacion.drop(columns=["index"])
-df_fincas=pd.DataFrame(supabase.table("FINCAS").select("*").execute().data)
-df_fincas=df_fincas.drop(columns=["index"])
-df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
-df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
-df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
-df_ganado_puro=df_ganado_puro.drop(columns=["index"])
-df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
-df_servicios=df_servicios.drop(columns=["index"])
-df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data)
-df_protocolo=df_protocolo.drop(columns=["index"])
-df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
-df_informe_vaca=pd.DataFrame(columns=["INFORME"])
-df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
+def abrir_DF():
+   df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
+   df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
+   df_partos=df_partos.drop(columns=["index"])
+   df_cria=pd.DataFrame(supabase.table("CRIA").select("*").execute().data)
+   df_cria=df_cria.drop(columns=["index"])
+   df_embriones=pd.DataFrame(supabase.table("EMBRIONES").select("*").execute().data)
+   df_embriones=df_embriones.drop(columns=["index"])
+   df_inseminacion=pd.DataFrame(supabase.table("INSEMINACION").select("*").execute().data)
+   df_inseminacion=df_inseminacion.drop(columns=["index"])
+   df_fincas=pd.DataFrame(supabase.table("FINCAS").select("*").execute().data)
+   df_fincas=df_fincas.drop(columns=["index"])
+   df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
+   df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
+   df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
+   df_ganado_puro=df_ganado_puro.drop(columns=["index"])
+   df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
+   df_servicios=df_servicios.drop(columns=["index"])
+   df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data)
+   df_protocolo=df_protocolo.drop(columns=["index"])
+   df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
+   df_informe_vaca=pd.DataFrame(columns=["INFORME"])
+   return (df_animal,df_partos,df_cria,df_embriones,df_inseminacion,df_fincas,df_toros
+           ,df_razas,df_ganado_puro,df_servicios,df_protocolo,df_informe_crias,df_informe_vaca)
 
 class Informes():
 
@@ -264,7 +265,7 @@ class Agregar_Eliminar:
         raza = df[df["RECEPTORA"] == vaca].iloc[0, 7]
         registro="pendiente"
         id_tc="pendiente"
-        df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,fn.date()]
+        df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,str(fn.date())]
       elif tc == "IA":
         df = df_inseminacion.sort_values(by='FECHA',ascending=False).reset_index(drop=True)
         toro = df[df["ID"] == vaca].iloc[0, 6]
@@ -289,7 +290,7 @@ class Agregar_Eliminar:
       df_cria.loc[len(df_cria)] = [finca,toro,vaca,str(fn),raza,sexo,tc]
       
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones]
-      #df_protocolo.loc[len(df_protocolo)]=[vaca,str(fn),finca,"pendiente"]
+      df_protocolo.loc[len(df_protocolo)]=[vaca,str(fn),finca,"pendiente"]
       return df_cria,df_partos
 
 class Buscador:
@@ -612,3 +613,7 @@ class Buscador:
       
       return df_resultado
    
+(df_animal,df_partos,df_cria,df_embriones,df_inseminacion
+ ,df_fincas,df_toros
+,df_razas,df_ganado_puro,df_servicios,
+df_protocolo,df_informe_crias,df_informe_vaca)=abrir_DF()
