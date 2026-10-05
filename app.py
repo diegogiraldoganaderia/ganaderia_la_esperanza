@@ -497,7 +497,7 @@ if st.session_state.informe_ganado_puro:
             
             texto="En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
             nombre_pdf = ("Informe_Ganado_Puro")
-            generar_informe.generar_pdf(texto,informe,nombre_pdf)
+            generar_informe.generar_pdf(texto,df,nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
