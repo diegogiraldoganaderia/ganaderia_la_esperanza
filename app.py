@@ -494,7 +494,7 @@ if st.session_state.informe_ganado_puro:
             st.session_state.informe_ganado_puro=False
             st.session_state.informes = False
             
-            informe=buscar.ordenar_fecha_df(df)
+            
             texto="En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
             nombre_pdf = ("Informe_Ganado_Puro")
             generar_informe.generar_pdf(texto,informe,nombre_pdf)
