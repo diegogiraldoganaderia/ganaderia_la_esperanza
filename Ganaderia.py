@@ -219,50 +219,6 @@ class Agregar_Eliminar:
             df.to_dict(orient="records")
         ).execute()
 
-
-   """def guardar(self,df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios,df_protocolo):
-      df_animal=df_animal.dropna()
-      supabase.table("ANIMAL").delete().neq("ID",-1).execute()
-      supabase.table("ANIMAL").insert(df_animal.to_dict(orient="records")).execute()
-      df_partos=df_partos.reset_index()
-      df_partos=df_partos.dropna()
-      supabase.table("PARTOS").delete().neq("index",-1).execute()
-      supabase.table("PARTOS").insert(df_partos.to_dict(orient="records")).execute()
-      df_cria=df_cria.reset_index()
-      df_cria=df_cria.dropna()
-      
-      supabase.table("CRIA").delete().neq("index",-1).execute()
-      supabase.table("CRIA").insert(df_cria.to_dict(orient="records")).execute()
-      df_embriones=df_embriones.reset_index()
-      df_embriones=df_embriones.dropna()
-      supabase.table("EMBRIONES").delete().neq("index",-1).execute()
-      supabase.table("EMBRIONES").insert(df_embriones.to_dict(orient="records")).execute()
-      df_inseminacion=df_inseminacion.reset_index()
-      df_inseminacion=df_inseminacion.dropna()
-      supabase.table("INSEMINACION").delete().neq("index",-1).execute()
-      supabase.table("INSEMINACION").insert(df_inseminacion.to_dict(orient="records")).execute()
-      df_fincas=df_fincas.reset_index()
-      df_fincas=df_fincas.dropna()
-      supabase.table("FINCAS").delete().neq("index",-1).execute()
-      supabase.table("FINCAS").insert(df_fincas.to_dict(orient="records")).execute()
-      df_razas=df_razas.dropna()
-      supabase.table("RAZAS").delete().neq("ID",-1).execute()
-      supabase.table("RAZAS").insert(df_razas.to_dict(orient="records")).execute()
-      df_ganado_puro=df_ganado_puro.reset_index()
-      df_ganado_puro=df_ganado_puro.dropna()
-      supabase.table("GANADO_PURO").delete().neq("index",-1).execute()
-      supabase.table("GANADO_PURO").insert(df_ganado_puro.to_dict(orient="records")).execute()
-
-      df_servicios=df_servicios.reset_index()
-      df_servicios=df_servicios.dropna()
-      supabase.table("SERVICIO").delete().neq("index",-1).execute()
-      supabase.table("SERVICIO").insert(df_servicios.to_dict(orient="records")).execute()
-
-      df_protocolo=df_protocolo.reset_index()
-      df_protocolo=df_protocolo.dropna()
-      supabase.table("PROTOCOLO").delete().neq("index",-1).execute()
-      supabase.table("PROTOCOLO").insert(df_protocolo.to_dict(orient="records")).execute()"""
-      
    def generar_consecutivo(self):
       if df_cria["FINCA"]=="bolanos":
          consecutivo="9999"+str(df_cria["FINCA"].count()+1)
@@ -320,112 +276,6 @@ class Agregar_Eliminar:
       return dataframes_guardar
 
 class Buscador:
-   def ordenar_fecha_df(self,df):
-      df_new=df.sort_values(by='FECHA_NACIMIENTO',kind="stable")
-      return df_new
-#genera un informe sobre las crias apartir de una fecha ingresada por el usuario
-   """def informe_crias_v(self,df,id_vaca):
-      df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])#Se crea el data frame que se va a retornar para que se limpie al ejecutar la funcion
-      prueba_datos=df[df["VACA"]==id_vaca]
-      
-      if prueba_datos.empty==False:
-         contador_te=0
-         contador_antes_2026=0
-         for i in range(len(df)):
-            consecutivo="0000"
-            fecha=df.iloc[i]["FECHA_NACIMIENTO"]
-            fecha=pd.to_datetime(fecha)
-            mes=str(fecha.month)
-            año=str(fecha.year)
-            if mes=="12":
-               mes="D"
-            elif mes=="11":
-               mes="N"
-            else:
-               mes=mes
-         #como se empezaron los numeros a partir del 2026 debo restar los animales anteriores a este año
-            if int(año)<2026 and (df.iloc[i]["T_C"]=="CN" or df.iloc[i]["T_C"]=="CN"):
-               contador_antes_2026+=1 #se crea para restar al consecutivo las crias antes del 2026
-
-            if df.iloc[i]["T_C"]=="TE":
-               id="id_pendiente"
-               contador_te+=1 #se crea para restar al consecutivo las crias por TE
-            elif (df.iloc[i]["T_C"]=="CN" and int(año)>=2026) or (df.iloc[i]["T_C"]=="IA" and int(año)>=2026):
-               consecutivo=consecutivo+str(i+1-contador_te-contador_antes_2026)
-               consecutivo=consecutivo[-3]+consecutivo[-2]+consecutivo[-1]
-               id=consecutivo+"/"+mes+año[-1]
-            elif(df.iloc[i]["T_C"]=="CN" and int(año)<2026) or (df.iloc[i]["T_C"]=="IA" and int(año)<2026):
-               id="No_Aplica"
-            else:
-               id="error_revisa el codigo aqui nunca deberia entrar"
-            if df_cria.iloc[i]["VACA"]==id_vaca:
-            
-               edad=self.calcular_edad(df.iloc[i,3])
-               df_informe_crias.loc[i]=[id,df.iloc[i,0],df.iloc[i,1],df.iloc[i,2],pd.to_datetime(df.iloc[i,3]).date(),edad,df.iloc[i,4],df.iloc[i,5],df.iloc[i,6]]
-      
-      return df_informe_crias,id_vaca
-   
-   def informe_crias(self,df,filtros,dfgp): 
-      
-#Se crea el data frame que se va a retornar para que se limpie al ejecutar la funcion
-      df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])  
-#Se crean los ID 
-      contador_te=0
-      contador_antes_2026=0
-      # pide filtros para el informe
-      contador_total=0
-      contador_TE_antes_2026=0
-      contador_compania=0
-      for i in range(len(df)):
-         consecutivo="0000"
-         fecha=df.iloc[i]["FECHA_NACIMIENTO"]
-         fecha=pd.to_datetime(fecha)
-         mes=str(fecha.month)
-         año=str(fecha.year)
-         if mes=="12":
-            mes="D"
-         elif mes=="11":
-            mes="N"
-         else:
-            mes=mes
-         #como se empezaron los numeros a partir del 2026 debo restar los animales anteriores a este año
-         if int(año)<2026 and df.iloc[i]["T_C"]=="CN" :
-            contador_antes_2026+=1 
-            #se crea para restar al consecutivo las crias antes del 2026
-         
-         if df.iloc[i]["T_C"]=="TE" and contador_te<len(dfgp):
-            id=dfgp.iloc[contador_te]["ID"]
-            contador_te+=1 #se crea para restar al consecutivo las crias por TE
-         elif (df.iloc[i]["T_C"]=="CN" and int(año)>=2026) or (df.iloc[i]["T_C"]=="IA" and int(año)>=2026):
-            contador_total+=1
-            consecutivo=consecutivo+str(i+1-contador_antes_2026-contador_te-contador_compania)
-            consecutivo=consecutivo[-3]+consecutivo[-2]+consecutivo[-1]
-            if df.iloc[i]["FINCA"]=="bolanos":
-               contador_compania+=1
-               consecutivo=contador_compania+1021
-               
-            id=str(consecutivo)+"/"+mes+año[-1]
-            
-         elif(df.iloc[i]["T_C"]=="CN" and int(año)<2026) or (df.iloc[i]["T_C"]=="IA" and int(año)<2026):
-            id="No_Aplica"
-         else:
-            id="error_revisa el codigo aqui nunca deberia entrar"
-#se  llena un nuevo df ya filtrado con todos los valores requeridos
-         
-         if pd.to_datetime(df.iloc[i]["FECHA_NACIMIENTO"])>=filtros[0]:
-            edad=self.calcular_edad(df.iloc[i,3])
-            df_informe_crias.loc[i]=[id,df.iloc[i,0],df.iloc[i,1],df.iloc[i,2],pd.to_datetime(df.iloc[i,3]).date(),edad,df.iloc[i,4],df.iloc[i,5],df.iloc[i,6]]
-      l1=[]
-      for j in range(len(filtros[1])):
-         l1.append(df_informe_crias[df_informe_crias["FINCA"]==filtros[1][j]])
-      df_informe_crias=pd.concat(l1)
-      l2=[]
-      for k in range(len(filtros[2])):
-         l2.append(df_informe_crias[df_informe_crias["T_C"]==filtros[2][k]])
-      df_informe_crias=pd.concat(l2)
-    
-      return filtros[0],df_informe_crias"""
-
    def calcular_edad(self,fecha):
       fecha=pd.to_datetime(fecha)
       edad = relativedelta(datetime.today(),fecha)
@@ -446,33 +296,6 @@ class Buscador:
       
       
       return tc
-
-   #aqui se van a realizar diferentes funciones dependienod que se busca
-   """
-   def informacion(self,tipo_animal,df_entrada,id):
-      if tipo_animal=="VACA":   
-         show_id = df_partos[df_partos["ID"] == id]
-         
-         show_raza = df_animal[df_animal["ID"] == id].iloc[0, 3]
-         show_edad=self.calcular_edad(df_animal[df_animal["ID"] == id].iloc[0, 2])
-
-         if show_id.empty==False:
-            
-            show_partos=df_partos[df_partos["ID"]==id]
-            df_l1=df_entrada[df_entrada["VACA"]==id].iloc[:,0:3]#muestra Id cria y finca
-            df_l2=df_entrada[df_entrada["VACA"]==id].iloc[:,4]#muestra la fecha del nacimiento    
-            df_l4=df_entrada[df_entrada["VACA"]==id].iloc[:,6:]#muestra la raza y sexo
-            df_l3=df_partos[df_partos["ID"]==id].iloc[:,2:5]#modificado el 5 es 4
-#se crea un nuevo df con las columnas deseadas  
-            df=pd.concat([df_l1,df_l2,df_l4,df_l3],axis=1)
-            show_partos=show_partos[show_partos.columns[2]].max()
-            texto="La Vaca identificada "+str(id)+" de la raza "+str(show_raza)+" "+str(show_edad)+" ha parido "+str(show_partos)+" veces, a continuación verá toda la información de sus procesos reproductivos,"
-         else:
-            df=pd.DataFrame()
-            texto="La Vaca identificada "+str(id)+" de la raza "+str(show_raza)+" "+str(show_edad)+" no tiene partos registrados"
-         
-      return texto,df,id"""
-
    def modificar_df(self,df,id,registro,posicion,confirmacion_preñez):
       nuevo_id=id
       nuevo_registro=registro 
