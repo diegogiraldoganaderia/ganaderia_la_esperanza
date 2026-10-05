@@ -479,7 +479,7 @@ if st.session_state.informe_ganado_puro:
     
     fecha=st.date_input("A partir de que fecha desea el informe")
     fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
-    finca=st.multiselect("finca",df_fincas)
+    finca=st.multiselect("finca",df_ganado_puro["FINCA"].unique())
     raza=st.multiselect("raza",df_ganado_puro["RAZA"].unique())
     col1, col2= st.columns(2)
     with col1:
@@ -493,8 +493,6 @@ if st.session_state.informe_ganado_puro:
             df=df[filtro_finca]
             st.session_state.informe_ganado_puro=False
             st.session_state.informes = False
-            
-            
             texto="En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
             nombre_pdf = ("Informe_Ganado_Puro")
             generar_informe.generar_pdf(texto,df,nombre_pdf)
@@ -666,15 +664,32 @@ if st.session_state.buscar_registros:
 #INICIO MODIFICAR BASE DE DATOS
 
 if st.button("🗃️ MODIFICAR BASE DATOS",use_container_width=True,type="primary"):
+    df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
+    df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
+    df_partos=df_partos.drop(columns=["index"])
+    df_cria=pd.DataFrame(supabase.table("CRIA").select("*").execute().data)
+    df_cria=df_cria.drop(columns=["index"])
+    df_embriones=pd.DataFrame(supabase.table("EMBRIONES").select("*").execute().data)
+    df_embriones=df_embriones.drop(columns=["index"])
+    df_inseminacion=pd.DataFrame(supabase.table("INSEMINACION").select("*").execute().data)
+    df_inseminacion=df_inseminacion.drop(columns=["index"])
+    df_fincas=pd.DataFrame(supabase.table("FINCAS").select("*").execute().data)
+    df_fincas=df_fincas.drop(columns=["index"])
+    df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
+    df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
+    df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
+    df_ganado_puro=df_ganado_puro.drop(columns=["index"])
+    df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
+    df_servicios=df_servicios.drop(columns=["index"])
+    df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data)
+    df_protocolo=df_protocolo.drop(columns=["index"])
+    df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
+    df_informe_vaca=pd.DataFrame(columns=["INFORME"])
     
     cerrar(14) 
     
 
 if st.session_state.modificar_df:
-    (df_animal,df_partos,df_cria,df_embriones,df_inseminacion
-     ,df_fincas,df_toros
-    ,df_razas,df_ganado_puro,df_servicios,
-    df_protocolo,df_informe_crias,df_informe_vaca)=abrir_DF()
     dataframes_guardar = []
     dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES"
     ,"INSEMINACION","FINCAS","RAZAS","GANADO PURO"
