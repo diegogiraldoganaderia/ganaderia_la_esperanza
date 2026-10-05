@@ -204,7 +204,7 @@ class Informes():
 
 class Agregar_Eliminar:
    def guardar(self, dataframes):
-    for tabla, df in dataframes:
+      for tabla, df in dataframes:
         df = df.dropna()
         # Tablas que utilizan ID como identificador
         if tabla in ["ANIMAL", "RAZAS","TORO"]:
@@ -373,8 +373,6 @@ class Buscador:
       df_resultado=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","RAZA","SEXO","T_C"])  
       df_numero_puros=df_crias[df_crias["T_C"]=="TE"] #deja solo los animales trasferidos
       contador=0
-      lista_numeros=[]
-      lista_fecha_nacimientos=[]
 
       for vaca in df_numero_puros["VACA"]:
          #detect los procesos de las vacas de otros poveedores 
@@ -401,10 +399,11 @@ class Buscador:
                
          for todas in df_otro_proveedor["RECEPTORA"]:
             id=df_puro[df_puro["RECEPTORA"]==todas]
-            fecha_n=id.iloc[0,8]
-            id=id.iloc[0,0]
-            lista_numeros.append(id)
-            lista_fecha_nacimientos.append(pd.to_datetime(fecha_n))
+            if len(id)==0:
+               id="NO APLICA"
+               
+            else:
+               id=id.iloc[0,0]
             df_resultado.loc[len(df_resultado)]=[id]+df_numero_puros.iloc[contador].tolist()
 
          #comprueba la fecha del animal puro con la de las crias registradas como nacidas
@@ -461,4 +460,3 @@ class Buscador:
       df_resultado.insert(5,'EDAD',df_resultado["FECHA_NACIMIENTO"].apply(self.calcular_edad))
       
       return df_resultado
-   

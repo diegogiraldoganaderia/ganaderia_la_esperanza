@@ -340,16 +340,23 @@ if st.session_state.informe_nacimientos:
             filtro_tc=informe["T_C"].isin(tc)
             informe=informe[filtro_tc]
             #filtro_finca
+          
+            if len(finca) == 1:
+                txt = " en la finca " + finca[0]
+            else:
+                txt = " en las fincas " + ", ".join(finca[:-1]) + " y " + finca[-1]
+            
             filtro_finca=informe["FINCA"].isin(finca)
             informe=informe[filtro_finca]
             
-            texto="En este informe se muestran todas las crias nacidas a partir de la fecha: "+fecha.strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe))
+            texto=("En este informe se muestran todas las crias nacidas"+
+            txt+" a partir de la fecha: "+fecha.strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe)))
             nombre_pdf = ("Informe_Nacimientos")
 
             if solo_numeros=="NO":
                 generar_informe.generar_pdf( texto,informe,nombre_pdf)
             elif solo_numeros=="SI":
-                informe=informe.iloc[:,[0,1,3,7]]
+                informe=informe.iloc[:,[0,3,7,1]]
                 generar_informe.generar_pdf( texto,informe,nombre_pdf)
 
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
