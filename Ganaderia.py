@@ -41,6 +41,10 @@ def abrir_DF():
    df_informe_vaca=pd.DataFrame(columns=["INFORME"])
    return (df_animal,df_partos,df_cria,df_embriones,df_inseminacion,df_fincas,df_toros
            ,df_razas,df_ganado_puro,df_servicios,df_protocolo,df_informe_crias,df_informe_vaca)
+(df_animal,df_partos,df_cria,df_embriones,df_inseminacion
+ ,df_fincas,df_toros
+,df_razas,df_ganado_puro,df_servicios,
+df_protocolo,df_informe_crias,df_informe_vaca)=abrir_DF()
 
 class Informes():
 
@@ -199,7 +203,24 @@ class Informes():
 
 
 class Agregar_Eliminar:
-   def guardar(self,df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios,df_protocolo):
+   def guardar(self, dataframes):
+    for tabla, df in dataframes:
+        df = df.dropna()
+        # Tablas que utilizan ID como identificador
+        if tabla in ["ANIMAL", "RAZAS","TORO"]:
+            supabase.table(tabla).delete().neq("ID", -1).execute()
+        # Tablas que utilizan index
+        else:
+            df = df.reset_index(drop=True)
+            df = df.reset_index()
+            supabase.table(tabla).delete().neq("index", -1).execute()
+        # Insertar nuevamente solamente esta tabla
+        supabase.table(tabla).insert(
+            df.to_dict(orient="records")
+        ).execute()
+
+
+   """def guardar(self,df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios,df_protocolo):
       df_animal=df_animal.dropna()
       supabase.table("ANIMAL").delete().neq("ID",-1).execute()
       supabase.table("ANIMAL").insert(df_animal.to_dict(orient="records")).execute()
@@ -240,7 +261,7 @@ class Agregar_Eliminar:
       df_protocolo=df_protocolo.reset_index()
       df_protocolo=df_protocolo.dropna()
       supabase.table("PROTOCOLO").delete().neq("index",-1).execute()
-      supabase.table("PROTOCOLO").insert(df_protocolo.to_dict(orient="records")).execute()
+      supabase.table("PROTOCOLO").insert(df_protocolo.to_dict(orient="records")).execute()"""
       
    def generar_consecutivo(self):
       if df_cria["FINCA"]=="bolanos":
@@ -288,17 +309,22 @@ class Agregar_Eliminar:
             tiempo_entre_partos="su anterior parto fue hace "+str(tiempo.years)+" años "+str(tiempo.months)+" meses "+str(tiempo.days)+" dias"
       fn=fn.date()
       df_cria.loc[len(df_cria)] = [finca,toro,vaca,str(fn),raza,sexo,tc]
-      
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones]
       df_protocolo.loc[len(df_protocolo)]=[vaca,str(fn),finca,"pendiente"]
-      return df_cria,df_partos
+
+      dataframes_guardar=[]
+      dataframes_guardar.append(("PARTOS", df_partos))
+      dataframes_guardar.append(("CRIA", df_cria))
+      dataframes_guardar.append(("PROTOCOLO", df_protocolo))
+      dataframes_guardar.append(("GANADO_PURO", df_ganado_puro))
+      return dataframes_guardar
 
 class Buscador:
    def ordenar_fecha_df(self,df):
       df_new=df.sort_values(by='FECHA_NACIMIENTO',kind="stable")
       return df_new
 #genera un informe sobre las crias apartir de una fecha ingresada por el usuario
-   def informe_crias_v(self,df,id_vaca):
+   """def informe_crias_v(self,df,id_vaca):
       df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])#Se crea el data frame que se va a retornar para que se limpie al ejecutar la funcion
       prueba_datos=df[df["VACA"]==id_vaca]
       
@@ -398,7 +424,7 @@ class Buscador:
          l2.append(df_informe_crias[df_informe_crias["T_C"]==filtros[2][k]])
       df_informe_crias=pd.concat(l2)
     
-      return filtros[0],df_informe_crias
+      return filtros[0],df_informe_crias"""
 
    def calcular_edad(self,fecha):
       fecha=pd.to_datetime(fecha)
@@ -613,7 +639,3 @@ class Buscador:
       
       return df_resultado
    
-(df_animal,df_partos,df_cria,df_embriones,df_inseminacion
- ,df_fincas,df_toros
-,df_razas,df_ganado_puro,df_servicios,
-df_protocolo,df_informe_crias,df_informe_vaca)=abrir_DF()

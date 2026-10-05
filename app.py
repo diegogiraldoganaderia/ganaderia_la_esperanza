@@ -188,7 +188,6 @@ def cerrar(x):
         st.session_state.buscar_registros=False
 
     if x==14:
-    
         st.session_state.modificar_df = True
     else:
         st.session_state.modificar_df = False
@@ -326,10 +325,8 @@ if st.session_state.informe_nacimientos:
     finca = st.multiselect("Finca",df_fincas["ID"])
     tc=st.multiselect("Tipo_concepcion",["TE","CN","IA"])
     fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
-    #filtros=[fecha,finca,tc]
     solo_numeros=st.selectbox("SOLO NÚMEROS:",["NO","SI"])
 
-    
     col1, col2= st.columns(2)
     with col1:
 
@@ -337,7 +334,6 @@ if st.session_state.informe_nacimientos:
             st.session_state.informe_nacimientos=False
             st.session_state.informes = False
             informe=buscar.numeros(df_cria,df_embriones,df_ganado_puro)
-            
             #filtro la fecha
             informe=informe[pd.to_datetime(informe["FECHA_NACIMIENTO"])>fecha]
             #filtro tc
@@ -369,7 +365,6 @@ if st.session_state.informe_vacas:
     df_vaca_servicios=df_servicios[df_servicios["VACA"]==id_vaca]
     df_vaca_inseminacion=df_inseminacion[df_inseminacion["ID"]==id_vaca]
 
-   
     col1, col2= st.columns(2)
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
@@ -596,10 +591,10 @@ if st.session_state.registro_nacimientos:
     
     if st.button("Guardar",use_container_width=True):
         registro_cria=nacimientos.nacimiento(buscar,vaca,fn,sexo,finca,observaciones,toro,raza)
-        nacimientos.guardar(df_inseminacion,df_animal,registro_cria[1],registro_cria[0],df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios,df_protocolo)
-        st.success("Guardado")
-        st.session_state.registro_nacimientos=False
-        st.rerun()
+        nacimientos.guardar(registro_cria)
+        if st.success("Guardado"):
+            cerrar(0)
+            st.rerun()
 if st.session_state.tiempo_inseminacion:
     if st.button("Generar informe",use_container_width=True):
         st.session_state.tiempo_inseminacion=False
@@ -669,39 +664,103 @@ if st.button("🗃️ MODIFICAR BASE DATOS",use_container_width=True,type="prima
     
 
 if st.session_state.modificar_df:
-    fecha_actual=datetime.now()
-    dias=[]
-    for i in range(len(df_protocolo)):
-        dias.append((fecha_actual-pd.to_datetime(df_protocolo.iloc[i]["FECHA_PARTO"])).days)
-    df_protocolo["DIAS DE PARIDA"]=dias
-    dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES","INSEMINACION","FINCAS","RAZAS","GANADO PURO","REPORTE SERVICIOS","PROTOCOLO REPRODUCCION"])
-    if dato =="ANIMAL":
-        df_animal=st.data_editor(df_animal,num_rows="dynamic")
-    elif dato =="PARTOS":
-        df_partos=st.data_editor(df_partos,num_rows="dynamic")
-    elif dato =="CRIAS":
-        df_cria=st.data_editor(df_cria,num_rows="dynamic")
-    elif dato =="EMBRIONES":
-        df_embriones=st.data_editor(df_embriones,num_rows="dynamic")
-    elif dato =="INSEMINACION":
-        df_inseminacion=st.data_editor(df_inseminacion,num_rows="dynamic")
-    elif dato =="FINCAS":
-        df_fincas=st.data_editor(df_fincas,num_rows="dynamic")
-    elif dato =="RAZAS":
-        df_razas=st.data_editor(df_razas,num_rows="dynamic")
-    elif dato =="GANADO PURO":
-        df_ganado_puro=st.data_editor(df_ganado_puro,num_rows="dynamic")
-    elif dato =="REPORTE SERVICIOS":
-        df_servicios=st.data_editor(df_servicios,num_rows="dynamic")
-    elif dato =="PROTOCOLO REPRODUCCION":
-        df_protocolo=st.data_editor(df_protocolo,num_rows="dynamic")
+    (df_animal,df_partos,df_cria,df_embriones,df_inseminacion
+     ,df_fincas,df_toros
+    ,df_razas,df_ganado_puro,df_servicios,
+    df_protocolo,df_informe_crias,df_informe_vaca)=abrir_DF()
+    dataframes_guardar = []
+    dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES"
+    ,"INSEMINACION","FINCAS","RAZAS","GANADO PURO"
+    ,"REPORTE SERVICIOS","PROTOCOLO REPRODUCCION"])
+    if dato == "ANIMAL":
+        df_animal = st.data_editor(
+        df_animal,
+        num_rows="dynamic",
+        key="editor_animal")
+        dataframes_guardar.append(("ANIMAL", df_animal))
 
-    if st.button("GUARDAR CAMBIOS",use_container_width=True):
-        df_protocolo=df_protocolo.drop(columns=["DIAS DE PARIDA"])
-        nacimientos.guardar(df_inseminacion,df_animal,df_partos,df_cria,df_embriones,df_fincas,df_razas,df_ganado_puro,df_servicios,df_protocolo)
-        st.success("Guardado correctamente")
-        st.session_state.modificar_df=False
-        st.rerun()
+    elif dato == "PARTOS":
+        df_partos = st.data_editor(
+            df_partos,
+            num_rows="dynamic",
+            key="editor_partos"
+        )
+        dataframes_guardar.append(("PARTOS", df_partos))
+
+    elif dato == "CRIAS":
+        df_cria = st.data_editor(
+            df_cria,
+            num_rows="dynamic",
+            key="editor_cria"
+        )
+        dataframes_guardar.append(("CRIA", df_cria))
+
+    elif dato == "EMBRIONES":
+        df_embriones = st.data_editor(
+            df_embriones,
+            num_rows="dynamic",
+            key="editor_embriones"
+        )
+        dataframes_guardar.append(("EMBRIONES", df_embriones))
+
+    elif dato == "INSEMINACION":
+        df_inseminacion = st.data_editor(
+            df_inseminacion,
+            num_rows="dynamic",
+            key="editor_inseminacion"
+        )
+        dataframes_guardar.append(("INSEMINACION", df_inseminacion))
+
+    elif dato == "FINCAS":
+        df_fincas = st.data_editor(
+            df_fincas,
+            num_rows="dynamic",
+            key="editor_fincas"
+        )
+        dataframes_guardar.append(("FINCAS", df_fincas))
+
+    elif dato == "RAZAS":
+        df_razas = st.data_editor(
+            df_razas,
+            num_rows="dynamic",
+            key="editor_razas"
+        )
+        dataframes_guardar.append(("RAZAS", df_razas))
+
+    elif dato == "GANADO PURO":
+        df_ganado_puro = st.data_editor(
+            df_ganado_puro,
+            num_rows="dynamic",
+            key="editor_ganado_puro"
+        )
+        dataframes_guardar.append(("GANADO_PURO", df_ganado_puro))
+
+    elif dato == "REPORTE SERVICIOS":
+        df_servicios = st.data_editor(
+            df_servicios,
+            num_rows="dynamic",
+            key="editor_servicios"
+        )
+        dataframes_guardar.append(("SERVICIO", df_servicios))
+
+    elif dato == "PROTOCOLO REPRODUCCION":
+        df_protocolo = st.data_editor(
+            df_protocolo,
+            num_rows="dynamic",
+            key="editor_protocolo"
+        )
+        dataframes_guardar.append(("PROTOCOLO", df_protocolo))
+    if st.button("GUARDAR CAMBIOS", use_container_width=True):
+
+        if dataframes_guardar:
+
+            nacimientos.guardar(dataframes_guardar)
+
+            if st.success("Guardado correctamente"):
+                cerrar(0)
+                st.rerun()
+
+            
 
         #FINAL MODIFICAR BASE DE DATOS
 #------------------------------------------------------------------------
