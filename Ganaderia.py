@@ -17,34 +17,28 @@ import time
 url ="https://soyjodguzmbiggwymfdn.supabase.co"
 key ="sb_publishable_2rsYfiqDckypRhCIgUgG0Q__6DJkp-c"
 supabase = create_client(url, key)
-def abrir_DF():
-   df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
-   df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
-   df_partos=df_partos.drop(columns=["index"])
-   df_cria=pd.DataFrame(supabase.table("CRIA").select("*").execute().data)
-   df_cria=df_cria.drop(columns=["index"])
-   df_embriones=pd.DataFrame(supabase.table("EMBRIONES").select("*").execute().data)
-   df_embriones=df_embriones.drop(columns=["index"])
-   df_inseminacion=pd.DataFrame(supabase.table("INSEMINACION").select("*").execute().data)
-   df_inseminacion=df_inseminacion.drop(columns=["index"])
-   df_fincas=pd.DataFrame(supabase.table("FINCAS").select("*").execute().data)
-   df_fincas=df_fincas.drop(columns=["index"])
-   df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
-   df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
-   df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
-   df_ganado_puro=df_ganado_puro.drop(columns=["index"])
-   df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
-   df_servicios=df_servicios.drop(columns=["index"])
-   df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data)
-   df_protocolo=df_protocolo.drop(columns=["index"])
-   df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
-   df_informe_vaca=pd.DataFrame(columns=["INFORME"])
-   return (df_animal,df_partos,df_cria,df_embriones,df_inseminacion,df_fincas,df_toros
-           ,df_razas,df_ganado_puro,df_servicios,df_protocolo,df_informe_crias,df_informe_vaca)
-(df_animal,df_partos,df_cria,df_embriones,df_inseminacion
- ,df_fincas,df_toros
-,df_razas,df_ganado_puro,df_servicios,
-df_protocolo,df_informe_crias,df_informe_vaca)=abrir_DF()
+
+df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
+df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
+df_partos=df_partos.drop(columns=["index"])
+df_cria=pd.DataFrame(supabase.table("CRIA").select("*").execute().data)
+df_cria=df_cria.drop(columns=["index"])
+df_embriones=pd.DataFrame(supabase.table("EMBRIONES").select("*").execute().data)
+df_embriones=df_embriones.drop(columns=["index"])
+df_inseminacion=pd.DataFrame(supabase.table("INSEMINACION").select("*").execute().data)
+df_inseminacion=df_inseminacion.drop(columns=["index"])
+df_fincas=pd.DataFrame(supabase.table("FINCAS").select("*").execute().data)
+df_fincas=df_fincas.drop(columns=["index"])
+df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
+df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
+df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
+df_ganado_puro=df_ganado_puro.drop(columns=["index"])
+df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
+df_servicios=df_servicios.drop(columns=["index"])
+df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data)
+df_protocolo=df_protocolo.drop(columns=["index"])
+df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
+df_informe_vaca=pd.DataFrame(columns=["INFORME"])
 
 class Informes():
 
