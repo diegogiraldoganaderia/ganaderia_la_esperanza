@@ -149,11 +149,20 @@ class Informes():
       for texto in textos:
          ancho_letras = pdf.get_string_width(texto)
          lineas_texto.append( math.ceil(ancho_letras / ancho_texto))
+
+      #print(lineas_texto,)
+      alto_texto = sum(lineas_texto)*20  #*len(textos)
+      alto_tabla = (sum(len(df) for df in dfs)) * alto_celda
+      alto_tabla=0
+      for df in dfs:
+         if len(df)>0:
+            alto_tabla+=(len(df)+1)*alto_celda
+         else:
+            alto_tabla+=2*alto_celda
+         
       
-      alto_texto = sum(lineas_texto)*10*len(textos)
-      alto_tabla = (sum(len(df) for df in dfss)) * alto_celda
       
-      alto_pagina= (alto_texto+alto_tabla)
+      alto_pagina= (alto_texto+alto_tabla+60)
      
 
       #primera pagina

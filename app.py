@@ -22,6 +22,7 @@ with open("logo.png", "rb") as image_file:
 
 
 
+
 st.markdown(f"""
 <style>
 .titulo-ganaderia {{
@@ -386,16 +387,23 @@ if st.session_state.informe_vacas:
             informacion_partos=buscar.numeros(df_cria,df_embriones,df_ganado_puro)
             informacion_partos=informacion_partos[informacion_partos["VACA"]==id_vaca]
             nombre_pdf = ("Informe_Vaca_"+ str(id_vaca.replace("/", "_")))
-            numero_intentos_prenez=len(df_vaca_embriones)+len(df_vaca_inseminacion)+len(df_vaca_servicios)
+           
             if len(df_vaca_embriones)>0:
                 prenez_embriones=df_vaca_embriones["# p+"].values[0]
+                protocolos=df_vaca_embriones["#PROTOCOLOS"].values[0]
+                
             else:
                 prenez_embriones=0
+                protocolos=0
             numero_prenez=(prenez_embriones
                            +len(df_vaca_inseminacion[df_vaca_inseminacion["CONFIRMACION"]=="p+"])+
                            len(df_vaca_servicios[df_vaca_servicios["ESTADO"]=="p+"]))
+            numero_intentos_prenez=(protocolos+len(df_vaca_inseminacion)
+                                            +len(df_vaca_servicios))
+                    
+            
             if numero_prenez>0:
-                texto_preñez=" se requieren "+str(round(numero_intentos_prenez/numero_prenez))
+                texto_preñez=" se requieren "+str(round(numero_intentos_prenez/numero_prenez,2))+" intentos para lograr una preñez"
             else:
                 texto_preñez=" no se tienen datos suficientes para determinar cuantos intentos se necesitan para lograr una preñez"
 
