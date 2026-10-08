@@ -618,7 +618,24 @@ if st.session_state.tiempo_inseminacion:
         with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
         if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
             st.rerun() 
-
+if st.session_state.palpacion:
+    archivo = st.file_uploader("SUBE EXCEL DE PALPACION", type=["xlsx"])
+    if archivo is not None:# espera que haya archivo
+        df_excel_palpacion=pd.read_excel(archivo)
+        df_excel_palpacion["FECHA"] = df_excel_palpacion["FECHA"].dt.strftime("%Y-%m-%d").astype("string")
+        df_excel_palpacion=df_excel_palpacion.fillna("NA")#convierte los nulos en "-"
+        df_palpacion=pd.concat([df_palpacion,df_excel_palpacion],ignore_index=True)
+        
+        dataframes_guardar=[]
+        dataframes_guardar.append(("PALPACION",df_palpacion))
+        st.write(df_palpacion)
+        
+        if st.button("GUARDAR",use_container_width=True):
+            nacimientos.guardar(dataframes_guardar)
+            if st.success("GUARDADO"):
+                cerrar(0)
+                st.rerun()
+   
 #FINAL REPRODUCCIÓN Y PRODUCCIÓN
 #-------------------------------------------------------------------------
 #INICIO REGISTROS

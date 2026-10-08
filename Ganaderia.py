@@ -39,6 +39,8 @@ df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data
 df_protocolo=df_protocolo.drop(columns=["index"])
 df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
 df_informe_vaca=pd.DataFrame(columns=["INFORME"])
+df_palpacion=pd.DataFrame(supabase.table("PALPACION").select("*").execute().data)
+df_palpacion=df_palpacion.drop(columns=["index"])
 
 class Informes():
 
@@ -278,6 +280,7 @@ class Agregar_Eliminar:
       dataframes_guardar.append(("GANADO_PURO", df_ganado_puro))
       return dataframes_guardar
 
+  
 class Buscador:
    def calcular_edad(self,fecha):
       fecha=pd.to_datetime(fecha)
@@ -463,3 +466,9 @@ class Buscador:
       df_resultado.insert(5,'EDAD',df_resultado["FECHA_NACIMIENTO"].apply(self.calcular_edad))
       
       return df_resultado
+
+
+#agregar esta funcion
+
+
+#n.guardar(dataframes_guardar)
