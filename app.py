@@ -509,11 +509,13 @@ if st.session_state.informe_ganado_puro:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun() 
 if st.session_state.informe_embriones:
-    fecha=st.selectbox("FECHA SINCRONIZACIÓN Y PROVEEDOR",
+    fechas=st.multiselect("FECHA SINCRONIZACIÓN Y PROVEEDOR",
                        (df_embriones["FECHA_SINCRONIZACION"]+" // "+
                         df_embriones["PROVEEDOR"].astype(str).str.upper()).unique())
-    fecha=fecha[0:10]
-    df=df_embriones[df_embriones["FECHA_SINCRONIZACION"]==fecha]
+    
+    fecha = [fecha[:10] for fecha in fechas]
+    filtro_fecha=df_embriones["FECHA_SINCRONIZACION"].isin(fecha)
+    df=df_embriones[filtro_fecha]
     finca=st.multiselect("FINCA",df["FINCA"].astype(str).str.upper().unique())
 
     col1, col2= st.columns(2)
@@ -522,8 +524,7 @@ if st.session_state.informe_embriones:
             st.session_state.informe_embriones=False
             st.session_state.informes = False
             informe=buscar.informe_embriones(df,fecha,finca)
-            texto=("En este informe se muestran todos los procesos de embrion realizados en la la fecha: "+fecha
-                    +", se sincronizaron "+informe[1]+" vacas de las cuales hubo un total de "+informe[2]+" vacas preñadas "+
+            texto=("En este informe se muestran todos los procesos de embrion en las fechas selecionadas, se sincronizaron "+informe[1]+" vacas de las cuales hubo un total de "+informe[2]+" vacas preñadas "+
                     "equivalente al "+informe[3]+"%, un total de "+informe[4]+" vacas vacias equivalente al " 
                     +informe[5]+"%, un total de "+informe[6]+" rechazaron el protocolo, equivalente al "+informe[7]+"%"
             )

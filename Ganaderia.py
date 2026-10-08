@@ -323,7 +323,7 @@ class Buscador:
          df.iloc[posicion,4]=[nueva_confirmacion]
       return df
    
-   def informe_embriones(df,fecha,finca):
+   def informe_embriones(self,df,fecha,finca):
       df= df[["PROVEEDOR", "FINCA","RECEPTORA","DONADORA","REPRODUCTOR","RAZA","TIPO_EMBRION","X1"]]
       l_finca=[]
       for i in finca:
