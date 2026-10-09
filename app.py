@@ -286,7 +286,11 @@ button[kind="tertiary"] {
 """)
 
 if st.button("🚀  INICIO",use_container_width=True,type="primary"):
-   cerrar(0)
+    cerrar(0)
+    st.cache_data.clear()
+    st.cache_resource.clear()
+    st.rerun()
+    
    
    
 
@@ -499,9 +503,11 @@ if st.session_state.informe_ganado_puro:
             df=df[filtro_raza]
             filtro_finca=df["FINCA"].isin(finca)
             df=df[filtro_finca]
+            df=df.sort_values(by="ID").reset_index(drop=True)
             st.session_state.informe_ganado_puro=False
             st.session_state.informes = False
-            texto="En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
+            texto=("En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
+            +", total de animales "+str(len(df)))
             nombre_pdf = ("Informe_Ganado_Puro")
             generar_informe.generar_pdf(texto,df,nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
