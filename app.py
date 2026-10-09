@@ -690,7 +690,6 @@ if st.session_state.buscar_registros:
 #INICIO MODIFICAR BASE DE DATOS
 
 if st.button("🗃️ MODIFICAR BASE DATOS",use_container_width=True,type="primary"):
-    df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
     df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
     df_partos=df_partos.drop(columns=["index"])
     df_cria=pd.DataFrame(supabase.table("CRIA").select("*").execute().data)
@@ -711,7 +710,6 @@ if st.button("🗃️ MODIFICAR BASE DATOS",use_container_width=True,type="prima
     df_protocolo=df_protocolo.drop(columns=["index"])
     df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
     df_informe_vaca=pd.DataFrame(columns=["INFORME"])
-    
     cerrar(14) 
     
 
@@ -805,7 +803,7 @@ if st.session_state.modificar_df:
             nacimientos.guardar(dataframes_guardar)
 
             if st.success("Guardado correctamente"):
-                cerrar(0)
+                st.session_state.modificar_df = False
                 st.rerun()
 
             
