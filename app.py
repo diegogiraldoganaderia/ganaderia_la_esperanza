@@ -957,3 +957,19 @@ if st.session_state.graficos:
 #   py -3.12 -m streamlit run app.py
 
 
+import streamlit.components.v1 as components
+from reporte_crias import generar_reporte_html
+if "reporte_html" not in st.session_state:
+    st.session_state.reporte_html = False
+
+if st.button("GENERAR REPORTE CRÍAS",use_container_width=True,type="primary"):
+    st.session_state["reporte_html"] = generar_reporte_html(df_cria)
+
+    if "reporte_html" in st.session_state:
+        st.download_button(
+            "DESCARGAR REPORTE HTML",
+            data=st.session_state["reporte_html"],
+            file_name="reporte_crias.html",
+            mime="text/html",use_container_width=True,type="tertiary"
+        )
+    #components.html(st.session_state["reporte_html"], height=1500, scrolling=True)
