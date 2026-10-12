@@ -285,11 +285,10 @@ button[kind="tertiary"] {
 """)
 
 if st.button("🚀  INICIO",use_container_width=True,type="primary"):
-    
     st.cache_data.clear()
     st.cache_resource.clear()
     st.rerun()
-    
+    cerrar(0)
    
    
 
