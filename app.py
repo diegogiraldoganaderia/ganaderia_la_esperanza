@@ -126,6 +126,34 @@ if "informe_receptoras" not in st.session_state:
     st.session_state.informe_receptoras=False
 
 def cerrar(x):
+    if x==0:
+        url ="https://soyjodguzmbiggwymfdn.supabase.co"
+        key ="sb_publishable_2rsYfiqDckypRhCIgUgG0Q__6DJkp-c"
+        supabase = create_client(url, key)
+
+        df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
+        df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
+        df_partos=df_partos.drop(columns=["index"])
+        df_cria=pd.DataFrame(supabase.table("CRIA").select("*").execute().data)
+        df_cria=df_cria.drop(columns=["index"])
+        df_embriones=pd.DataFrame(supabase.table("EMBRIONES").select("*").execute().data)
+        df_embriones=df_embriones.drop(columns=["index"])
+        df_inseminacion=pd.DataFrame(supabase.table("INSEMINACION").select("*").execute().data)
+        df_inseminacion=df_inseminacion.drop(columns=["index"])
+        df_fincas=pd.DataFrame(supabase.table("FINCAS").select("*").execute().data)
+        df_fincas=df_fincas.drop(columns=["index"])
+        df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
+        df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
+        df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
+        df_ganado_puro=df_ganado_puro.drop(columns=["index"])
+        df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
+        df_servicios=df_servicios.drop(columns=["index"])
+        df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data)
+        df_protocolo=df_protocolo.drop(columns=["index"])
+        df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
+        df_informe_vaca=pd.DataFrame(columns=["INFORME"])
+        df_palpacion=pd.DataFrame(supabase.table("PALPACION").select("*").execute().data)
+        df_palpacion=df_palpacion.drop(columns=["index"])
     
     if x==1:
         st.session_state.informes = True
