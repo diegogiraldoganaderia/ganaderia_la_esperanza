@@ -92,7 +92,7 @@ _PLANTILLA = r"""<!DOCTYPE html>
     --bg:#f6f7f4; --card:#ffffff; --txt:#1d2a1f; --muted:#6b786d; --line:#dfe4dc;
     --accent:#2f6b3a; --chip:#eef2ec; --chip-on:#2f6b3a; --chip-on-txt:#ffffff;
   }
-  @media (prefers-color-scheme: dark){
+  @media (prefers-color-scheme: ligth){
     :root{
       --bg:#0f1511; --card:#18211b; --txt:#e6ece6; --muted:#97a69a; --line:#2a362d;
       --accent:#6fbf7d; --chip:#223027; --chip-on:#6fbf7d; --chip-on-txt:#0f1511;
