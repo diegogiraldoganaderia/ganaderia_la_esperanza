@@ -1,13 +1,14 @@
 import streamlit as st
 import base64
 from Ganaderia import *
+from reporte_crias import generar_reporte_html
 import os
 import time
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 from supabase import create_client
-
+import streamlit.components.v1 as components
 
 
 #objetos
@@ -72,14 +73,15 @@ def set_local_bg(image_path):
 #fondo
 set_local_bg(r"fondo.png")
 #logo
-
-
 #menú
 st.header("MENÚ")
 
 #FORMULARIOS GENERALES CERRADOS
 if "informes" not in st.session_state:
     st.session_state.informes = False
+
+if "reportes" not in st.session_state:
+    st.session_state.reportes = False
 
 if "reproduccion_produccion" not in st.session_state:
     st.session_state.reproduccion_produccion = False
@@ -124,6 +126,9 @@ if "palpacion" not in st.session_state:
 
 if "informe_receptoras" not in st.session_state:
     st.session_state.informe_receptoras=False
+
+if "reporte_nacimientos" not in st.session_state:
+    st.session_state.reporte_nacimientos=False
 
 def cerrar(x):
     if x==1:
@@ -201,6 +206,14 @@ def cerrar(x):
         st.session_state.informe_receptoras=True
     else:
         st.session_state.informe_receptoras=False
+    if x==17:
+        st.session_state.reportes=True
+    else:
+        st.session_state.reportes=False
+    if x==18:
+        st.session_state.reporte_nacimientos=True
+    else:
+        st.session_state.reporte_nacimientos=False
     
 #Botones
 st.html("""
@@ -285,40 +298,36 @@ button[kind="tertiary"] {
 """)
 
 if st.button("🚀  INICIO",use_container_width=True,type="primary"):
+    cerrar(0)
     st.cache_data.clear()
     st.cache_resource.clear()
     st.rerun()
-    cerrar(0)
-   
-   
-
+    
 #INICIO INFORMES
-
-if st.button("📋 INFORMES",use_container_width=True,type="primary"):
+if st.button("📋RESUMÉN DATOS",use_container_width=True,type="primary"):
     cerrar(1)
     
 if st.session_state.informes:
 
     col1, col2, col3= st.columns(3)
     with col1:
-        if st.button("INFORME NACIMIENTOS",use_container_width=True):
+        if st.button("NACIMIENTOS",use_container_width=True):
             cerrar(2)    
     with col2:
-        if st.button("INFORME VACAS",use_container_width=True):
+        if st.button("VACAS",use_container_width=True):
             cerrar(3)
     with col3:
-        if st.button("INFORME TOROS",use_container_width=True):
+        if st.button("TOROS",use_container_width=True):
             cerrar(4)
 
-    
     with col2:
-        if  st.button("INFORME EMBRIONES",use_container_width=True):
+        if  st.button("EMBRIONES",use_container_width=True):
             cerrar(5)
     with col3:
-        if  st.button("INFORME GANADO PURO",use_container_width=True):
+        if  st.button("GANADO PURO",use_container_width=True):
             cerrar(6)
     with col1:
-        if  st.button("INFORME RECEPTORAS",use_container_width=True):
+        if  st.button("RECEPTORAS",use_container_width=True):
             cerrar(16)
 
 if st.session_state.informe_nacimientos:  
@@ -366,7 +375,6 @@ if st.session_state.informe_nacimientos:
             with col2:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):     
                     st.rerun()
-
 if st.session_state.informe_vacas:
     dfve=df_embriones
     id_vaca = st.selectbox("Vaca",df_partos["ID"].unique())
@@ -570,7 +578,33 @@ if st.session_state.informe_receptoras:
             with col2:
                 if st.download_button("DESCARGAR PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun()           
-#FINAL INFORMES
+
+#INICIO REPORTES
+if st.button("REPORTES",use_container_width=True,type="primary"):
+    cerrar(17)
+
+
+if st.session_state.reportes:
+    col1, col2, col3= st.columns(3)
+    with col1:
+        if st.button("NACIMIENTOS",use_container_width=True):
+            cerrar(18)
+
+if st.session_state.reporte_nacimientos:
+    Data=generar_reporte_html(df_cria)
+    if st.button("NAVEGAR",use_container_width=True,type="tertiary"):
+        components.html(Data, height=1500, scrolling=True)
+
+    if st.download_button("DESCARGAR REPORTE (solo pc)",
+            data=Data,
+            file_name="reporte_crias.html",
+            mime="text/html",use_container_width=True,type="tertiary"
+                            ):
+        cerrar(0)
+        st.rerun()
+
+
+#FINAL REPORTES
 #-------------------------------------------------------------------------
 #INICIO REPRODUCCIÓN Y PRODUCIÓN
 
@@ -714,9 +748,7 @@ if st.button("🗃️ MODIFICAR BASE DATOS",use_container_width=True,type="prima
     df_protocolo=df_protocolo.drop(columns=["index"])
     df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
     df_informe_vaca=pd.DataFrame(columns=["INFORME"])
-    cerrar(14) 
-    
-
+    cerrar(14)   
 if st.session_state.modificar_df:
     dataframes_guardar = []
     dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES"
@@ -955,19 +987,7 @@ if st.session_state.graficos:
 #   py -3.12 -m streamlit run app.py
 
 
-import streamlit.components.v1 as components
-from reporte_crias import generar_reporte_html
-if "reporte_html" not in st.session_state:
-    st.session_state.reporte_html = False
 
-if st.button("GENERAR REPORTE CRÍAS",use_container_width=True,type="primary"):
-    st.session_state["reporte_html"] = generar_reporte_html(df_cria)
 
-    if "reporte_html" in st.session_state:
-        st.download_button(
-            "DESCARGAR REPORTE HTML",
-            data=st.session_state["reporte_html"],
-            file_name="reporte_crias.html",
-            mime="text/html",use_container_width=True,type="tertiary"
-        )
-    #components.html(st.session_state["reporte_html"], height=1500, scrolling=True)
+
+    
