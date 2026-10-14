@@ -205,8 +205,6 @@ class Informes():
 # 5. Guardar el archivo final
       return pdff.output(str(nombre_archivo+".pdf"))
 
-
-
 class Agregar_Eliminar:
    def guardar(self, dataframes):
       for tabla, df in dataframes:
@@ -224,31 +222,27 @@ class Agregar_Eliminar:
             df.to_dict(orient="records")
         ).execute()
 
-   def generar_consecutivo(self):
-      if df_cria["FINCA"]=="bolanos":
-         consecutivo="9999"+str(df_cria["FINCA"].count()+1)
-      else:
-         consecutivo="0000"+str(df_cria["FINCA"].count()+1)
-      l=len(consecutivo)
-      consecutivo=str(consecutivo[l-3])+str(consecutivo[l-2])+str(consecutivo[l-1])
-      return str(consecutivo)    
      
    def nacimiento(self,buscar,vaca,fn,sexo,finca,observaciones,toro=None,raza=None):
       
-      tc = buscar.comprobar_tc(vaca, fn)
-      
-      if tc == "CN":
+      tc = buscar.comprobar_tc(vaca,toro,fn)
+      raza=tc[1]
+      if tc[0] == "CN":
         toro = toro.lower()
-        raza = raza.lower()
-      elif tc == "TE":
+      elif tc[0]=="CN_puro":
+         toro = toro.lower()
+         df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,str(fn.date())]
+      elif tc[0]=="CN_f1":
+         toro = toro.lower()
+         df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,str(fn.date())]
+      elif tc[0] == "TE":
         df = df_embriones.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
         toro = df[df["RECEPTORA"] == vaca].iloc[0, 6]
         donadora=df[df["RECEPTORA"] == vaca].iloc[0, 5]
-        raza = df[df["RECEPTORA"] == vaca].iloc[0, 7]
         registro="pendiente"
         id_tc="pendiente"
         df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,str(fn.date())]
-      elif tc == "IA":
+      elif tc[0] == "IA":
         df = df_inseminacion.sort_values(by='FECHA',ascending=False).reset_index(drop=True)
         toro = df[df["ID"] == vaca].iloc[0, 6]
       numero_datos= len(df_partos[df_partos["ID"] == vaca])
@@ -269,7 +263,8 @@ class Agregar_Eliminar:
             Numero_parto=numero_datos+1
             tiempo_entre_partos="su anterior parto fue hace "+str(tiempo.years)+" años "+str(tiempo.months)+" meses "+str(tiempo.days)+" dias"
       fn=fn.date()
-      df_cria.loc[len(df_cria)] = [finca,toro,vaca,str(fn),raza,sexo,tc]
+      
+      df_cria.loc[len(df_cria)] = [finca,toro,vaca,str(fn),raza,sexo,tc[0][:2]]
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones]
       df_protocolo.loc[len(df_protocolo)]=[vaca,str(fn),finca,"pendiente"]
 
@@ -279,7 +274,6 @@ class Agregar_Eliminar:
       dataframes_guardar.append(("PROTOCOLO", df_protocolo))
       dataframes_guardar.append(("GANADO_PURO", df_ganado_puro))
       return dataframes_guardar
-
   
 class Buscador:
    def calcular_edad(self,fecha):
@@ -287,21 +281,43 @@ class Buscador:
       edad = relativedelta(datetime.today(),fecha)
       return f"tiene una edad de {edad.years} años, {edad.months} meses y {edad.days} dias"
 
-   def  comprobar_tc(self,id,fecha_parto):
+   def  comprobar_tc(self,id,toro,fecha_parto):
       tc="CN"
+      raza="comercial"
       datos_embriones=df_embriones[df_embriones["RECEPTORA"]==id]
       datos_inseminacion=df_inseminacion[df_inseminacion["ID"]==id]
 
       for fecha_embriones in datos_embriones["FECHA_TRANSFERENCIA"]:
          if (abs(fecha_parto-pd.to_datetime(fecha_embriones)).days-280)<45:
             tc="TE"
+            df = df_embriones.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
+            raza = df[df["RECEPTORA"] ==id].iloc[0, 7]
 
       for fecha_inseminacion in datos_inseminacion["FECHA"]:
          if (abs(fecha_parto-pd.to_datetime(fecha_inseminacion)).days-280)<45:
             tc="IA"
+      raza_vaca="comercial"
+   
+      raza_vaca=df_ganado_puro[(df_ganado_puro["SEXO"]=="hembra")&(df_ganado_puro["ID"]==id)]
+      if len(raza_vaca)>0:
+         raza_vaca.iloc[0,1]
+      else:
+         raza_vaca="comercial"
+      raza_toro=df_toros[df_toros["ID"]==toro].iloc[0,1]
+   
+      if  raza_vaca==raza_toro and raza_vaca!="comercial":
       
-      
-      return tc
+         tc="CN_puro"
+         raza =raza_toro
+      elif raza_vaca!=raza_toro and raza_vaca!="comercial":
+         tc="CN_f1"
+         raza= "f1 "+raza_toro+" x "+raza_vaca
+            
+      else:
+         tc="CN"
+   
+      return tc,raza
+   
    def modificar_df(self,df,id,registro,posicion,confirmacion_preñez):
       nuevo_id=id
       nuevo_registro=registro 
@@ -468,7 +484,3 @@ class Buscador:
       return df_resultado
 
 
-#agregar esta funcion
-
-
-#n.guardar(dataframes_guardar)
