@@ -29,7 +29,7 @@ from datetime import datetime
 
 import pandas as pd
 
-COLUMNAS = ["FINCA", "TORO", "VACA", "FECHA_NACIMIENTO", "RAZA", "SEXO", "T_C"]
+COLUMNAS = ["FINCA", "TORO", "VACA", "FECHA_NACIMIENTO", "RAZA", "SEXO", "TC_GG_O"]
 
 
 def _preparar(df: pd.DataFrame) -> list:
