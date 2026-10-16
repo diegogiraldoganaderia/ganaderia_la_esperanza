@@ -223,28 +223,29 @@ class Agregar_Eliminar:
         ).execute()
 
      
-   def nacimiento(self,buscar,vaca,fn,sexo,finca,observaciones,toro=None,raza=None):
+   def nacimiento(self,buscar,vaca,fn,sexo,finca,observaciones,toro=None):
+      puro_te=["TE_P_V","TE_F1_V","TE_P_C","TE_F1_C"]
+      v_v=["CN_C_V","CN_C_C","CN_P_V","CN_F1_V"]
+      ia=["IA_P_V","IA_F1_V","IA_C_V"]
       
-      tc = buscar.comprobar_tc(vaca,toro,fn)
+      tc = buscar.comprobar_tc(vaca,toro,fn,finca)
       raza=tc[1]
-      if tc[0] == "CN":
+
+      if tc[0] in v_v:
         toro = toro.lower()
-      elif tc[0]=="CN_puro":
-         toro = toro.lower()
-         df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,str(fn.date())]
-      elif tc[0]=="CN_f1":
-         toro = toro.lower()
-         df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,str(fn.date())]
-      elif tc[0] == "TE":
+      elif tc[0] in puro_te:
         df = df_embriones.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
         toro = df[df["RECEPTORA"] == vaca].iloc[0, 6]
         donadora=df[df["RECEPTORA"] == vaca].iloc[0, 5]
         registro="pendiente"
         id_tc="pendiente"
         df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,str(fn.date())]
-      elif tc[0] == "IA":
+
+      elif tc[0] in  ia:
         df = df_inseminacion.sort_values(by='FECHA',ascending=False).reset_index(drop=True)
         toro = df[df["ID"] == vaca].iloc[0, 6]
+
+      
       numero_datos= len(df_partos[df_partos["ID"] == vaca])
       df_tiempo_entre_partos=df_cria[df_cria["VACA"] == vaca].reset_index(drop=True)
       Numero_parto=0
@@ -264,7 +265,7 @@ class Agregar_Eliminar:
             tiempo_entre_partos="su anterior parto fue hace "+str(tiempo.years)+" años "+str(tiempo.months)+" meses "+str(tiempo.days)+" dias"
       fn=fn.date()
       
-      df_cria.loc[len(df_cria)] = [finca,toro,vaca,str(fn),raza,sexo,tc[0][:2]]
+      df_cria.loc[len(df_cria)] = [finca,toro,vaca,str(fn),raza,sexo,tc[0]]
       df_partos.loc[len(df_partos)] = [vaca,finca,Numero_parto,tiempo_entre_partos,observaciones]
       df_protocolo.loc[len(df_protocolo)]=[vaca,str(fn),finca,"pendiente"]
 
@@ -281,41 +282,95 @@ class Buscador:
       edad = relativedelta(datetime.today(),fecha)
       return f"tiene una edad de {edad.years} años, {edad.months} meses y {edad.days} dias"
 
-   def  comprobar_tc(self,id,toro,fecha_parto):
-      tc="CN"
-      raza="comercial"
-      datos_embriones=df_embriones[df_embriones["RECEPTORA"]==id]
-      datos_inseminacion=df_inseminacion[df_inseminacion["ID"]==id]
+   def  comprobar_tc(self,id,toro,fecha_parto,finca):
+      
+      datos_embrionesV=df_embriones[(df_embriones["RECEPTORA"]==id)
+                                    &(df_embriones["#PROVEEDOR"]=="vanguardia")]
+      datos_embrionesC=df_embriones[(df_embriones["RECEPTORA"]==id)
+                                          &(df_embriones["#PROVEEDOR"]!="vanguardia")]
 
-      for fecha_embriones in datos_embriones["FECHA_TRANSFERENCIA"]:
+      #TE_P_V AND TE_F1_V
+     
+      for fecha_embriones in datos_embrionesV["FECHA_TRANSFERENCIA"]:
          if (abs(fecha_parto-pd.to_datetime(fecha_embriones)).days-280)<45:
-            tc="TE"
-            df = df_embriones.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
+            
+            df = datos_embrionesV.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
             raza = df[df["RECEPTORA"] ==id].iloc[0, 7]
+            if df_razas.iloc[df_razas["ID"]==raza,1]=="PURO":
+               tc="TE_P_V"
+            elif df_razas.iloc[df_razas["ID"]==raza,1]=="F1":
+               tc="TE_F1_V"
+            else:
+               tc="no se encontro la raza"
 
-      for fecha_inseminacion in datos_inseminacion["FECHA"]:
-         if (abs(fecha_parto-pd.to_datetime(fecha_inseminacion)).days-280)<45:
-            tc="IA"
-      raza_vaca="comercial"
-   
+
+            
+      #TE_P_C AND TE_F1_C
+      for fecha_embriones in datos_embrionesC["FECHA_TRANSFERENCIA"]:
+               if (abs(fecha_parto-pd.to_datetime(fecha_embriones)).days-280)<45: 
+                  df = datos_embrionesC.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
+                  raza = df[df["RECEPTORA"] ==id].iloc[0, 7]
+                  if df_razas.iloc[df_razas["ID"]==raza,1]=="PURO":
+                     tc="TE_P_C"
+                  elif df_razas.iloc[df_razas["ID"]==raza,1]=="F1":
+                     tc="TE_F1_C"
+                  else:
+                     tc="no se encontro la raza"
+                  
+
+      
+      #concepcon natural
       raza_vaca=df_ganado_puro[(df_ganado_puro["SEXO"]=="hembra")&(df_ganado_puro["ID"]==id)]
+      raza_toro=df_toros[df_toros["ID"]==toro]
       if len(raza_vaca)>0:
-         raza_vaca.iloc[0,1]
+         raza_vaca=raza_vaca.iloc[0,1]
       else:
          raza_vaca="comercial"
-      raza_toro=df_toros[df_toros["ID"]==toro].iloc[0,1]
+
+      if len(raza_toro)>0:
+         raza_toro=raza_toro.iloc[0,1]
+      else:
+         raza_toro="comercial"
+
    
       if  raza_vaca==raza_toro and raza_vaca!="comercial":
       
-         tc="CN_puro"
+         tc="CN_P_V"
          raza =raza_toro
-      elif raza_vaca!=raza_toro and raza_vaca!="comercial":
-         tc="CN_f1"
+      elif raza_vaca!=raza_toro and raza_vaca!="comercial" and raza_toro!="comercial":
+         tc="CN_F1_V"
          raza= "f1 "+raza_toro+" x "+raza_vaca
-            
-      else:
-         tc="CN"
-   
+
+      elif raza_vaca=="comercial" or raza_toro=="comercial" and finca=="compañia":
+         tc="CN_C_C"
+         raza="comercial"
+
+      elif raza_vaca=="comercial" or raza_toro=="comercial" and finca!="compañia":
+         tc="CN_C_V"
+         raza="comercial"
+
+
+
+      datos_inseminacion=df_inseminacion[(df_inseminacion["ID"]==id)
+                                         &(df_inseminacion["CONFIRMACION"]=="p+")]
+      
+      contador_IA=0
+      for fecha_inseminacion in datos_inseminacion["FECHA"]:
+         if (abs(fecha_parto-pd.to_datetime(fecha_inseminacion)).days-280)<45:
+            raza_toro_IA= datos_inseminacion.iloc[contador_IA,2]
+            contador_IA+=1
+            if raza_vaca=="comercial" or raza_toro_IA=="comercial":
+               tc="IA_C_V"
+               raza="comercial"
+            elif raza_vaca!=raza_toro_IA and raza_vaca!="comercial":
+               tc="IA_F1_V"
+               raza= "f1 "+raza_toro_IA+" x "+raza_vaca
+
+            elif raza_vaca==raza_toro_IA and raza_vaca!="comercial":
+               tc="IA_P_V"
+               raza=raza_toro_IA
+      
+      
       return tc,raza
    
    def modificar_df(self,df,id,registro,posicion,confirmacion_preñez):
@@ -388,75 +443,64 @@ class Buscador:
       df_receptoras["% p+"]=df_receptoras["% p+"].astype(str) +" %"
       return df_receptoras
 
-   def numeros(self,df_crias,df_embrion,df_puro):
-      #id numeros vanguardia
-      #ID FINCA TORO VACA FECHA_NACIMIENTO EDAD RAZA SEXO T_C
+   def numeros(self,df_crias,df_puro):
       df_crias=df_crias.sort_values(by="FECHA_NACIMIENTO").reset_index(drop=True)
-      df_resultado=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","RAZA","SEXO","T_C"])  
-      df_numero_puros=df_crias[df_crias["T_C"]=="TE"] #deja solo los animales trasferidos
-      contador=0
-
-      for vaca in df_numero_puros["VACA"]:
-         #detect los procesos de las vacas de otros poveedores 
-         df_otro_proveedor=(df_embrion[(df_embrion["RECEPTORA"]==vaca)
-                                          &(df_embrion["X1"]=="p+")
-                                          &(df_embrion["#PROVEEDOR"]!="vanguardia")])
-         
-         #detecta los procesos de las vacas de vanguardia
-         df_vaca=(df_embrion[(df_embrion["RECEPTORA"]==vaca)
-                           &(df_embrion["X1"]=="p+")
-                           &(df_embrion["#PROVEEDOR"]=="vanguardia")])
-         
-         #busca la fecha de nacimiento de los animales puros de cada vaca
-         fecha_parto=pd.to_datetime(df_numero_puros["FECHA_NACIMIENTO"].values[contador])
-
-         #comprueba la fecha del animal puro con la de las crias registradas como nacidas
-         #para cada vaca y así evitar errores de cuando una vaca pare más d eun puro
-         #esto para animales de proveedores externos
-         for x in range(len(df_otro_proveedor)):
-            fecha=pd.to_datetime(df_otro_proveedor["FECHA_TRANSFERENCIA"].values[x])
-           
-            if abs((fecha-fecha_parto).days+280)>45:
-               df_otro_proveedor.drop(x, inplace=True)
-               
-         for todas in df_otro_proveedor["RECEPTORA"]:
-            id=df_puro[df_puro["RECEPTORA"]==todas]
-            if len(id)==0:
-               id="NO APLICA"
-               
-            else:
-               id=id.iloc[0,0]
-            df_resultado.loc[len(df_resultado)]=[id]+df_numero_puros.iloc[contador].tolist()
-
-         #comprueba la fecha del animal puro con la de las crias registradas como nacidas
-         #para cada vaca y así evitar errores de cuando una vaca pare más d eun puro
-         #esto para animales de vanguardia
-            
-         for g in range(len(df_vaca)):
-            fecha=pd.to_datetime(df_vaca["FECHA_TRANSFERENCIA"].values[g])
-            if abs((fecha-fecha_parto).days+280)<45:
-               consecutivo="000"
-               consecutivo=consecutivo+str(g+1)
-               anno=str(fecha_parto)
-               mes={"01":"1","02":"2","03":"3","04":"4"
-                  ,"05":"5","06":"6","07":"7","08":"8"
-                  ,"09":"9","10":"0","11":"N","12":"D"}.get(anno[5:7])
-               if df_vaca["RAZA"].values[g]=="girolando":
-                  id=consecutivo[-3:]+"/"+mes+anno[3]
-                  df_resultado.loc[len(df_resultado)]=[id]+df_vaca.iloc[contador].tolist()
-               else:
-                  id=consecutivo[-3:]+"/"+anno[3]
-                  df_resultado.loc[len(df_resultado)]=[id]+df_vaca.iloc[contador].tolist()
-         #indica el numero de exploracione spara la fecha_parto 
-         contador+=1    
-      #detecta los animales no artificiales de lafinca es decir CN
-      #a partir del 2026 
-      # Xxx para tener en cuenta hay que agregar cuando los papas son purosXXX
-      df_cn=df_crias[(pd.to_datetime(df_crias["FECHA_NACIMIENTO"]).dt.year>=2026)&
-               (df_crias["T_C"]=="CN")&(df_crias["FINCA"]!="compañia")]
       
-      for contador_comercial in range(len(df_cn)):
-         fecha_parto=pd.to_datetime(df_cn["FECHA_NACIMIENTO"].values[contador_comercial])
+      df_resultado=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","RAZA","SEXO","TC_GG_O"]) 
+         
+#  ---------------PUROS CON NUMEROS FUERA DE LA FINCA------------
+      n_cria=0
+      df_datos_puros_c=df_crias[(df_crias["TC_GG_O"]=="TE_P_C")|(df_crias["TC_GG_O"]=="TE_F1_C")]
+      for fila_df in range(len(df_datos_puros_c)):
+         vaca=df_datos_puros_c.iloc[fila_df]["VACA"]
+         
+         if fila_df>0 and df_datos_puros_c.iloc[fila_df-1]["VACA"]==vaca:
+            n_cria+=1
+         else:
+            n_cria=0
+         fecha_nacimiento=pd.to_datetime(df_datos_puros_c.iloc[fila_df]["FECHA_NACIMIENTO"])
+         datos=df_puro[(df_puro["RECEPTORA"]==vaca)&(pd.to_datetime(df_puro["FECHA_NACIMIENTO"])==fecha_nacimiento)]
+         if len(datos)>0:
+            df_resultado.loc[len(df_resultado)]=[datos.iloc[n_cria,0]]+df_datos_puros_c.iloc[fila_df].tolist()
+#  ---------------PUROS CON NUMEROS DENTRO DE LA FINCA------------
+      df_datos_puros_v=df_crias[(df_crias["TC_GG_O"]=="TE_P_V")
+                        |(df_crias["TC_GG_O"]=="TE_F1_V")
+                        |(df_crias["TC_GG_O"]=="IA_P_V")
+                        |(df_crias["TC_GG_O"]=="IA_F1_V")
+                        |(df_crias["TC_GG_O"]=="CN_P_V")
+                        |(df_crias["TC_GG_O"]=="CN_F1_V")]
+      
+      for contador_puros in range(len(df_datos_puros_v)):#cambio
+      
+         anno=str(df_datos_puros_v.iloc[contador_puros]["FECHA_NACIMIENTO"])#cambio   
+         mes={"01":"1","02":"2","03":"3","04":"4"
+            ,"05":"5","06":"6","07":"7","08":"8"
+            ,"09":"9","10":"0","11":"N","12":"D"}.get(anno[5:7])
+         tc_gg_o=df_datos_puros_v.iloc[contador_puros]["TC_GG_O"]
+         if tc_gg_o=="TE_P_V" or tc_gg_o=="IA_P_V" or tc_gg_o=="CN_P_V":
+            
+            id=(("000"+str(contador_puros+51))[-3:])+"/"+anno[3]
+            df_resultado.loc[len(df_resultado)]=[id]+df_datos_puros_v.iloc[contador_puros].tolist()
+         elif tc_gg_o=="TE_F1_V" or tc_gg_o=="IA_F1_V" or tc_gg_o=="CN_F1_V":
+            id=(("000"+str(contador_puros+51))[-3:])+"/"+mes+anno[3]
+            df_resultado.loc[len(df_resultado)]=[id]+df_datos_puros_v.iloc[contador_puros].tolist()
+   
+#  ---------------COMERCIALES ANTES DE 2026------------
+      df_cn_antes_2026=df_crias[(pd.to_datetime(df_crias["FECHA_NACIMIENTO"]).dt.year<2026)&
+                           (df_crias["TC_GG_O"]=="CN_C_V")]
+
+      for antes_2026 in range(len(df_cn_antes_2026)):
+         id="no aplica"
+         df_resultado.loc[len(df_resultado)]=[id]+df_cn_antes_2026.iloc[antes_2026].tolist()
+
+# ---------------COMERCIALES DESPUES DE 2026------------
+      df_c_v=df_crias[(pd.to_datetime(df_crias["FECHA_NACIMIENTO"]).dt.year>=2026)&(
+         (df_crias["TC_GG_O"]=="CN_C_V")
+         |(df_crias["TC_GG_O"]=="CN_C_C")
+         |(df_crias["TC_GG_O"]=="IA_C_V"))]
+
+      for contador_comercial in range(len(df_c_v)):
+         fecha_parto=pd.to_datetime(df_c_v["FECHA_NACIMIENTO"].values[contador_comercial])
          consecutivo="000"
          consecutivo=consecutivo+str(contador_comercial+1)
          anno=str(fecha_parto)
@@ -465,22 +509,10 @@ class Buscador:
             ,"09":"9","10":"0","11":"N","12":"D"}.get(anno[5:7])
       
          id=consecutivo[-3:]+"/"+mes+anno[3]
-         df_resultado.loc[len(df_resultado)]=[id]+df_cn.iloc[contador_comercial].tolist()
-         
+         df_resultado.loc[len(df_resultado)]=[id]+df_c_v.iloc[contador_comercial].tolist()
 
-      #detecta los animales no artificiales de lafinca es decir CN
-      # antes del 2026
-      df_cn_antes_2026=df_crias[(pd.to_datetime(df_crias["FECHA_NACIMIENTO"]).dt.year<2026)&
-                     (df_crias["T_C"]=="CN")]
-
-      for antes_2026 in range(len(df_cn_antes_2026)):
-         id="no aplica"
-         df_resultado.loc[len(df_resultado)]=[id]+df_cn_antes_2026.iloc[antes_2026].tolist()
-
-         
       df_resultado=df_resultado.sort_values(by="FECHA_NACIMIENTO").reset_index(drop=True)
       df_resultado.insert(5,'EDAD',df_resultado["FECHA_NACIMIENTO"].apply(self.calcular_edad))
-      
       return df_resultado
 
 

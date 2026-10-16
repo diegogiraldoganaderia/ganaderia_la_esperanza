@@ -304,7 +304,7 @@ if st.button("🚀  INICIO",use_container_width=True,type="primary"):
     st.rerun()
     
 #INICIO INFORMES
-if st.button("📋RESUMÉN DATOS",use_container_width=True,type="primary"):
+if st.button("📋RESÚMEN DATOS",use_container_width=True,type="primary"):
     cerrar(1)
     
 if st.session_state.informes:
@@ -334,8 +334,10 @@ if st.session_state.informe_nacimientos:
     
     fecha=st.date_input("A partir de que fecha desea el informe")
     fincas=[]
-    finca = st.multiselect("Finca",df_fincas["ID"])
-    tc=st.multiselect("Tipo_concepcion",["TE","CN","IA"])
+    finca = st.multiselect("FINCA",df_fincas["ID"])
+    ta=st.multiselect("TIPO DE ANIMAL",["PURO","COMERCIAL"])
+    ta_dic={"PURO":["TE_P_V","TE_P_C","TE_F1_V","TE_F1_C","IA_P_V","CN_F1_V","CN_P_V","IA_F1_V"],"COMERCIAL":["CN_C_V","CN_C_C","IA_C_V"]}
+    l = [j for i in ta for j in ta_dic[i]]
     fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
     solo_numeros=st.selectbox("SOLO NÚMEROS:",["NO","SI"])
 
@@ -345,11 +347,11 @@ if st.session_state.informe_nacimientos:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
             st.session_state.informe_nacimientos=False
             st.session_state.informes = False
-            informe=buscar.numeros(df_cria,df_embriones,df_ganado_puro)
+            informe=buscar.numeros(df_cria,df_ganado_puro)
             #filtro la fecha
             informe=informe[pd.to_datetime(informe["FECHA_NACIMIENTO"])>fecha]
             #filtro tc
-            filtro_tc=informe["T_C"].isin(tc)
+            filtro_tc=informe["TC_GG_O"].isin(l)
             informe=informe[filtro_tc]
             #filtro_finca
           
@@ -635,14 +637,11 @@ if st.session_state.registro_nacimientos:
     for i in range(len(df_toros)):
         toros.append(df_toros.iloc[i,0])
     toro = st.selectbox("Toro",toros)
-    razas=[]
-    for i in range(len(df_razas)):
-        razas.append(df_razas.iloc[i,0]) 
-    raza = st.selectbox("Raza",razas)
+   
     observaciones = st.text_area("Observaciones")
     
     if st.button("Guardar",use_container_width=True):
-        registro_cria=nacimientos.nacimiento(buscar,vaca,fn,sexo,finca,observaciones,toro,raza)
+        registro_cria=nacimientos.nacimiento(buscar,vaca,fn,sexo,finca,observaciones,toro)
         nacimientos.guardar(registro_cria)
         if st.success("Guardado"):
             cerrar(0)

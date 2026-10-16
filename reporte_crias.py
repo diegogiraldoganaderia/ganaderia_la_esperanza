@@ -43,8 +43,8 @@ def _preparar(df: pd.DataFrame) -> list:
     for c in ["FINCA", "TORO", "VACA", "RAZA", "SEXO"]:
         d[c] = d[c].astype("string").str.strip().str.lower().fillna("sin dato")
         d[c] = d[c].replace("", "sin dato")
-    d["T_C"] = d["T_C"].astype("string").str.strip().str.upper().fillna("SIN DATO")
-    d["T_C"] = d["T_C"].replace("", "SIN DATO")
+    d["TC_GG_O"] = d["TC_GG_O"].astype("string").str.strip().str.upper().fillna("SIN DATO")
+    d["TC_GG_O"] =d["TC_GG_O"].replace("", "SIN DATO")
 
     # Fechas
     fecha = pd.to_datetime(d["FECHA_NACIMIENTO"], errors="coerce")
@@ -62,7 +62,7 @@ def _preparar(df: pd.DataFrame) -> list:
             "vaca": d["VACA"],
             "raza": d["RAZA"],
             "sexo": d["SEXO"],
-            "tc": d["T_C"],
+            "tc": d["TC_GG_O"],
         }
     )
     return registros.astype(object).to_dict(orient="records")
@@ -126,13 +126,36 @@ _PLANTILLA = r"""<!DOCTYPE html>
   input[type=search]{background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-width:220px}
   .note{color:var(--muted);font-size:12px;margin-top:8px}
   .pivot td.n,.pivot th.n{text-align:right}
+
+  .nota {
+    font-size: 10px;
+    color: #777;
+    line-height: 1.4;
+    margin-top: 8px;
+    margin-bottom: 20px;
+}
 </style>
 </head>
 <body>
 <header>
   <h1>__TITULO__</h1>
   <div class="sub">GENERADO EL __GENERADO__</div>
+
+  <div class="nota">
+    <strong>TC_GG_O</strong><br>
+    TC: TIPO DE CONCEPCIÓN (CN: MONTA NATURAL, TE: TRANSFERENCIA DE EMBRIÓN, IA: INSEMINACIÓN ARTIFICIAL)<br>
+    GG: GRUPO GENÉTICO (P: PURO, F1: CRUCE CON REGISTRO, C: COMERCIAL)<br>
+    O: ORIGEN (V: VANGUARDIA, C: COMPAÑÍA)
+  </div>
+
 </header>
+
+
+
+
+
+
+</h1>
 <main>
 <header style="display: flex; justify-content: center;">
   <h1>FILTROS</h1>
@@ -157,9 +180,9 @@ _PLANTILLA = r"""<!DOCTYPE html>
   </header>
   <div class="grid">
     <div class="card"><h3>CRÍAS NACIDAS POR AÑO</h3><div class="box"><canvas id="c_anio_sexo"></canvas></div></div>
-    <div class="card"><h3>NÚMERO DE CRÍAS POR TIPO DE CONCEPCIÓN</h3><div class="box"><canvas id="c_anio_tc"></canvas></div></div>
+    <div class="card"><h3>NÚMERO DE CRÍAS POR TC_GG_O</h3><div class="box"><canvas id="c_anio_tc"></canvas></div></div>
     <div class="card"><h3>CRÍAZ POR RAZA</h3><div class="box"><canvas id="c_raza"></canvas></div></div>
-    <div class="card"><h3>DISTRIBUCIÓN POR TIPO DE CONCEPCIÓN</h3><div class="box"><canvas id="c_tc"></canvas></div></div>
+    <div class="card"><h3>DISTRIBUCIÓN POR TC_GG_O</h3><div class="box"><canvas id="c_tc"></canvas></div></div>
     <div class="card"><h3>DISTRIBUCIÓN POR SEXO</h3><div class="box"><canvas id="c_sexo"></canvas></div></div>
     <div class="card"><h3>CRÍAS POR MES</h3><div class="box"><canvas id="c_mes"></canvas></div></div>
     <div class="card"><h3>TOROS CON MÁS CRÍAS (top 10)</h3><div class="box"><canvas id="c_toro"></canvas></div></div>
@@ -186,7 +209,7 @@ const DATA = __DATA__;
 const TC_LABEL = {CN:'Natural', IA:'Inseminación artificial', TE:'Transferencia de embriones'};
 const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const PALETA = ['#2f6b3a','#d98c2b','#3b7ea1','#b5523b','#7a5c99','#6b9e8a','#c2a33a','#8a8f98','#a14d73','#4c6f9b'];
-const DIMS = {anio:'Año', raza:'Raza', finca:'Finca', sexo:'Sexo', tc:'Concepción'};
+const DIMS = {anio:'Año', raza:'Raza', finca:'Finca', sexo:'Sexo', tc:'TC_GG_O'};
 const sel = {}; Object.keys(DIMS).forEach(k => sel[k] = new Set());
 const charts = {};
 let sortKey = 'fecha', sortDir = -1;
@@ -257,9 +280,9 @@ function render(){
   // KPIs
   const m = rows.filter(r => r.sexo === 'macho').length;
   const h = rows.filter(r => r.sexo === 'hembra').length;
-  const cn = rows.filter(r => r.tc === 'CN').length;
-  const ia = rows.filter(r => r.tc === 'IA').length;
-  const te = rows.filter(r => r.tc === 'TE').length;
+  const cn = rows.filter(r => ['CN_P_V', 'CN_F1_V', 'CN_C_V', 'CN_C_C'].includes(r.tc)).length;
+  const ia = rows.filter(r => ['IA_P_V', 'IA_F1_V','IA_C_V'].includes(r.tc)).length;
+  const te = rows.filter(r => ['TE_P_V', 'TE_P_C', 'TE_F1_V', 'TE_F1_C'].includes(r.tc)).length;
   const kp = [
     [rows.length,'Total de crías'], [m,'Machos ('+pct(m,rows.length)+')'], [h,'Hembras ('+pct(h,rows.length)+')'],
     [cn,'Natural ('+pct(cn,rows.length)+')'], [ia,'Inseminación ('+pct(ia,rows.length)+')'], [te,'Embriones ('+pct(te,rows.length)+')'],
