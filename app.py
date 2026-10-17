@@ -1,7 +1,7 @@
 import streamlit as st
 import base64
 from Ganaderia import *
-from reporte_crias import generar_reporte_html
+from reportes import *
 import os
 import time
 import plotly.express as px
@@ -585,7 +585,6 @@ if st.session_state.informe_receptoras:
 if st.button("REPORTES",use_container_width=True,type="primary"):
     cerrar(17)
 
-
 if st.session_state.reportes:
     col1, col2, col3= st.columns(3)
     with col1:
@@ -593,7 +592,9 @@ if st.session_state.reportes:
             cerrar(18)
 
 if st.session_state.reporte_nacimientos:
-    Data=generar_reporte_html(df_cria)
+    #Data=generar_reporte_html(df_cria)
+    Data=generar_reporte_html(df_embriones)
+    
     if st.button("NAVEGAR",use_container_width=True,type="tertiary"):
         components.html(Data, height=1500, scrolling=True)
 
@@ -867,8 +868,7 @@ if st.session_state.graficos:
     </style>
     <div class='titulo-ganaderia'>SEXO DE LAS CRIAS</div>
     """,
-    unsafe_allow_html=True
-)
+    unsafe_allow_html=True)
     #st.markdown("<br>", unsafe_allow_html=True)  
     dfg1=df_cria
     filtro_finca=st.multiselect("FINCA",df_fincas)    

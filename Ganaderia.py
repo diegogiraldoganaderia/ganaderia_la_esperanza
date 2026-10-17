@@ -233,6 +233,10 @@ class Agregar_Eliminar:
 
       if tc[0] in v_v:
         toro = toro.lower()
+        if tc[0]=="CN_P_V" or tc[0]=="CN_F1_V":
+         id_tc="pendiente"
+         registro="pendiente"
+         df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,vaca,vaca,finca,str(fn.date())]
       elif tc[0] in puro_te:
         df = df_embriones.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
         toro = df[df["RECEPTORA"] == vaca].iloc[0, 6]
@@ -242,9 +246,14 @@ class Agregar_Eliminar:
         df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,donadora,vaca,finca,str(fn.date())]
 
       elif tc[0] in  ia:
+        
         df = df_inseminacion.sort_values(by='FECHA',ascending=False).reset_index(drop=True)
         toro = df[df["ID"] == vaca].iloc[0, 6]
-
+        if tc[0]=="IA_P_V" or tc[0]=="IA_F1_V":
+           id_tc="pendiente"
+           registro="pendiente"
+           df_ganado_puro.loc[len(df_ganado_puro)]=[id_tc,raza,sexo,registro,toro,vaca,vaca,finca,str(fn.date())]
+      
       
       numero_datos= len(df_partos[df_partos["ID"] == vaca])
       df_tiempo_entre_partos=df_cria[df_cria["VACA"] == vaca].reset_index(drop=True)
@@ -284,41 +293,6 @@ class Buscador:
 
    def  comprobar_tc(self,id,toro,fecha_parto,finca):
       
-      datos_embrionesV=df_embriones[(df_embriones["RECEPTORA"]==id)
-                                    &(df_embriones["#PROVEEDOR"]=="vanguardia")]
-      datos_embrionesC=df_embriones[(df_embriones["RECEPTORA"]==id)
-                                          &(df_embriones["#PROVEEDOR"]!="vanguardia")]
-
-      #TE_P_V AND TE_F1_V
-     
-      for fecha_embriones in datos_embrionesV["FECHA_TRANSFERENCIA"]:
-         if (abs(fecha_parto-pd.to_datetime(fecha_embriones)).days-280)<45:
-            
-            df = datos_embrionesV.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
-            raza = df[df["RECEPTORA"] ==id].iloc[0, 7]
-            if df_razas.iloc[df_razas["ID"]==raza,1]=="PURO":
-               tc="TE_P_V"
-            elif df_razas.iloc[df_razas["ID"]==raza,1]=="F1":
-               tc="TE_F1_V"
-            else:
-               tc="no se encontro la raza"
-
-
-            
-      #TE_P_C AND TE_F1_C
-      for fecha_embriones in datos_embrionesC["FECHA_TRANSFERENCIA"]:
-               if (abs(fecha_parto-pd.to_datetime(fecha_embriones)).days-280)<45: 
-                  df = datos_embrionesC.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
-                  raza = df[df["RECEPTORA"] ==id].iloc[0, 7]
-                  if df_razas.iloc[df_razas["ID"]==raza,1]=="PURO":
-                     tc="TE_P_C"
-                  elif df_razas.iloc[df_razas["ID"]==raza,1]=="F1":
-                     tc="TE_F1_C"
-                  else:
-                     tc="no se encontro la raza"
-                  
-
-      
       #concepcon natural
       raza_vaca=df_ganado_puro[(df_ganado_puro["SEXO"]=="hembra")&(df_ganado_puro["ID"]==id)]
       raza_toro=df_toros[df_toros["ID"]==toro]
@@ -339,18 +313,57 @@ class Buscador:
          raza =raza_toro
       elif raza_vaca!=raza_toro and raza_vaca!="comercial" and raza_toro!="comercial":
          tc="CN_F1_V"
-         raza= "f1 "+raza_toro+" x "+raza_vaca
+         raza= raza_toro+" x "+raza_vaca
 
-      elif raza_vaca=="comercial" or raza_toro=="comercial" and finca=="compañia":
+      elif (raza_vaca=="comercial" or raza_toro=="comercial") and finca=="compañia":
          tc="CN_C_C"
          raza="comercial"
 
-      elif raza_vaca=="comercial" or raza_toro=="comercial" and finca!="compañia":
+      elif (raza_vaca=="comercial" or raza_toro=="comercial") and finca!="compañia":
          tc="CN_C_V"
          raza="comercial"
+      
+      datos_embrionesV=df_embriones[(df_embriones["RECEPTORA"]==id)
+                                    &(df_embriones["#PROVEEDOR"]=="vanguardia")
+                                    &(df_embriones["X1"]=="p+")]
+      
+      datos_embrionesC=df_embriones[(df_embriones["RECEPTORA"]==id)
+                                          &(df_embriones["#PROVEEDOR"]!="vanguardia")
+                                          &(df_embriones["X1"]=="p+")]
+
+      #TE_P_V AND TE_F1_V
+     
+      for fecha_embriones in datos_embrionesV["FECHA_TRANSFERENCIA"]:
+         
+         if (abs((fecha_parto-pd.to_datetime(fecha_embriones)).days-280))<45:
+            
+            df = datos_embrionesV.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
+            raza = df[df["RECEPTORA"] ==id].iloc[0, 7]
+            grupo_genetico= df_razas.loc[df_razas["ID"] == raza, "GRUPO_GENETICO"].iloc[0]
+            
+            if grupo_genetico=="PURO":
+               tc="TE_P_V"
+            elif grupo_genetico=="F1":
+               tc="TE_F1_V"
+            else:
+               tc="no se encontro la raza"
 
 
-
+            
+      #TE_P_C AND TE_F1_C
+      for fecha_embriones in datos_embrionesC["FECHA_TRANSFERENCIA"]:
+         if (abs((fecha_parto-pd.to_datetime(fecha_embriones)).days-280))<45: 
+            df = datos_embrionesC.sort_values(by='FECHA_SINCRONIZACION',ascending=False).reset_index(drop=True)
+            raza = df[df["RECEPTORA"] ==id].iloc[0, 7]
+            grupo_genetico= df_razas.loc[df_razas["ID"] == raza, "GRUPO_GENETICO"].iloc[0]
+            
+            if grupo_genetico=="PURO":
+               tc="TE_P_C"
+            elif grupo_genetico=="F1":
+               tc="TE_F1_C"
+            else:
+               tc="no se encontro la raza"
+            
       datos_inseminacion=df_inseminacion[(df_inseminacion["ID"]==id)
                                          &(df_inseminacion["CONFIRMACION"]=="p+")]
       
@@ -364,7 +377,7 @@ class Buscador:
                raza="comercial"
             elif raza_vaca!=raza_toro_IA and raza_vaca!="comercial":
                tc="IA_F1_V"
-               raza= "f1 "+raza_toro_IA+" x "+raza_vaca
+               raza= raza_toro_IA+" x "+raza_vaca
 
             elif raza_vaca==raza_toro_IA and raza_vaca!="comercial":
                tc="IA_P_V"
@@ -514,5 +527,3 @@ class Buscador:
       df_resultado=df_resultado.sort_values(by="FECHA_NACIMIENTO").reset_index(drop=True)
       df_resultado.insert(5,'EDAD',df_resultado["FECHA_NACIMIENTO"].apply(self.calcular_edad))
       return df_resultado
-
-
