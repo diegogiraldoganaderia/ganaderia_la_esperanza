@@ -530,7 +530,63 @@ def _resultado(serie: pd.Series) -> pd.Series:
     return out
 
 
-def _preparar_embriones(df: pd.DataFrame, dia_primero: bool) -> list:
+def _posparto(fsync: pd.Series, receptora: pd.Series, finca: pd.Series, df_cria: pd.DataFrame,
+              vaca_por_finca: bool = False):
+    """Para cada fila de embriones: días desde el último parto de la receptora anterior a su sincronización.
+
+    Usa las crías ya preparadas por _preparar_nacimiento (no se repite la limpieza de df_cria).
+    Devuelve tres listas alineadas con las filas de embriones:
+      - estado: 'con parto', 'sin parto' (no tiene ningún parto anterior en df_cria) o 'sin dato'
+      - días posparto (None si no aplica)
+      - si la receptora aparece en df_cria
+    """
+    crias = pd.DataFrame(_preparar_nacimiento(df_cria, vaca_por_finca))
+    crias = crias[crias["vaca"] != "sin dato"].copy()
+    crias["fecha"] = pd.to_datetime(crias["fecha"], errors="coerce")
+    if vaca_por_finca:
+        crias["clave"] = crias["finca"] + "|" + crias["vaca"]
+    else:
+        crias["clave"] = crias["vaca"]
+    crias["clave"] = crias["clave"].astype(object)
+    conocidas = set(crias["clave"])
+    partos = (crias.loc[crias["fecha"].notna(), ["clave", "fecha"]]
+              .drop_duplicates().sort_values("fecha").reset_index(drop=True))
+
+    rec = receptora.astype(object).reset_index(drop=True)
+    fin = finca.astype(object).reset_index(drop=True)
+    clave = (fin + "|" + rec) if vaca_por_finca else rec
+    izq = pd.DataFrame({"clave": clave.astype(object), "fsync": fsync.reset_index(drop=True)})
+    izq["pos"] = range(len(izq))
+    sin_receptora = (rec == "sin dato").tolist()
+
+    calculables = izq[izq["fsync"].notna() & ~pd.Series(sin_receptora)].sort_values("fsync")
+    if len(partos) and len(calculables):
+        union = pd.merge_asof(calculables, partos, left_on="fsync", right_on="fecha", by="clave",
+                              direction="backward", allow_exact_matches=False)
+        previo = union.set_index("pos")["fecha"]
+    else:
+        previo = pd.Series(dtype="datetime64[ns]")
+
+    estados, dias_pp, en_cria = [], [], []
+    for pos in range(len(izq)):
+        f = izq.at[pos, "fsync"]
+        en_cria.append(bool(izq.at[pos, "clave"] in conocidas))
+        if pd.isna(f) or sin_receptora[pos]:
+            estados.append("sin dato")
+            dias_pp.append(None)
+            continue
+        ultimo = previo.get(pos, pd.NaT)
+        if pd.isna(ultimo):
+            estados.append("sin parto")
+            dias_pp.append(None)
+        else:
+            estados.append("con parto")
+            dias_pp.append(int((f - ultimo).days))
+    return estados, dias_pp, en_cria
+
+
+def _preparar_embriones(df: pd.DataFrame, dia_primero: bool, df_cria: pd.DataFrame = None,
+                        vaca_por_finca: bool = False) -> list:
     COLUMNAS = [
     "PROVEEDOR", "FINCA", "FECHA_SINCRONIZACION", "FECHA_TRANSFERENCIA",
     "RECEPTORA", "DONADORA", "REPRODUCTOR", "RAZA", "TIPO_EMBRION", "X1", "X3",
@@ -577,10 +633,15 @@ def _preparar_embriones(df: pd.DataFrame, dia_primero: bool) -> list:
     # Si X1 es V, X3 toma por defecto el mismo valor (no se preña sola)
     out.loc[(out["x1"] == "V") & (out["x3"] == "SIN DATO"), "x3"] = "V"
 
+    # Tiempo desde el último parto (solo si se entrega df_cria)
+    pp = _posparto(fsync, out["receptora"], out["finca"], df_cria, vaca_por_finca) if df_cria is not None else None
+
     registros = []
-    for fila, dia in zip(out.astype(object).to_dict(orient="records"), dias.tolist()):
+    for i, (fila, dia) in enumerate(zip(out.astype(object).to_dict(orient="records"), dias.tolist())):
         fila["transferida"] = bool(fila["transferida"])
         fila["dias"] = None if (pd.isna(dia) or not fila["transferida"]) else int(dia)
+        if pp is not None:
+            fila["pp"], fila["dias_pp"], fila["en_cria"] = pp[0][i], pp[1][i], pp[2][i]
         registros.append(fila)
     return registros
 
@@ -589,12 +650,17 @@ def generar_reporte_embriones_html(
     df: pd.DataFrame,
     titulo: str = "Reporte de procesos de embriones",
     dia_primero: bool = False,
+    df_cria: pd.DataFrame = None,
+    vaca_por_finca: bool = False,
 ) -> str:
     """Devuelve el HTML completo del reporte como string.
 
     dia_primero=True si tus fechas vienen como texto día/mes/año (03/05/2024 = 3 de mayo).
+    df_cria: dataframe de nacimientos. Si se entrega, el reporte agrega la sección que relaciona los días
+    desde el último parto de cada receptora (VACA en df_cria) con el resultado del proceso.
+    vaca_por_finca=True si un mismo código de vaca puede repetirse en fincas distintas.
     """
-    datos = _preparar_embriones(df, dia_primero)
+    datos = _preparar_embriones(df, dia_primero, df_cria, vaca_por_finca)
     datos_json = json.dumps(datos, ensure_ascii=False).replace("</", "<\\/")
     generado = datetime.now().strftime("%Y-%m-%d %H:%M")
     return (
@@ -688,6 +754,15 @@ input[type=number]{width:80px}
 ::-webkit-scrollbar{height:8px;width:8px}
 ::-webkit-scrollbar-thumb{background:rgba(110,255,190,.28);border-radius:8px}
 ::-webkit-scrollbar-track{background:transparent}
+details.card{padding:0}
+details.card>summary{cursor:pointer;list-style:none;padding:14px 18px;display:flex;align-items:center;gap:10px;
+  font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:#d6f5e4;font-size:12px}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:'+';margin-left:auto;font-size:18px;color:var(--g1)}
+details.card[open]>summary::after{content:'–'}
+details.card .cuerpo{padding:0 18px 14px}
+.badge{background:rgba(248,113,113,.18);border:1px solid rgba(248,113,113,.6);color:#fecaca;border-radius:999px;padding:2px 10px;letter-spacing:0}
+.maxh{max-height:420px;overflow:auto}
 </style>
 </head>
 <body>
@@ -705,6 +780,17 @@ input[type=number]{width:80px}
 </div>
 
 <div class="kpis" id="kpis"></div>
+
+<details class="card full" id="det_ab">
+  <summary>Receptoras que abortaron <span class="badge" id="ab_n">0</span></summary>
+  <div class="cuerpo">
+    <div class="toolbar" style="margin-bottom:10px">
+      <button class="act" id="ab_csv">Descargar CSV de abortos</button>
+    </div>
+    <div class="tablewrap maxh"><table id="t_ab"></table></div>
+    <div class="note" id="ab_note"></div>
+  </div>
+</details>
 
 <div class="card full">
   <div class="toolbar" style="margin-bottom:10px">
@@ -759,6 +845,17 @@ input[type=number]{width:80px}
   </div>
   <div class="tablewrap"><table id="t_rp"></table></div>
   <div class="note" id="rpnote"></div>
+</div>
+<div class="card full" id="card_pp" style="display:none">
+  <div class="toolbar" style="margin-bottom:10px">
+    <h3 style="margin:0">Resultado según días posparto (% de casos con resultado)</h3>
+    <label class="sub">Tamaño del rango (días):</label>
+    <input type="number" id="ppsize" min="1" value="30">
+    <label class="sub">Mínimo de casos por rango:</label>
+    <input type="number" id="ppmin" min="1" value="1">
+  </div>
+  <div class="box tall"><canvas id="c_pp"></canvas></div>
+  <div class="note" id="ppnote"></div>
 </div>
 </main>
 
@@ -924,6 +1021,8 @@ draw('c_dias', {type:'bar', data:{labels: dstat.map(x => x.d + ' d (' + x.n + ')
 
 renderTop(rows);
 renderRP(rows);
+  renderPP(rows);
+  renderAb(rows);
 }
 
 function renderCat(rows, total){
@@ -1055,6 +1154,93 @@ document.getElementById('rpnote').textContent =
   'Si hay filtros de raza, reproductor o donadora activos, las filas RP no se incluyen, porque en un rechazo esos campos valen RP.';
 }
 
+// ---------- Tiempo desde el último parto ----------
+const HAY_PP = DATA.length > 0 && 'dias_pp' in DATA[0];
+const PP_SIN = 'Sin parto previo';
+function ppStats(rs){
+  const tr = rs.filter(r => r.transferida);
+  const p = tr.filter(r => r.x1 === 'P').length, v = tr.filter(r => r.x1 === 'V').length;
+  return {n: rs.length, rp: rs.length - tr.length, tr: tr.length, p, v,
+    pend: tr.filter(r => r.x1 === 'SIN DATO').length,
+    ab: tr.filter(r => r.x1 === 'P' && r.x3 === 'V').length};
+}
+function renderPP(rows){
+  const card = document.getElementById('card_pp');
+  if (!HAY_PP){ card.style.display = 'none'; return; }
+  card.style.display = '';
+  const size = Math.max(1, Number(document.getElementById('ppsize').value) || 30);
+  const minn = Math.max(1, Number(document.getElementById('ppmin').value) || 1);
+
+  const sinParto = rows.filter(r => r.pp === 'sin parto');
+  const conParto = rows.filter(r => r.pp === 'con parto' && r.dias_pp != null);
+  const sinDato = rows.filter(r => r.pp === 'sin dato').length;
+
+  const g = new Map();
+  conParto.forEach(r => { const b = Math.floor(r.dias_pp / size) * size; if (!g.has(b)) g.set(b, []); g.get(b).push(r); });
+  const grupos = [];
+  if (sinParto.length) grupos.push({k: PP_SIN, rs: sinParto});
+  [...g.keys()].sort((a,b) => a-b).forEach(b => grupos.push({k: b + '–' + (b + size - 1) + ' d', rs: g.get(b)}));
+  const lista = grupos.map(x => ({k: x.k, ...ppStats(x.rs)})).filter(x => x.n >= minn && x.p + x.v + x.rp > 0);
+
+  // Gráfica 1: distribución del resultado por rango (sobre casos con resultado: P+, V o RP)
+  const base = x => x.p + x.v + x.rp;
+  const pc = (a, x) => base(x) ? 100 * a / base(x) : 0;
+  draw('c_pp', {type:'bar', data:{labels: lista.map(x => x.k + ' (n=' + base(x) + ')'), datasets:[
+    {label:'Preñada en X1, sin aborto confirmado', data: lista.map(x => pc(x.p - x.ab, x)), backgroundColor: PALETA[0]},
+    {label:'Aborto (P+ en X1 y V en X3)', data: lista.map(x => pc(x.ab, x)), backgroundColor: PALETA[1]},
+    {label:'Vacía en X1 (V)', data: lista.map(x => pc(x.v, x)), backgroundColor: PALETA[3]},
+    {label:'Rechazó el protocolo (RP)', data: lista.map(x => pc(x.rp, x)), backgroundColor: PALETA[7]}]},
+    options:{responsive:true, maintainAspectRatio:false,
+      scales:{x:{stacked:true}, y:{stacked:true, beginAtZero:true, max:100, ticks:{callback: v => v + '%'}}}}});
+
+  const rec = new Map();
+  rows.forEach(r => { if (r.receptora !== 'sin dato') rec.set(r.receptora, r.en_cria); });
+  document.getElementById('ppnote').textContent =
+    'Días desde el último parto: entre el último parto de la receptora registrado en df_cria y su fecha de sincronización; los partos con la misma fecha (mellizos) cuentan como uno. ' +
+    '"' + PP_SIN + '" son las receptoras sin ningún parto anterior a la sincronización en df_cria, es decir, que no habían parido hasta este proceso. ' +
+    'Los porcentajes se calculan sobre los casos con resultado (P+, V o RP); los pendientes no se cuentan. ' +
+    'Aborto: preñada en X1 (P+) y vacía en X3 (V); las P+ sin X3 registrado no se cuentan como aborto. ' +
+    'Que el resultado cambie con los días no prueba que los días sean la causa: compara dentro de una misma finca o proveedor con los filtros. ' +
+    sinDato + ' filas sin fecha de sincronización o sin receptora no entran en el análisis. ' +
+    'Receptoras que aparecen en df_cria: ' + [...rec.values()].filter(Boolean).length + ' de ' + rec.size + '.';
+}
+
+// ---------- Receptoras que abortaron ----------
+let ULTIMA_AB = {cols: [], ab: []};
+function renderAb(rows){
+  const ab = rows.filter(r => r.transferida && r.x1 === 'P' && r.x3 === 'V')
+    .sort((a,b) => String(b.ftrans).localeCompare(String(a.ftrans)));
+  const veces = new Map();
+  ab.forEach(r => veces.set(r.receptora, (veces.get(r.receptora) || 0) + 1));
+  const cols = [
+    ['Receptora', r => cap(r.receptora)], ['Veces que abortó', r => veces.get(r.receptora)],
+    ['Finca', r => cap(r.finca)], ['Proveedor', r => cap(r.proveedor)],
+    ['Sincronización', r => r.fsync], ['Transferencia', r => r.ftrans],
+    ['Donadora', r => cap(r.donadora)], ['Reproductor', r => cap(r.reproductor)],
+    ['Raza', r => cap(r.raza)], ['Tipo de embrión', r => cap(r.tipo)]
+  ];
+  if (HAY_PP) cols.push(['Días desde el último parto', r => r.pp === 'con parto' ? r.dias_pp : (r.pp === 'sin parto' ? 'Sin parto previo' : '-')]);
+  ULTIMA_AB = {cols, ab};
+
+  document.getElementById('ab_n').textContent = ab.length;
+  document.getElementById('t_ab').innerHTML =
+    '<tr>' + cols.map(c => '<th' + (c[0] === 'Veces que abortó' ? ' class="n"' : '') + '>' + c[0] + '</th>').join('') + '</tr>' +
+    (ab.length ? ab.map(r => '<tr>' + cols.map(c => '<td' + (c[0] === 'Veces que abortó' ? ' class="n"' : '') + '>' + c[1](r) + '</td>').join('') + '</tr>').join('')
+               : '<tr><td colspan="' + cols.length + '">Ninguna receptora abortó con los filtros actuales.</td></tr>');
+  document.getElementById('ab_note').textContent =
+    'Aborto: preñada en X1 (P+) y vacía en X3 (V). Las preñadas en X1 sin X3 registrado no aparecen porque todavía no se sabe si abortaron. ' +
+    'La lista respeta los filtros actuales.';
+}
+document.getElementById('ab_csv').onclick = () => {
+  const {cols, ab} = ULTIMA_AB;
+  const esc = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const csv = [cols.map(c => c[0].toUpperCase()).join(',')].concat(ab.map(r => cols.map(c => esc(c[1](r))).join(','))).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], {type: 'text/csv;charset=utf-8'}));
+  a.download = 'receptoras_que_abortaron.csv';
+  a.click();
+};
+
 // ---------- CSV ----------
 const COLS = [['fsync','Sincronización'],['ftrans','Transferencia'],['finca','Finca'],['proveedor','Proveedor'],['receptora','Receptora'],
 ['donadora','Donadora'],['reproductor','Reproductor'],['raza','Raza'],['tipo','Tipo embrión'],['x1','X1'],['x3','X3'],['estado','Estado']];
@@ -1073,6 +1259,8 @@ const el = document.getElementById(id);
 el.addEventListener(id === 'topmin' ? 'input' : 'change', () => renderTop(filtered()));
 });
 document.getElementById('rpmin').addEventListener('input', () => renderRP(filtered()));
+document.getElementById('ppsize').addEventListener('input', () => renderPP(filtered()));
+document.getElementById('ppmin').addEventListener('input', () => renderPP(filtered()));
 document.getElementById('reset').onclick = () => { Object.values(sel).forEach(s => s.clear()); render(); };
 document.getElementById('csv').onclick = () => {
 const rows = filtered();

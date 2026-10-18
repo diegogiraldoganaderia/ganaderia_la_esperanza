@@ -402,7 +402,7 @@ if st.session_state.informe_vacas:
                           " de la raza " + str(informacion_vaca["RAZA"]) + " " +
                             buscar.calcular_edad(informacion_vaca["FECHA_NACIMIENTO"])
                             )
-            informacion_partos=buscar.numeros(df_cria,df_embriones,df_ganado_puro)
+            informacion_partos=buscar.numeros(df_cria,df_ganado_puro)
             informacion_partos=informacion_partos[informacion_partos["VACA"]==id_vaca]
             nombre_pdf = ("Informe_Vaca_"+ str(id_vaca.replace("/", "_")))
            
@@ -617,7 +617,7 @@ if st.session_state.reporte_nacimientos:
         cerrar(0)
         st.rerun()
 if st.session_state.reporte_embriones:
-    Data=generar_reporte_embriones_html(df_embriones)
+    Data=generar_reporte_embriones_html(df_embriones,df_cria=df_cria)
     
     if st.button("NAVEGAR",use_container_width=True,type="tertiary"):
         components.html(Data, height=1500, scrolling=True)
