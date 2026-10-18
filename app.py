@@ -129,6 +129,8 @@ if "informe_receptoras" not in st.session_state:
 
 if "reporte_nacimientos" not in st.session_state:
     st.session_state.reporte_nacimientos=False
+if "reporte_embriones" not in st.session_state:
+    st.session_state.reporte_embriones=False
 
 def cerrar(x):
     if x==1:
@@ -214,6 +216,10 @@ def cerrar(x):
         st.session_state.reporte_nacimientos=True
     else:
         st.session_state.reporte_nacimientos=False
+    if x==19:
+        st.session_state.reporte_embriones=True
+    else:
+        st.session_state.reporte_embriones=False
     
 #Botones
 st.html("""
@@ -591,9 +597,14 @@ if st.session_state.reportes:
         if st.button("NACIMIENTOS",use_container_width=True):
             cerrar(18)
 
+    with col2:
+        if st.button("EMBRIONES",use_container_width=True):
+            cerrar(19)
+
+
 if st.session_state.reporte_nacimientos:
-    #Data=generar_reporte_html(df_cria)
-    Data=generar_reporte_html(df_embriones)
+  
+    Data=generar_reporte_nacimiento_html(df_cria)
     
     if st.button("NAVEGAR",use_container_width=True,type="tertiary"):
         components.html(Data, height=1500, scrolling=True)
@@ -601,6 +612,19 @@ if st.session_state.reporte_nacimientos:
     if st.download_button("DESCARGAR REPORTE (solo pc)",
             data=Data,
             file_name="reporte_crias.html",
+            mime="text/html",use_container_width=True,type="tertiary"
+                            ):
+        cerrar(0)
+        st.rerun()
+if st.session_state.reporte_embriones:
+    Data=generar_reporte_embriones_html(df_embriones)
+    
+    if st.button("NAVEGAR",use_container_width=True,type="tertiary"):
+        components.html(Data, height=1500, scrolling=True)
+
+    if st.download_button("DESCARGAR REPORTE (solo pc)",
+            data=Data,
+            file_name="reporte_embriones.html",
             mime="text/html",use_container_width=True,type="tertiary"
                             ):
         cerrar(0)
