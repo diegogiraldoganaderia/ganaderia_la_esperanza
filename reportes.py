@@ -8,7 +8,7 @@ reporte_solicitado=""
 COLUMNAS = ["FINCA", "TORO", "VACA", "FECHA_NACIMIENTO", "RAZA", "SEXO", "TC_GG_O"]
 
 
-def _preparar(df: pd.DataFrame, vaca_por_finca: bool = False) -> list:
+def _preparar_nacimiento(df: pd.DataFrame, vaca_por_finca: bool = False) -> list:
     faltantes = [c for c in COLUMNAS if c not in df.columns]
     if faltantes:
         raise ValueError(f"Faltan columnas en el dataframe: {faltantes}")
@@ -62,7 +62,7 @@ def generar_reporte_nacimiento_html(df: pd.DataFrame, titulo: str = "REPORTE CR�
     vaca_por_finca=True si un mismo código de vaca puede repetirse en fincas distintas
     (en ese caso cada finca se trata como un hato separado para medir los intervalos).
     """
-    datos_json = json.dumps(_preparar(df, vaca_por_finca), ensure_ascii=False).replace("</", "<\\/")
+    datos_json = json.dumps(_preparar_nacimiento(df, vaca_por_finca), ensure_ascii=False).replace("</", "<\\/")
     return (
         _NACIMIENTO.replace("__DATA__", datos_json)
         .replace("__TITULO__", titulo)
@@ -503,10 +503,7 @@ render();
 """
 
 
-COLUMNAS = [
-    "PROVEEDOR", "FINCA", "FECHA_SINCRONIZACION", "FECHA_TRANSFERENCIA",
-    "RECEPTORA", "DONADORA", "REPRODUCTOR", "RAZA", "TIPO_EMBRION", "X1", "X3",
-]
+
 
 # Columnas donde se escribe "RP" cuando la vaca rechazó el protocolo (no hubo transferencia)
 RP_COLS = ["DONADORA", "REPRODUCTOR", "RAZA", "TIPO_EMBRION"]
@@ -532,7 +529,11 @@ def _resultado(serie: pd.Series) -> pd.Series:
     return out
 
 
-def _preparar(df: pd.DataFrame, dia_primero: bool) -> list:
+def _preparar_embriones(df: pd.DataFrame, dia_primero: bool) -> list:
+    COLUMNAS = [
+    "PROVEEDOR", "FINCA", "FECHA_SINCRONIZACION", "FECHA_TRANSFERENCIA",
+    "RECEPTORA", "DONADORA", "REPRODUCTOR", "RAZA", "TIPO_EMBRION", "X1", "X3",
+]
     faltantes = [c for c in COLUMNAS if c not in df.columns]
     if faltantes:
         raise ValueError(f"Faltan columnas en el dataframe: {faltantes}")
@@ -592,7 +593,7 @@ def generar_reporte_embriones_html(
 
     dia_primero=True si tus fechas vienen como texto día/mes/año (03/05/2024 = 3 de mayo).
     """
-    datos = _preparar(df, dia_primero)
+    datos = _preparar_embriones(df, dia_primero)
     datos_json = json.dumps(datos, ensure_ascii=False).replace("</", "<\\/")
     generado = datetime.now().strftime("%Y-%m-%d %H:%M")
     return (
