@@ -617,7 +617,7 @@ if st.session_state.reporte_nacimientos:
         cerrar(0)
         st.rerun()
 if st.session_state.reporte_embriones:
-    Data=generar_reporte_embriones_html(df_embriones,df_cria=df_cria)
+    Data=generar_reporte_embriones_html(df_embriones)
     
     if st.button("NAVEGAR",use_container_width=True,type="tertiary"):
         components.html(Data, height=1500, scrolling=True)
