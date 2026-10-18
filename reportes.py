@@ -2,13 +2,14 @@ import json
 from datetime import datetime
 
 import pandas as pd
-reporte_solicitado=""
+
 
 #NACIMINETOS
-COLUMNAS = ["FINCA", "TORO", "VACA", "FECHA_NACIMIENTO", "RAZA", "SEXO", "TC_GG_O"]
+
 
 
 def _preparar_nacimiento(df: pd.DataFrame, vaca_por_finca: bool = False) -> list:
+    COLUMNAS = ["FINCA", "TORO", "VACA", "FECHA_NACIMIENTO", "RAZA", "SEXO", "TC_GG_O"]
     faltantes = [c for c in COLUMNAS if c not in df.columns]
     if faltantes:
         raise ValueError(f"Faltan columnas en el dataframe: {faltantes}")
