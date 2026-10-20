@@ -131,6 +131,9 @@ if "reporte_nacimientos" not in st.session_state:
     st.session_state.reporte_nacimientos=False
 if "reporte_embriones" not in st.session_state:
     st.session_state.reporte_embriones=False
+if "ultimo_parto" not in st.session_state:
+
+    st.session_state.ultimo_parto=False
 
 def cerrar(x):
     if x==1:
@@ -220,6 +223,11 @@ def cerrar(x):
         st.session_state.reporte_embriones=True
     else:
         st.session_state.reporte_embriones=False
+
+    if x==20:
+        st.session_state.ultimo_parto=True
+    else:
+        st.session_state.ultimo_parto=False
     
 #Botones
 st.html("""
@@ -335,6 +343,9 @@ if st.session_state.informes:
     with col1:
         if  st.button("RECEPTORAS",use_container_width=True):
             cerrar(16)
+    with col1:
+            if st.button("ULTIMO PARTO",use_container_width=True):
+                cerrar(20)
 
 if st.session_state.informe_nacimientos:  
     
@@ -356,6 +367,7 @@ if st.session_state.informe_nacimientos:
             informe=buscar.numeros(df_cria,df_ganado_puro)
             #filtro la fecha
             informe=informe[pd.to_datetime(informe["FECHA_NACIMIENTO"])>fecha]
+            
             #filtro tc
             filtro_tc=informe["TC_GG_O"].isin(l)
             informe=informe[filtro_tc]
@@ -372,7 +384,7 @@ if st.session_state.informe_nacimientos:
             texto=("En este informe se muestran todas las crias nacidas"+
             txt+" a partir de la fecha: "+fecha.strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe)))
             nombre_pdf = ("Informe_Nacimientos")
-
+            
             if solo_numeros=="NO":
                 generar_informe.generar_pdf( texto,informe,nombre_pdf)
             elif solo_numeros=="SI":
@@ -586,7 +598,41 @@ if st.session_state.informe_receptoras:
             with col2:
                 if st.download_button("DESCARGAR PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun()           
+if st.session_state.ultimo_parto:
+    finca = st.multiselect("FINCA",df_fincas["ID"])
+    tiempo_en_meses=st.selectbox("MESES TRASCURRIDOS",[0,1,2,3,4,5,6,7,8,9,10,11,12])
+    col1, col2= st.columns(2)
+    with col1:
+        if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
+            df_ultimo_parto= df_cria.sort_values("FECHA_NACIMIENTO").drop_duplicates("VACA", keep="last")[["VACA", "FINCA", "FECHA_NACIMIENTO"]]
+           
+            hoy = datetime.today()
+            mes_desde_el_parto=hoy - relativedelta(months=tiempo_en_meses)
+         
+            tiempo_trasncurrido=[]
+            for line in range(len(df_ultimo_parto)):
+                tiempo=relativedelta(hoy,pd.to_datetime(df_ultimo_parto.iloc[line]["FECHA_NACIMIENTO"]))
+                tiempo_trasncurrido.append(  str(tiempo.years)+" años "+str(tiempo.months)+" meses "+str(tiempo.days)+" dias")
+            
+            df_ultimo_parto["TIEMPO TRASNCURRIDOS"] = tiempo_trasncurrido
+            texto=("En este reporte se muestra el tiempo trasncurrido desde el ultimo parto, para todas las vacas que tienen más de "
+            +str(tiempo_en_meses)+" meses de parida\neste informe fue generado: "+str(hoy.date()))
 
+            df_ultimo_parto= df_ultimo_parto.rename(columns={"FECHA_NACIMIENTO": "ULTIMO_PARTO"})
+            
+            nombre_pdf=("ultimo_parto")
+            informe=df_ultimo_parto.reset_index(drop=True)
+            filtro_finca=informe["FINCA"].isin(finca)
+            informe=informe[filtro_finca]
+            
+            informe=informe[pd.to_datetime(informe["ULTIMO_PARTO"])<=mes_desde_el_parto]
+            
+            generar_informe.generar_pdf(texto,informe,nombre_pdf)
+            
+            with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+            with col2:
+                if st.download_button("DESCARGAR PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
+                    st.rerun() 
 #INICIO REPORTES
 if st.button("REPORTES",use_container_width=True,type="primary"):
     cerrar(17)

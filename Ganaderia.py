@@ -50,6 +50,7 @@ class Informes():
       return pdf_path
  
    def generar_pdf(self,texto,df,nombre_archivo):
+
       df=df.dropna()
       if df.empty:
          df=pd.DataFrame(columns=["Mensaje"])
@@ -103,7 +104,7 @@ class Informes():
          pdff.ln()
       
 # 5. Guardar el archivo final
-      return pdff.output(str(nombre_archivo+".pdf"))
+      return pdff.output(nombre_archivo+".pdf")
 
    def generar_pdf_multiple(self,textos,dfs,nombre_archivo):
       
@@ -527,3 +528,7 @@ class Buscador:
       df_resultado=df_resultado.sort_values(by="FECHA_NACIMIENTO").reset_index(drop=True)
       df_resultado.insert(5,'EDAD',df_resultado["FECHA_NACIMIENTO"].apply(self.calcular_edad))
       return df_resultado
+
+hoy = datetime.today()
+mes_anterior = hoy - relativedelta(months=12)
+print(mes_anterior)
