@@ -681,19 +681,22 @@ if st.session_state.reporte_embriones:
 #-------------------------------------------------------------------------
 #INICIO REPRODUCCIÓN Y PRODUCIÓN
 
-if st.button("🤰🐄  REPRODUCCIÓN Y PRODUCCIÓN",use_container_width=True,type="primary"):
-    cerrar(7)   
+if st.button("🤰🐄  REPRODUCCIÓN Y PRODUCCIÓN",use_container_width=True,type="primary"): 
+    cerrar(7)
 if st.session_state.reproduccion_produccion:
+    password = st.text_input(
+    "INGRESE LA CONTRASEÑA",
+    type="password")
 
     col1, col2, col3= st.columns(3)
     with col1:
-        if st.button("REGISTRO NACIMIENTOS",use_container_width=True): 
+        if st.button("REGISTRO NACIMIENTOS",use_container_width=True) and password=="h": 
            cerrar(8)
     with col2:
-        if st.button("INSEMINACION",use_container_width=True):
+        if st.button("INSEMINACION",use_container_width=True) and password=="h":
             cerrar(9)
     with col3:
-        if st.button("PALPACION",use_container_width=True):
+        if st.button("PALPACION",use_container_width=True) and password=="h":
             cerrar(10)
 if st.session_state.registro_nacimientos: 
     vaca = st.text_input("ID de la vaca").lower()
@@ -820,18 +823,19 @@ if st.button("🗃️ MODIFICAR BASE DATOS",use_container_width=True,type="prima
     df_informe_vaca=pd.DataFrame(columns=["INFORME"])
     cerrar(14)   
 if st.session_state.modificar_df:
+    password = st.text_input( "INGRESE LA CONTRASEÑA", type="password")
     dataframes_guardar = []
     dato=st.selectbox("Base_Datos",["ANIMAL","PARTOS","CRIAS","EMBRIONES"
     ,"INSEMINACION","FINCAS","RAZAS","GANADO PURO"
     ,"REPORTE SERVICIOS","PROTOCOLO REPRODUCCION"])
-    if dato == "ANIMAL":
+    if dato == "ANIMAL" and password=="h":
         df_animal = st.data_editor(
         df_animal,
         num_rows="dynamic",
         key="editor_animal")
         dataframes_guardar.append(("ANIMAL", df_animal))
 
-    elif dato == "PARTOS":
+    elif dato == "PARTOS" and password=="h":
         df_partos = st.data_editor(
             df_partos,
             num_rows="dynamic",
@@ -839,7 +843,7 @@ if st.session_state.modificar_df:
         )
         dataframes_guardar.append(("PARTOS", df_partos))
 
-    elif dato == "CRIAS":
+    elif dato == "CRIAS" and password=="h":
         df_cria = st.data_editor(
             df_cria,
             num_rows="dynamic",
@@ -847,7 +851,7 @@ if st.session_state.modificar_df:
         )
         dataframes_guardar.append(("CRIA", df_cria))
 
-    elif dato == "EMBRIONES":
+    elif dato == "EMBRIONES" and password=="h":
         df_embriones = st.data_editor(
             df_embriones,
             num_rows="dynamic",
@@ -855,7 +859,7 @@ if st.session_state.modificar_df:
         )
         dataframes_guardar.append(("EMBRIONES", df_embriones))
 
-    elif dato == "INSEMINACION":
+    elif dato == "INSEMINACION" and password=="h":
         df_inseminacion = st.data_editor(
             df_inseminacion,
             num_rows="dynamic",
@@ -863,7 +867,7 @@ if st.session_state.modificar_df:
         )
         dataframes_guardar.append(("INSEMINACION", df_inseminacion))
 
-    elif dato == "FINCAS":
+    elif dato == "FINCAS" and password=="h":
         df_fincas = st.data_editor(
             df_fincas,
             num_rows="dynamic",
@@ -871,7 +875,7 @@ if st.session_state.modificar_df:
         )
         dataframes_guardar.append(("FINCAS", df_fincas))
 
-    elif dato == "RAZAS":
+    elif dato == "RAZAS" and password=="h":
         df_razas = st.data_editor(
             df_razas,
             num_rows="dynamic",
@@ -879,7 +883,7 @@ if st.session_state.modificar_df:
         )
         dataframes_guardar.append(("RAZAS", df_razas))
 
-    elif dato == "GANADO PURO":
+    elif dato == "GANADO PURO" and password=="h":
         df_ganado_puro = st.data_editor(
             df_ganado_puro,
             num_rows="dynamic",
@@ -887,7 +891,7 @@ if st.session_state.modificar_df:
         )
         dataframes_guardar.append(("GANADO_PURO", df_ganado_puro))
 
-    elif dato == "REPORTE SERVICIOS":
+    elif dato == "REPORTE SERVICIOS" and password=="h":
         df_servicios = st.data_editor(
             df_servicios,
             num_rows="dynamic",
@@ -895,7 +899,7 @@ if st.session_state.modificar_df:
         )
         dataframes_guardar.append(("SERVICIO", df_servicios))
 
-    elif dato == "PROTOCOLO REPRODUCCION":
+    elif dato == "PROTOCOLO REPRODUCCION" and password=="h":
         df_protocolo = st.data_editor(
             df_protocolo,
             num_rows="dynamic",
