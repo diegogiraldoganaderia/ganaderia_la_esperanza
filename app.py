@@ -127,14 +127,20 @@ if "palpacion" not in st.session_state:
 if "informe_receptoras" not in st.session_state:
     st.session_state.informe_receptoras=False
 
+if "informe_inseminacion" not in st.session_state:
+
+    st.session_state.informe_inseminacion=False
+
+
+
 if "reporte_nacimientos" not in st.session_state:
     st.session_state.reporte_nacimientos=False
 if "reporte_embriones" not in st.session_state:
     st.session_state.reporte_embriones=False
 if "ultimo_parto" not in st.session_state:
-
     st.session_state.ultimo_parto=False
-
+if "vacas_prennadas" not in st.session_state:
+    st.session_state.vacas_prennadas=False
 def cerrar(x):
     if x==1:
         st.session_state.informes = True
@@ -228,6 +234,19 @@ def cerrar(x):
         st.session_state.ultimo_parto=True
     else:
         st.session_state.ultimo_parto=False
+
+    if x==21:
+        st.session_state.informe_inseminacion=True
+    else:
+        st.session_state.informe_inseminacio=False
+
+    if x==22:
+        st.session_state.vacas_prennadas=True
+    else:
+        st.session_state.vacas_prennadas=False
+
+    
+        
     
 #Botones
 st.html("""
@@ -346,6 +365,12 @@ if st.session_state.informes:
     with col1:
             if st.button("ULTIMO PARTO",use_container_width=True):
                 cerrar(20)
+    with col2:
+        if st.button("INSEMINACIÓN",use_container_width=True):
+            cerrar(21)
+    with col3:
+        if st.button("VACAS PREÑADAS",use_container_width=True):
+            cerrar(22)
 
 if st.session_state.informe_nacimientos:  
     
@@ -541,6 +566,7 @@ if st.session_state.informe_ganado_puro:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun() 
 if st.session_state.informe_embriones:
+    df_embriones=df_embriones.sort_values(by="FECHA_SINCRONIZACION").reset_index(drop=True)
     fechas=st.multiselect("FECHA SINCRONIZACIÓN Y PROVEEDOR",
                        (df_embriones["FECHA_SINCRONIZACION"]+" // "+
                         df_embriones["PROVEEDOR"].astype(str).str.upper()).unique())
@@ -556,13 +582,14 @@ if st.session_state.informe_embriones:
             st.session_state.informe_embriones=False
             st.session_state.informes = False
             informe=buscar.informe_embriones(df,fecha,finca)
+            informedf=informe[0].sort_values(by="X1").reset_index(drop=True)
             texto=("En este informe se muestran todos los procesos de embrion en las fechas selecionadas, se sincronizaron "+informe[1]+" vacas de las cuales hubo un total de "+informe[2]+" vacas preñadas "+
                     "equivalente al "+informe[3]+"%, un total de "+informe[4]+" vacas vacias equivalente al " 
                     +informe[5]+"%, un total de "+informe[6]+" rechazaron el protocolo, equivalente al "+informe[7]+"%"
             )
 
             nombre_pdf = ("Informe_Embriones")
-            generar_informe.generar_pdf(texto,informe[0],nombre_pdf)
+            generar_informe.generar_pdf(texto,informedf,nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
@@ -633,6 +660,60 @@ if st.session_state.ultimo_parto:
             with col2:
                 if st.download_button("DESCARGAR PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun() 
+if st.session_state.informe_inseminacion:
+    df=df_inseminacion
+    finca = st.multiselect("FINCA",df_fincas["ID"])
+    filtro_finca=df["FINCA"].isin(finca)
+    df=df[filtro_finca]
+    confirmacion = st.multiselect("ESTADO DE LA CONFIRMACIÓN",df["CONFIRMACION"].unique())
+    filtro_confirmacion=df["CONFIRMACION"].isin(confirmacion)
+    df=df[filtro_confirmacion]
+                
+    col1, col2= st.columns(2)
+    with col1:
+        if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
+            
+            
+            cantidad=len(df)
+            cantidad_pendiente=len(df[df["CONFIRMACION"]=="pendiente"])
+            cantidad_positiva=len(df[df["CONFIRMACION"]=="p+"])
+            porcentaje=round(cantidad_positiva*100/(cantidad))
+            
+            textos=[("En este informe se muestra el historial de inseminación\ncantidad de vacas "+str(cantidad)
+                     +" porcentaje de efectividad "+str(porcentaje)+"% "
+            +"animales pendientes por palpación "+str(cantidad_pendiente))]
+           
+            nombre_pdf="informe_inseminacion"
+            
+            
+            generar_informe.generar_pdf_multiple(textos,[df],nombre_pdf)
+            with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+            with col2:
+                if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
+                    st.rerun()
+if st.session_state.vacas_prennadas:
+    finca = st.multiselect("FINCA",df_fincas["ID"])
+    hoy = datetime.now().date()
+    fin_de_ano = datetime(hoy.year, 12, 31).date()
+    dias_faltantes = (fin_de_ano - hoy).days
+    col1, col2= st.columns(2)
+    with col1:
+        if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
+            
+            df=buscar.prennez(df_cria,df_embriones,df_inseminacion,df_servicios,df_palpacion)
+            filtro_finca=df["FINCA"].isin(finca)
+            df=df[filtro_finca]
+            cantidad=len(df)
+            cantidad_este_anno=len(df[df["DIAS_DE_PREÑADA"]+dias_faltantes>295])
+            textos=[("En este informe se muestran todas las vacas preñadas\ntotal de vacas "+str(cantidad)
+                        +" cantidad de vacas que paren este año "+str(cantidad_este_anno))]
+            nombre_pdf="informe_vacas_preñadas"
+            
+            generar_informe.generar_pdf_multiple(textos,[df],nombre_pdf)
+            with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
+            with col2:
+                if st.download_button("DESCARGAR PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
+                    st.rerun()
 #INICIO REPORTES
 if st.button("REPORTES",use_container_width=True,type="primary"):
     cerrar(17)
@@ -721,15 +802,22 @@ if st.session_state.registro_nacimientos:
             cerrar(0)
             st.rerun()
 if st.session_state.tiempo_inseminacion:
-    if st.button("Generar informe",use_container_width=True):
-        st.session_state.tiempo_inseminacion=False
-        informe=Buscador.palpacion_inseminacion(df_inseminacion)
-        texto="En este informe se muestran todos las vacas inseminadas pendientes por palpacion\n"+"Cantidad de animales: "+str(informe[1])
-        nombre_pdf = ("Informe_Timpo_inseminacion")
-        generar_informe.generar_pdf(texto,informe[0],nombre_pdf)
-        with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
-        if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True):
-            st.rerun() 
+    archivo = st.file_uploader("SUBE EXCEL DE INSEINACION", type=["xlsx"])
+    if archivo is not None:# espera que haya archivo
+        df_excel_inseminacion=pd.read_excel(archivo)
+        df_excel_inseminacion["FECHA"] = df_excel_inseminacion["FECHA"].dt.strftime("%Y-%m-%d").astype("string")
+        df_excel_inseminacion=df_excel_inseminacion.fillna("pendiente")#convierte los nulos en "-"
+        df_inseminacion=pd.concat([df_inseminacion,df_excel_inseminacion],ignore_index=True)
+        
+        dataframes_guardar=[]
+        dataframes_guardar.append(("INSEMINACION",df_inseminacion))
+        st.write(df_inseminacion)
+        
+        if st.button("GUARDAR",use_container_width=True):
+            nacimientos.guardar(dataframes_guardar)
+            if st.success("GUARDADO"):
+                cerrar(0)
+                st.rerun()
 if st.session_state.palpacion:
     archivo = st.file_uploader("SUBE EXCEL DE PALPACION", type=["xlsx"])
     if archivo is not None:# espera que haya archivo
@@ -740,7 +828,7 @@ if st.session_state.palpacion:
         
         dataframes_guardar=[]
         dataframes_guardar.append(("PALPACION",df_palpacion))
-        st.write(df_palpacion)
+        
         
         if st.button("GUARDAR",use_container_width=True):
             nacimientos.guardar(dataframes_guardar)

@@ -529,6 +529,77 @@ class Buscador:
       df_resultado.insert(5,'EDAD',df_resultado["FECHA_NACIMIENTO"].apply(self.calcular_edad))
       return df_resultado
 
-hoy = datetime.today()
-mes_anterior = hoy - relativedelta(months=12)
-print(mes_anterior)
+#vacas por parir
+   def prennez(self,df_cria,df_embriones,df_inseminacion,df_servicios,df_palpacion):
+      #se sacan las preñadas
+      df_prennez=pd.DataFrame(columns=["VACA","FINCA","FEACHA_PREÑEZ","DIAS_DE_PREÑADA","TC"])
+      df_embriones=df_embriones[(df_embriones["X1"]=="p+")&(df_embriones["X3"]!="v")&((df_embriones["FINCA"]=="la esperanza")|(df_embriones["FINCA"]=="la lucha"))]
+      df_embriones= df_embriones.sort_values("FECHA_TRANSFERENCIA").drop_duplicates("RECEPTORA", keep="last")
+      df_inseminacion=df_inseminacion[df_inseminacion["CONFIRMACION"]=="p+"]
+      df_inseminacion=df_inseminacion.sort_values("FECHA").drop_duplicates("ID", keep="last")
+      df_servicios=df_servicios[df_servicios["ESTADO"]=="p+"][["VACA", "FINCA", "FECHA_SERVICIO","ESTADO"]]
+      df_servicios= df_servicios.rename(columns={"FECHA_SERVICIO": "FECHA"})
+      df_palpacion=df_palpacion[df_palpacion["ESTADO"]=="p+"][["VACA", "FINCA", "FECHA","DIAS_DE_PREÑEZ","ESTADO"]]
+      #print(df_palpacion)
+      for i in range(len(df_palpacion)):
+         df_palpacion.iloc[0,2]=str(pd.to_datetime(df_palpacion.iloc[i,2])- relativedelta(days=int(df_palpacion.iloc[i,3])))
+      df_palpacion=df_palpacion.drop('DIAS_DE_PREÑEZ', axis=1, inplace=True)
+      df_natural=pd.concat([df_servicios, df_palpacion], ignore_index=True)
+      df_natural=df_natural[df_natural["ESTADO"]=="p+"].sort_values("FECHA").drop_duplicates("VACA", keep="last")
+      
+      hoy = pd.to_datetime(datetime.today())
+      for contar_embriones in range(len(df_embriones)):
+         vaca=df_embriones.iloc[contar_embriones,4]
+         finca=df_embriones.iloc[contar_embriones,1]
+         
+         df_partos=df_cria[df_cria["VACA"]==vaca]
+         fecha_prennez=pd.to_datetime(df_embriones.iloc[contar_embriones,2])
+         confirmar=0
+         if len(df_partos)>0:
+            for contar_crias in range(len(df_partos)):     
+               fecha_parto=pd.to_datetime(df_partos.iloc[contar_crias]["FECHA_NACIMIENTO"])
+               if abs((fecha_parto-fecha_prennez).days-280)<45:
+                  confirmar+=1
+            if confirmar==0:
+               df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"TE"]   
+         elif len(df_partos)==0:
+            df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"TE"]
+
+   #INSEMINACION
+      for contar_IA in range(len(df_inseminacion)):
+         vaca=df_inseminacion.iloc[contar_IA,1]
+         finca=df_inseminacion.iloc[contar_IA,5]
+         
+         df_partos=df_cria[df_cria["VACA"]==vaca]
+         fecha_prennez=pd.to_datetime(df_inseminacion.iloc[contar_IA,0])
+         confirmar=0
+         if len(df_partos)>0:
+            for contar_crias in range(len(df_partos)):     
+               fecha_parto=pd.to_datetime(df_partos.iloc[contar_crias]["FECHA_NACIMIENTO"])
+               if abs((fecha_parto-fecha_prennez).days-280)<45:
+                  confirmar+=1
+            if confirmar==0:
+               df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"IA"]   
+         elif len(df_partos)==0:
+            df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"IA"]
+   #MONTA NATURAL
+      for contar_MN in range(len(df_natural)):
+         vaca=df_natural.iloc[contar_MN,0]
+         finca=df_natural.iloc[contar_MN,1]
+         
+         df_partos=df_cria[df_cria["VACA"]==vaca]
+         fecha_prennez=pd.to_datetime(df_natural.iloc[contar_MN,2])
+         confirmar=0
+         if len(df_partos)>0:
+            for contar_crias in range(len(df_partos)):     
+               fecha_parto=pd.to_datetime(df_partos.iloc[contar_crias]["FECHA_NACIMIENTO"])
+               if abs((fecha_parto-fecha_prennez).days-280)<45:
+                  confirmar+=1
+            if confirmar==0:
+               df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"MN"]   
+         elif len(df_partos)==0:
+            df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"MN"]
+      df_prennez=df_prennez.sort_values(by="DIAS_DE_PREÑADA", ascending=False).reset_index(drop=True)
+      return df_prennez
+      
+
