@@ -142,6 +142,7 @@ if "ultimo_parto" not in st.session_state:
 if "vacas_prennadas" not in st.session_state:
     st.session_state.vacas_prennadas=False
 def cerrar(x):
+   
     if x==1:
         st.session_state.informes = True
     else:
@@ -238,7 +239,7 @@ def cerrar(x):
     if x==21:
         st.session_state.informe_inseminacion=True
     else:
-        st.session_state.informe_inseminacio=False
+        st.session_state.informe_inseminacion=False
 
     if x==22:
         st.session_state.vacas_prennadas=True
@@ -335,7 +336,7 @@ if st.button("🚀  INICIO",use_container_width=True,type="primary"):
     st.cache_data.clear()
     st.cache_resource.clear()
     st.rerun()
-    
+   
 #INICIO INFORMES
 if st.button("📋RESÚMEN DATOS",use_container_width=True,type="primary"):
     cerrar(1)
@@ -407,7 +408,7 @@ if st.session_state.informe_nacimientos:
             informe=informe[filtro_finca]
             
             texto=("En este informe se muestran todas las crias nacidas"+
-            txt+" a partir de la fecha: "+fecha.strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe))+"\neste informe fue generado: "+str(datetime.today().date()))
+            txt+" a partir de la fecha: "+fecha.strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe))+"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
             nombre_pdf = ("Informe_Nacimientos")
             
             if solo_numeros=="NO":
@@ -438,7 +439,7 @@ if st.session_state.informe_vacas:
             texto_vaca = ( "La Vaca identificada " + str(id_vaca) +
                           " de la raza " + str(informacion_vaca["RAZA"]) + " " +
                             buscar.calcular_edad(informacion_vaca["FECHA_NACIMIENTO"])
-                            +"\neste informe fue generado: "+str(datetime.today().date()))
+                            +"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
             informacion_partos=buscar.numeros(df_cria,df_ganado_puro)
             informacion_partos=informacion_partos[informacion_partos["VACA"]==id_vaca]
             nombre_pdf = ("Informe_Vaca_"+ str(id_vaca.replace("/", "_")))
@@ -531,7 +532,7 @@ if st.session_state.informe_toros:
             else:
                 texto_ano=str(filtro_ano[0])
                 textos=texto3
-            texto=textof+" "+texto_toros+" "+textos+" "+texto_ano+"\neste informe fue generado: "+str(datetime.today().date())
+            texto=textof+" "+texto_toros+" "+textos+" "+texto_ano+"\neste informe fue generado en la fecha: "+str(datetime.today().date())
             generar_informe.generar_pdf(texto,df_crias_toro,nombre_pdf)
                
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
@@ -558,7 +559,7 @@ if st.session_state.informe_ganado_puro:
             st.session_state.informe_ganado_puro=False
             st.session_state.informes = False
             texto=("En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
-            +", total de animales "+str(len(df))+"\neste informe fue generado: "+str(datetime.today().date()))
+            +", total de animales "+str(len(df))+"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
             nombre_pdf = ("Informe_Ganado_Puro")
             generar_informe.generar_pdf(texto,df,nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
@@ -586,7 +587,7 @@ if st.session_state.informe_embriones:
             texto=("En este informe se muestran todos los procesos de embrion en las fechas selecionadas, se sincronizaron "+informe[1]+" vacas de las cuales hubo un total de "+informe[2]+" vacas preñadas "+
                     "equivalente al "+informe[3]+"%, un total de "+informe[4]+" vacas vacias equivalente al " 
                     +informe[5]+"%, un total de "+informe[6]+" rechazaron el protocolo, equivalente al "+informe[7]+"%"
-                    +"\neste informe fue generado: "+str(datetime.today().date())
+                    +"\neste informe fue generado en la fecha: "+str(datetime.today().date())
             )
 
             nombre_pdf = ("Informe_Embriones")
@@ -616,9 +617,8 @@ if st.session_state.informe_receptoras:
                 filtro_receptora=informe["RECEPTORA"].isin(receptora)
                 informe=informe[filtro_receptora]
             
-            texto=("Se muestran todas las receptoras que hay en la ganadería\n"
-                   "p+: Preñada\n v: Vacia\n rp: No respondío al protocolo"
-                   +"\neste informe fue generado: "+str(datetime.today().date())
+            texto=("Se muestran todas las receptoras que hay en la ganadería \neste informe fue generado en la fecha: "+str(datetime.today().date())
+                   +"\np+: Preñada, v: Vacia, rp: No respondío al protocolo"
             )
             nombre_pdf=("informe_receptoras")
             generar_informe.generar_pdf(texto,informe,nombre_pdf)
@@ -645,7 +645,7 @@ if st.session_state.ultimo_parto:
             
             df_ultimo_parto["TIEMPO TRASNCURRIDOS"] = tiempo_trasncurrido
             texto=("En este reporte se muestra el tiempo trasncurrido desde el ultimo parto, para todas las vacas que tienen más de "
-            +str(tiempo_en_meses)+" meses de parida\neste informe fue generado: "+str(hoy.date()))
+            +str(tiempo_en_meses)+" meses de parida\neste informe fue generado en la fecha: "+str(hoy.date()))
 
             df_ultimo_parto= df_ultimo_parto.rename(columns={"FECHA_NACIMIENTO": "ULTIMO_PARTO"})
             
@@ -664,27 +664,42 @@ if st.session_state.ultimo_parto:
                     st.rerun() 
 if st.session_state.informe_inseminacion:
     df=df_inseminacion
+    fecha = st.multiselect("FECHA DE LA INSEMINACION",df["FECHA"].unique())
+    if len(fecha)>0:
+        filtro_fecha=df_embriones["FECHA_SINCRONIZACION"].isin(fecha)
+        df=df_embriones[filtro_fecha]
+    df["#PROTOCOLOS"] = df.groupby("ID").cumcount() + 1
     finca = st.multiselect("FINCA",df_fincas["ID"])
     filtro_finca=df["FINCA"].isin(finca)
     df=df[filtro_finca]
+    N_protocolos=st.multiselect("#INSEMINACIONES",df["#PROTOCOLOS"].unique())
+    filtro_N_protocolos=df["#PROTOCOLOS"].isin(N_protocolos)
+    df=df[filtro_N_protocolos]
+
+    
     confirmacion = st.multiselect("ESTADO DE LA CONFIRMACIÓN",df["CONFIRMACION"].unique())
     filtro_confirmacion=df["CONFIRMACION"].isin(confirmacion)
     df=df[filtro_confirmacion]
+    
+    df=df.sort_values(by=["#PROTOCOLOS","FECHA"])
+
                 
     col1, col2= st.columns(2)
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
             
             
-            cantidad=len(df)
+            cantidad=len(df["ID"].unique())
+            cantidad_procesos=len(df)
             cantidad_pendiente=len(df[df["CONFIRMACION"]=="pendiente"])
             cantidad_positiva=len(df[df["CONFIRMACION"]=="p+"])
             porcentaje=round(cantidad_positiva*100/(cantidad))
             
             textos=[("En este informe se muestra el historial de inseminación\ncantidad de vacas "+str(cantidad)
+                     +" cantidad de procesos "+str(cantidad_procesos)
                      +" porcentaje de efectividad "+str(porcentaje)+"% "
             +"animales pendientes por palpación "+str(cantidad_pendiente)
-            +"\neste informe fue generado: "+str(datetime.today().date()))]
+            +"\neste informe fue generado en la fecha: "+str(datetime.today().date()))]
            
             nombre_pdf="informe_inseminacion"
             
@@ -710,7 +725,7 @@ if st.session_state.vacas_prennadas:
             cantidad_este_anno=len(df[df["DIAS_DE_PREÑADA"]+dias_faltantes>295])
             textos=[("En este informe se muestran todas las vacas preñadas\ntotal de vacas "+str(cantidad)
                         +" cantidad de vacas que paren este año "+str(cantidad_este_anno)
-                        +"\neste informe fue generado: "+str(datetime.today().date()))]
+                        +"\neste informe fue generado en la fecha: "+str(datetime.today().date()))]
             nombre_pdf="informe_vacas_preñadas"
             
             generar_informe.generar_pdf_multiple(textos,[df],nombre_pdf)
