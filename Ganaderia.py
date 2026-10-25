@@ -42,6 +42,7 @@ df_informe_vaca=pd.DataFrame(columns=["INFORME"])
 df_palpacion=pd.DataFrame(supabase.table("PALPACION").select("*").execute().data)
 df_palpacion=df_palpacion.drop(columns=["index"])
 
+
 class Informes():
 
    
