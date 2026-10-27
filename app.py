@@ -338,7 +338,7 @@ if st.button("🚀  INICIO",use_container_width=True,type="primary"):
     st.rerun()
    
 #INICIO INFORMES
-if st.button("📋RESÚMEN DATOS",use_container_width=True,type="primary"):
+if st.button("📋HISTORIAL DATOS",use_container_width=True,type="primary"):
     cerrar(1)
     
 if st.session_state.informes:
@@ -375,14 +375,29 @@ if st.session_state.informes:
 
 if st.session_state.informe_nacimientos:  
     
-    fecha=st.date_input("A partir de que fecha desea el informe")
+    fecha=st.date_input("A PARTIR DE QUE FECHA DESEA EL INFORME")
     fincas=[]
-    finca = st.multiselect("FINCA",df_fincas["ID"])
-    ta=st.multiselect("TIPO DE ANIMAL",["PURO","COMERCIAL"])
+    finca = st.pills(
+        "SELECCIONE LA FINCA",[elemento.upper() for elemento in df_fincas["ID"].tolist()],
+        selection_mode="multi",
+    
+        width="stretch"
+    )
+    finca=[elemento.lower() for elemento in finca]#convierto las fincas a minusculas para filtrarlas
+
+    ta= st.pills(
+            "TIPO DE ANIMAL",["PURO","COMERCIAL"] ,
+            selection_mode="multi",
+        
+            width="stretch"
+        )
     ta_dic={"PURO":["TE_P_V","TE_P_C","TE_F1_V","TE_F1_C","IA_P_V","CN_F1_V","CN_P_V","IA_F1_V"],"COMERCIAL":["CN_C_V","CN_C_C","IA_C_V"]}
     l = [j for i in ta for j in ta_dic[i]]
     fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
-    solo_numeros=st.selectbox("SOLO NÚMEROS:",["NO","SI"])
+    solo_numeros= st.radio(
+                "DATOS:",["SOLO NÚMEROS","TODOS LOS DATOS"] ,
+                horizontal=True
+            )
 
     col1, col2= st.columns(2)
     with col1:
@@ -411,9 +426,9 @@ if st.session_state.informe_nacimientos:
             txt+" a partir de la fecha: "+fecha.strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe))+"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
             nombre_pdf = ("Informe_Nacimientos")
             
-            if solo_numeros=="NO":
+            if solo_numeros=="TODOS LOS DATOS":
                 generar_informe.generar_pdf( texto,informe,nombre_pdf)
-            elif solo_numeros=="SI":
+            elif solo_numeros=="SOLO NÚMEROS":
                 informe=informe.iloc[:,[0,3,7,1]]
                 generar_informe.generar_pdf( texto,informe,nombre_pdf)
 
@@ -543,18 +558,32 @@ if st.session_state.informe_ganado_puro:
     
     fecha=st.date_input("A partir de que fecha desea el informe")
     fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
-    finca=st.multiselect("finca",df_ganado_puro["FINCA"].unique())
-    raza=st.multiselect("raza",df_ganado_puro["RAZA"].unique())
+    df=df_ganado_puro
+   
+    
+    finca = st.pills(
+        "SELECCIONE LA FINCA",[elemento.upper() for elemento in df["FINCA"].unique().tolist()],
+        selection_mode="multi",
+    
+        width="stretch"
+    )
+    finca=[elemento.lower() for elemento in finca]#convierto las fincas a minusculas para filtrarlas
+    filtro_finca=df["FINCA"].isin(finca)
+    df=df[filtro_finca]
+
+    raza = st.pills(
+            "SELECCIONE LA RAZA",[elemento.upper() for elemento in df["RAZA"].unique().tolist()],
+            selection_mode="multi",
+        
+            width="stretch"
+        )
+    raza=[elemento.lower() for elemento in raza]#convierto las fincas a minusculas para filtrarlas
+    filtro_raza=df["RAZA"].isin(raza)
+    df=df[filtro_raza]   
     col1, col2= st.columns(2)
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
-            df=df_ganado_puro
-            df=df[pd.to_datetime(df["FECHA_NACIMIENTO"])>=fecha]
-        
-            filtro_raza=df["RAZA"].isin(raza)
-            df=df[filtro_raza]
-            filtro_finca=df["FINCA"].isin(finca)
-            df=df[filtro_finca]
+            df=df[pd.to_datetime(df["FECHA_NACIMIENTO"])>=fecha]        
             df=df.sort_values(by="ID").reset_index(drop=True)
             st.session_state.informe_ganado_puro=False
             st.session_state.informes = False
@@ -575,7 +604,14 @@ if st.session_state.informe_embriones:
     fecha = [fecha[:10] for fecha in fechas]
     filtro_fecha=df_embriones["FECHA_SINCRONIZACION"].isin(fecha)
     df=df_embriones[filtro_fecha]
-    finca=st.multiselect("FINCA",df["FINCA"].astype(str).str.upper().unique())
+    
+    finca = st.pills(
+            "SELECCIONE LA FINCA",[elemento.upper() for elemento in df["FINCA"].unique().tolist()],
+            selection_mode="multi",
+        
+            width="stretch"
+        )
+    finca=[elemento.lower() for elemento in finca]#convierto las fincas a minusculas para filtrarlas
 
     col1, col2= st.columns(2)
     with col1:
@@ -598,11 +634,18 @@ if st.session_state.informe_embriones:
                     st.rerun() 
 if st.session_state.informe_receptoras:
     df=df_embriones
-    finca=st.multiselect("FINCA",df["FINCA"].astype(str).str.upper().unique())
-    finca = [texto.lower() for texto in finca] #se convirten los datos  aminuscula
+    finca = st.pills(
+        "SELECCIONE LA FINCA",[elemento.upper() for elemento in df_fincas["ID"].tolist()],
+        selection_mode="multi",
+    
+        width="stretch"
+    )
+    finca=[elemento.lower() for elemento in finca]#convierto las fincas a minusculas para filtrarlas
+    
+    #finca = [texto.lower() for texto in finca] #se convirten los datos  aminuscula
     filtro_finca=df["FINCA"].isin(finca)
-    df1=df[filtro_finca]
-    receptora=st.multiselect("RECEPTORA",df1["RECEPTORA"].unique())
+    df=df[filtro_finca]
+    receptora=st.multiselect("RECEPTORA",df["RECEPTORA"].unique())
     col1, col2= st.columns(2)
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
@@ -628,7 +671,13 @@ if st.session_state.informe_receptoras:
                 if st.download_button("DESCARGAR PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun()           
 if st.session_state.ultimo_parto:
-    finca = st.multiselect("FINCA",df_fincas["ID"])
+    finca = st.pills(
+            "SELECCIONE LA FINCA",[elemento.upper() for elemento in df_fincas["ID"].tolist()],
+            selection_mode="multi",
+        
+            width="stretch"
+        )
+    finca=[elemento.lower() for elemento in finca]#convierto las fincas a minusculas para filtrarlas
     tiempo_en_meses=st.selectbox("MESES TRASCURRIDOS",[0,1,2,3,4,5,6,7,8,9,10,11,12])
     col1, col2= st.columns(2)
     with col1:
@@ -664,14 +713,24 @@ if st.session_state.ultimo_parto:
                     st.rerun() 
 if st.session_state.informe_inseminacion:
     df=df_inseminacion
-    fecha = st.multiselect("FECHA DE LA INSEMINACION",df["FECHA"].unique())
-    if len(fecha)>0:
-        filtro_fecha=df_embriones["FECHA_SINCRONIZACION"].isin(fecha)
-        df=df_embriones[filtro_fecha]
     df["#PROTOCOLOS"] = df.groupby("ID").cumcount() + 1
-    finca = st.multiselect("FINCA",df_fincas["ID"])
+    
+    finca = st.pills(
+                "SELECCIONE LA FINCA",[elemento.upper() for elemento in df["FINCA"].unique().tolist()],
+                selection_mode="multi",
+            
+                width="stretch"
+            )
+    finca=[elemento.lower() for elemento in finca]#convierto las fincas a minusculas para filtrarlas
     filtro_finca=df["FINCA"].isin(finca)
     df=df[filtro_finca]
+    fecha = st.multiselect("FECHA DE LA INSEMINACION",df["FECHA"].unique())
+    if len(fecha)>0:
+        filtro_fecha=df["FECHA"].isin(fecha)
+        df=df[filtro_fecha]
+    
+    
+    
     N_protocolos=st.multiselect("#INSEMINACIONES",df["#PROTOCOLOS"].unique())
     filtro_N_protocolos=df["#PROTOCOLOS"].isin(N_protocolos)
     df=df[filtro_N_protocolos]
@@ -710,7 +769,16 @@ if st.session_state.informe_inseminacion:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun()
 if st.session_state.vacas_prennadas:
-    finca = st.multiselect("FINCA",df_fincas["ID"])
+    finca = st.pills(
+    "SELECCIONE LA FINCA",df_fincas["ID"].tolist() ,
+    selection_mode="multi",
+
+    width="stretch"
+)
+
+
+
+  
     hoy = datetime.now().date()
     fin_de_ano = datetime(hoy.year, 12, 31).date()
     dias_faltantes = (fin_de_ano - hoy).days
