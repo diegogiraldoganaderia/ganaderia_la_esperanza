@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 import numpy as np
 from supabase import create_client
 import streamlit.components.v1 as components
-
+import calendar
 
 #objetos
 buscar = Buscador()
@@ -21,7 +21,24 @@ generar_informe=Informes()
 with open("logo.png", "rb") as image_file:
         logo = base64.b64encode(image_file.read()).decode()
 
+st.markdown("""
+<style>
+div[data-testid="stDateInput"] input {
+    background-color: #1E1E1E !important;
+    color: #F2E8D0 !important;
+    border: 1px solid #806A35 !important;
+    border-radius: 12px !important;
+    min-height: 48px !important;
+    font-size: 16px !important;
+}
 
+/* Color del contenedor */
+div[data-testid="stDateInput"] > div > div {
+    background-color: #1E1E1E !important;
+    border-radius: 12px !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
 st.markdown(f"""
@@ -149,23 +166,29 @@ def cerrar(x):
         st.session_state.informes = False
 
     if x==2:
+        st.session_state.informes = False
         st.session_state.informe_nacimientos = True
     else:
         st.session_state.informe_nacimientos = False
     if x==3:
+        st.session_state.informes = False
         st.session_state.informe_vacas = True
     else:
         st.session_state.informe_vacas= False
+
     if x==4:
+        st.session_state.informes = False
         st.session_state.informe_toros = True
     else:
         st.session_state.informe_toros= False
     if x==5:
+        st.session_state.informes = False
         st.session_state.informe_embriones=True
     else:
         st.session_state.informe_embriones=False  
    
     if x==6:
+        st.session_state.informes = False
         st.session_state.informe_ganado_puro = True
     else:
         st.session_state.informe_ganado_puro= False
@@ -215,6 +238,7 @@ def cerrar(x):
         st.session_state.graficos=False
 
     if x==16:
+        st.session_state.informes = False
         st.session_state.informe_receptoras=True
     else:
         st.session_state.informe_receptoras=False
@@ -237,14 +261,17 @@ def cerrar(x):
         st.session_state.ultimo_parto=False
 
     if x==21:
+        st.session_state.informes = False
         st.session_state.informe_inseminacion=True
     else:
         st.session_state.informe_inseminacion=False
 
     if x==22:
+        st.session_state.informes = False
         st.session_state.vacas_prennadas=True
     else:
         st.session_state.vacas_prennadas=False
+    st.rerun()
 
     
         
@@ -374,8 +401,39 @@ if st.session_state.informes:
             cerrar(22)
 
 if st.session_state.informe_nacimientos:  
+    st.markdown(
+    "<h2 style='text-align: center;'>HISTORIAL DE NACIMIENTOS</h2>",
+    unsafe_allow_html=True
+)
+   
+    st.markdown(
+                   "<h9 style='text-align: left;'>A PARTIR DE QUE FECHA DESEA EL INFORME</h9>",unsafe_allow_html=True
+               )
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        
+        anio = st.selectbox(
+            "AÑO",pd.to_datetime(df_cria["FECHA_NACIMIENTO"]).dt.year.unique())
+    with col2:
+        mes = st.selectbox(
+            "MES",
+            options=range(1, 13),
+            format_func=lambda m: calendar.month_name[m]
+        )
+
+    with col3:
+        dias_mes = calendar.monthrange(anio, mes)[1]
+
+        dia = st.selectbox(
+            "DÍA",
+            options=range(1, dias_mes + 1)
+        )
+
+    fecha =str(anio)+"-"+str( mes)+"-"+str(dia)
     
-    fecha=st.date_input("A PARTIR DE QUE FECHA DESEA EL INFORME")
+
+   
     fincas=[]
     finca = st.pills(
         "SELECCIONE LA FINCA",[elemento.upper() for elemento in df_fincas["ID"].tolist()],
@@ -393,7 +451,7 @@ if st.session_state.informe_nacimientos:
         )
     ta_dic={"PURO":["TE_P_V","TE_P_C","TE_F1_V","TE_F1_C","IA_P_V","CN_F1_V","CN_P_V","IA_F1_V"],"COMERCIAL":["CN_C_V","CN_C_C","IA_C_V"]}
     l = [j for i in ta for j in ta_dic[i]]
-    fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
+    #fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
     solo_numeros= st.radio(
                 "DATOS:",["SOLO NÚMEROS","TODOS LOS DATOS"] ,
                 horizontal=True
@@ -423,7 +481,7 @@ if st.session_state.informe_nacimientos:
             informe=informe[filtro_finca]
             
             texto=("En este informe se muestran todas las crias nacidas"+
-            txt+" a partir de la fecha: "+fecha.strftime("%d/%m/%Y")+"\n"+ "cantidad de animales: "+str(len(informe))+"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
+            txt+" a partir de la fecha: "+fecha+"\n"+ "cantidad de animales: "+str(len(informe))+"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
             nombre_pdf = ("Informe_Nacimientos")
             
             if solo_numeros=="TODOS LOS DATOS":
@@ -437,8 +495,12 @@ if st.session_state.informe_nacimientos:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):     
                     st.rerun()
 if st.session_state.informe_vacas:
+    st.markdown(
+    "<h2 style='text-align: center;'>HISTORIAL DE LAS VACAS</h2>",
+    unsafe_allow_html=True
+)
     dfve=df_embriones
-    id_vaca = st.selectbox("Vaca",df_partos["ID"].unique())
+    id_vaca = st.selectbox("SELECCIONE UNA VACA",df_partos["ID"].unique())
     df_vaca_embriones=buscar.informe_receptoras(dfve)
     df_vaca_embriones=df_vaca_embriones[df_vaca_embriones["RECEPTORA"]==id_vaca]
     df_vaca_servicios=df_servicios[df_servicios["VACA"]==id_vaca]
@@ -489,6 +551,10 @@ if st.session_state.informe_vacas:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun()
 if st.session_state.informe_toros:
+    st.markdown(
+        "<h2 style='text-align: center;'>HISTORIAL DE LOS TOROS</h2>",
+        unsafe_allow_html=True
+    )
     filtro_toro=st.multiselect("TORO",df_toros)
     df_crias_toro=pd.DataFrame(columns=["TOROS","CANTIDAD DE CRÍAS","MACHOS","HEMBRAS","AÑO"])
     contar=0
@@ -555,9 +621,36 @@ if st.session_state.informe_toros:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun()
 if st.session_state.informe_ganado_puro:
-    
-    fecha=st.date_input("A partir de que fecha desea el informe")
-    fecha=pd.to_datetime(fecha,format="%d/%m/%Y")
+    st.markdown(
+        "<h2 style='text-align: center;'>HISTORIAL DE LOS ANIMALES CON REGISTRO</h2>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+                   "<h9 style='text-align: left;'>A PARTIR DE QUE FECHA DESEA EL INFORME</h9>",unsafe_allow_html=True
+               )
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        
+        anio = st.selectbox(
+            "AÑO",pd.to_datetime(df_ganado_puro["FECHA_NACIMIENTO"]).dt.year.unique())
+    with col2:
+        mes = st.selectbox(
+            "MES",
+            options=range(1, 13),
+            format_func=lambda m: calendar.month_name[m]
+        )
+
+    with col3:
+        dias_mes = calendar.monthrange(anio, mes)[1]
+
+        dia = st.selectbox(
+            "DÍA",
+            options=range(1, dias_mes + 1)
+        )
+
+    fecha =str(anio)+"-"+str( mes)+"-"+str(dia)
     df=df_ganado_puro
    
     
@@ -587,7 +680,7 @@ if st.session_state.informe_ganado_puro:
             df=df.sort_values(by="ID").reset_index(drop=True)
             st.session_state.informe_ganado_puro=False
             st.session_state.informes = False
-            texto=("En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+str(fecha.strftime("%d/%m/%Y"))
+            texto=("En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+fecha
             +", total de animales "+str(len(df))+"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
             nombre_pdf = ("Informe_Ganado_Puro")
             generar_informe.generar_pdf(texto,df,nombre_pdf)
@@ -596,6 +689,10 @@ if st.session_state.informe_ganado_puro:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun() 
 if st.session_state.informe_embriones:
+    st.markdown(
+        "<h2 style='text-align: center;'>HISTORIAL DE EMBRIONES</h2>",
+        unsafe_allow_html=True
+    )
     df_embriones=df_embriones.sort_values(by="FECHA_SINCRONIZACION").reset_index(drop=True)
     fechas=st.multiselect("FECHA SINCRONIZACIÓN Y PROVEEDOR",
                        (df_embriones["FECHA_SINCRONIZACION"]+" // "+
@@ -633,6 +730,10 @@ if st.session_state.informe_embriones:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun() 
 if st.session_state.informe_receptoras:
+    st.markdown(
+        "<h2 style='text-align: center;'>HISTORIAL DE RECEPTORAS DE EMBRION</h2>",
+        unsafe_allow_html=True
+    )
     df=df_embriones
     finca = st.pills(
         "SELECCIONE LA FINCA",[elemento.upper() for elemento in df_fincas["ID"].tolist()],
@@ -671,6 +772,10 @@ if st.session_state.informe_receptoras:
                 if st.download_button("DESCARGAR PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun()           
 if st.session_state.ultimo_parto:
+    st.markdown(
+        "<h2 style='text-align: center;'>HISTORIAL ULTIMO PARTO DE LAS VACAS</h2>",
+        unsafe_allow_html=True
+    )
     finca = st.pills(
             "SELECCIONE LA FINCA",[elemento.upper() for elemento in df_fincas["ID"].tolist()],
             selection_mode="multi",
@@ -712,6 +817,10 @@ if st.session_state.ultimo_parto:
                 if st.download_button("DESCARGAR PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun() 
 if st.session_state.informe_inseminacion:
+    st.markdown(
+        "<h2 style='text-align: center;'>HISTORIAL DE INSEMINACION</h2>",
+        unsafe_allow_html=True
+    )
     df=df_inseminacion
     df["#PROTOCOLOS"] = df.groupby("ID").cumcount() + 1
     
@@ -769,6 +878,10 @@ if st.session_state.informe_inseminacion:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
                     st.rerun()
 if st.session_state.vacas_prennadas:
+    st.markdown(
+        "<h2 style='text-align: center;'>VACAS PREÑADAS</h2>",
+        unsafe_allow_html=True
+    )
     finca = st.pills(
     "SELECCIONE LA FINCA",df_fincas["ID"].tolist() ,
     selection_mode="multi",
