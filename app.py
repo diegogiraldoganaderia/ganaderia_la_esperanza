@@ -430,7 +430,7 @@ if st.session_state.informe_nacimientos:
             options=range(1, dias_mes + 1)
         )
 
-    fecha =str(anio)+"-"+str( mes)+"-"+str(dia)
+    fecha =str(anio)+"-"+str( mes).zfill(2)+"-"+str(dia).zfill(2)
     
 
    
@@ -481,9 +481,12 @@ if st.session_state.informe_nacimientos:
             informe=informe[filtro_finca]
             
             texto=("En este informe se muestran todas las crias nacidas"+
-            txt+" a partir de la fecha: "+fecha+"\n"+ "cantidad de animales: "+str(len(informe))+"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
+            txt+" a partir de la fecha: "+fecha+"\n"+ "cantidad de animales: "+str(len(informe))
+            + ", cantidad de hembras: "+str(len(informe[informe["SEXO"]=="hembra"]))
+            + ", cantidad de machos: "+str(len(informe[informe["SEXO"]=="macho"]))
+            +"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
             nombre_pdf = ("Informe_Nacimientos")
-            
+            informe=buscar.corregir_ID(df_correccion,informe)
             if solo_numeros=="TODOS LOS DATOS":
                 generar_informe.generar_pdf( texto,informe,nombre_pdf)
             elif solo_numeros=="SOLO NÚMEROS":
@@ -649,8 +652,8 @@ if st.session_state.informe_ganado_puro:
             "DÍA",
             options=range(1, dias_mes + 1)
         )
-
-    fecha =str(anio)+"-"+str( mes)+"-"+str(dia)
+    fecha =str(anio)+"-"+str( mes).zfill(2)+"-"+str(dia).zfill(2)
+    
     df=df_ganado_puro
    
     
@@ -863,7 +866,7 @@ if st.session_state.informe_inseminacion:
             cantidad_positiva=len(df[df["CONFIRMACION"]=="p+"])
             porcentaje=round(cantidad_positiva*100/(cantidad))
             
-            textos=[("En este informe se muestra el historial de inseminación\ncantidad de vacas "+str(cantidad)
+            textos=[("En este informe se muestra el historial de inseminación, cantidad de vacas "+str(cantidad)
                      +" cantidad de procesos "+str(cantidad_procesos)
                      +" porcentaje de efectividad "+str(porcentaje)+"% "
             +"animales pendientes por palpación "+str(cantidad_pendiente)

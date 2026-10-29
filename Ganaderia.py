@@ -41,7 +41,7 @@ df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIE
 df_informe_vaca=pd.DataFrame(columns=["INFORME"])
 df_palpacion=pd.DataFrame(supabase.table("PALPACION").select("*").execute().data)
 df_palpacion=df_palpacion.drop(columns=["index"])
-
+df_correccion=pd.DataFrame(supabase.table("CORRECCION").select("*").execute().data)
 
 class Informes():
 
@@ -70,6 +70,8 @@ class Informes():
          else:
             ancho_columnas.append(largo2)
       ancho_pagina=sum(ancho_columnas)+20
+      if ancho_pagina<210:
+         ancho_pagina=210
       ancho_texto=ancho_pagina-20
       ancho_letras = pdf.get_string_width(texto)
       lineas_texto = math.ceil(ancho_letras / ancho_texto)
@@ -81,11 +83,15 @@ class Informes():
       pdff = FPDF(unit="mm",format=(ancho_pagina,alto_pagina))
       pdff.set_font("Helvetica", size=11) 
       pdff.add_page()#format=(ancho_pagina,alto_pagina)
+   
       pdff.image("logopdf.png", x=ancho_pagina-48, y=0, w=40)#logo
       pdff.set_y(15) 
       pdff.multi_cell(0,8,texto,align="J")
       pdff.ln()
 # 3. Dibujar el encabezado de la tabla (Negrita)
+      ancho_tabla = sum(ancho_columnas)
+      margen_izquierdo = (ancho_pagina - ancho_tabla) / 2
+      pdff.set_x(margen_izquierdo)
       pdff.set_font("Helvetica", style="B", size=11)
       count=0
       for i in df.columns:
@@ -94,8 +100,10 @@ class Informes():
       pdff.ln()
 # 4. Dibujar las filas con los datos (Texto normal)
       pdff.set_font("Helvetica", style="B", size=11)
-      
+     
       for index, fila in df.iterrows():
+         
+         pdff.set_x(margen_izquierdo)
          for i, celda in enumerate(fila):
             if isinstance(celda ,(datetime, pd.Timestamp)):
                pdff.cell(ancho_columnas[i], alto_celda, celda.strftime("%d/%m/%Y"), border=1, align="C")
@@ -103,7 +111,7 @@ class Informes():
                 pdff.cell(ancho_columnas[i], alto_celda, str(celda), border=1, align="C")
         
          pdff.ln()
-      
+     
 # 5. Guardar el archivo final
       return pdff.output(nombre_archivo+".pdf")
 
@@ -603,4 +611,7 @@ class Buscador:
       df_prennez=df_prennez.sort_values(by="DIAS_DE_PREÑADA", ascending=False).reset_index(drop=True)
       return df_prennez
       
-
+   def corregir_ID(self,df_correccion,df_a_corregir):
+      df_a_corregir["ID"] = df_a_corregir["ID"].replace(
+      df_correccion.set_index("ID_ERRONEO")["ID_CORREGIDO"].to_dict())
+      return df_a_corregir
