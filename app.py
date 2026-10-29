@@ -148,6 +148,9 @@ if "informe_inseminacion" not in st.session_state:
 
     st.session_state.informe_inseminacion=False
 
+if "agregar_datos_embriones" not in st.session_state:
+
+    st.session_state.agregar_datos_embriones=False
 
 
 if "reporte_nacimientos" not in st.session_state:
@@ -271,6 +274,11 @@ def cerrar(x):
         st.session_state.vacas_prennadas=True
     else:
         st.session_state.vacas_prennadas=False
+
+    if x==23:
+        st.session_state.agregar_datos_embriones=True
+    else:
+       st.session_state.agregar_datos_embriones=False
     st.rerun()
 
     
@@ -359,7 +367,6 @@ button[kind="tertiary"] {
 """)
 
 if st.button("🚀  INICIO",use_container_width=True,type="primary"):
-    cerrar(0)
     st.cache_data.clear()
     st.cache_resource.clear()
     st.rerun()
@@ -965,23 +972,26 @@ if st.session_state.reporte_embriones:
 #-------------------------------------------------------------------------
 #INICIO REPRODUCCIÓN Y PRODUCIÓN
 
-if st.button("🤰🐄  REPRODUCCIÓN Y PRODUCCIÓN",use_container_width=True,type="primary"): 
+if st.button("🤰🐄 REPRODUCCIÓN",use_container_width=True,type="primary"): 
     cerrar(7)
 if st.session_state.reproduccion_produccion:
     password = st.text_input(
     "INGRESE LA CONTRASEÑA",
     type="password")
 
-    col1, col2, col3= st.columns(3)
+    col1, col2= st.columns(2)
     with col1:
-        if st.button("REGISTRO NACIMIENTOS",use_container_width=True) and password=="h": 
+        if st.button("AGREGAR NACIMIENTO",use_container_width=True) and password=="h": 
            cerrar(8)
     with col2:
-        if st.button("INSEMINACION",use_container_width=True) and password=="h":
+        if st.button("AGREGAR INSEMINACION",use_container_width=True) and password=="h":
             cerrar(9)
-    with col3:
-        if st.button("PALPACION",use_container_width=True) and password=="h":
+    with col1:
+        if st.button("AGREGAR PALPACION",use_container_width=True) and password=="h":
             cerrar(10)
+    with col2:
+            if st.button("AGREGAR EMBRIONES",use_container_width=True) and password=="h":
+                cerrar(23)
 if st.session_state.registro_nacimientos: 
     vaca = st.text_input("ID de la vaca").lower()
     fn = st.date_input("Fecha nacimiento")
@@ -1039,7 +1049,25 @@ if st.session_state.palpacion:
             if st.success("GUARDADO"):
                 cerrar(0)
                 st.rerun()
-   
+if st.session_state.agregar_datos_embriones:
+    archivo = st.file_uploader("SUBE EXCEL DE EMBRIONES", type=["xlsx"])
+    if archivo is not None:# espera que haya archivo
+        df_excel_embriones=pd.read_excel(archivo)
+        df_excel_embriones["FECHA_TRANSFERENCIA"] = df_excel_embriones["FECHA_TRANSFERENCIA"].dt.strftime("%Y-%m-%d").astype("string")
+        df_excel_embriones["FECHA_SINCRONIZACION"] = df_excel_embriones["FECHA_SINCRONIZACION"].dt.strftime("%Y-%m-%d").astype("string")
+        df_excel_embriones=df_excel_embriones.fillna("rp")#convierte los nulos en "-"
+        df_embriones=pd.concat([df_embriones,df_excel_embriones],ignore_index=True)
+        st.write(df_embriones)
+        
+        dataframes_guardar=[]
+        dataframes_guardar.append(("EMBRIONES",df_embriones))
+        if st.button("GUARDAR",use_container_width=True):
+            nacimientos.guardar(dataframes_guardar)
+            if st.success("GUARDADO"):
+                cerrar(0)
+                st.rerun()
+            
+            
 #FINAL REPRODUCCIÓN Y PRODUCCIÓN
 #-------------------------------------------------------------------------
 #INICIO REGISTROS
