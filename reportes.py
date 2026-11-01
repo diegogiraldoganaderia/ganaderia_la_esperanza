@@ -521,7 +521,7 @@ def _resultado(serie: pd.Series) -> pd.Series:
     """Normaliza X1/X3 a 'P', 'V', 'RP' o 'SIN DATO' (pendiente)."""
     x = serie.astype("string").str.strip().str.upper()
     es_rp = (x == "RP").fillna(False).astype(bool)
-    es_p = x.str.startswith("P", na=False) | x.str.startswith("+", na=False)
+    es_p = x.str.startswith("P+", na=False)
     es_v = x.str.startswith("V", na=False)
     out = pd.Series("SIN DATO", index=serie.index, dtype="object")
     out[es_p] = "P"
@@ -661,12 +661,14 @@ def generar_reporte_embriones_html(
     vaca_por_finca=True si un mismo código de vaca puede repetirse en fincas distintas.
     """
     datos = _preparar_embriones(df, dia_primero, df_cria, vaca_por_finca)
+   
     datos_json = json.dumps(datos, ensure_ascii=False).replace("</", "<\\/")
     generado = datetime.now().strftime("%Y-%m-%d %H:%M")
     return (
         _EMBRIONES.replace("__DATA__", datos_json)
         .replace("__TITULO__", titulo)
         .replace("__GENERADO__", generado)
+        
     )
 
 
@@ -1000,11 +1002,15 @@ document.getElementById('kpis').innerHTML = kp.map(k =>
 renderCat(rows, s);
 
 // Transferencias y preñeces por mes
-const tr = rows.filter(r => r.transferida && r.aniomes);
+const tr = rows.filter(r => r.transferida && r.aniomes)
+const trr = rows.filter(r => r.transferida === false && r.aniomes);
+
 const meses = [...new Set(tr.map(r => r.aniomes))].sort();
 draw('c_tiempo', {type:'bar', data:{labels: meses, datasets:[
   {label:'Transferencias', data: meses.map(m => tr.filter(r => r.aniomes === m).length), backgroundColor: PALETA[0]},
-  {label:'Preñadas en X1', data: meses.map(m => tr.filter(r => r.aniomes === m && r.x1 === 'P').length), backgroundColor: PALETA[1]}]},
+  {label:'Preñadas en X1', data: meses.map(m => tr.filter(r => r.aniomes === m && r.x1 === 'P').length), backgroundColor: PALETA[1]},
+  {label:'Rechazaron protocolo', data: meses.map(m => trr.filter(r => r.aniomes === m).length), backgroundColor: PALETA[3]}
+  ]},
   options:{responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:true, ticks:{precision:0}}}}});
 
 // Preñez X1 según días entre sincronización y transferencia

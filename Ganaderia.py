@@ -42,7 +42,31 @@ df_informe_vaca=pd.DataFrame(columns=["INFORME"])
 df_palpacion=pd.DataFrame(supabase.table("PALPACION").select("*").execute().data)
 df_palpacion=df_palpacion.drop(columns=["index"])
 df_correccion=pd.DataFrame(supabase.table("CORRECCION").select("*").execute().data)
-
+def actualizar_datos():
+   df_animal=pd.DataFrame(supabase.table("ANIMAL").select("*").execute().data)
+   df_partos=pd.DataFrame(supabase.table("PARTOS").select("*").execute().data)
+   df_partos=df_partos.drop(columns=["index"])
+   df_cria=pd.DataFrame(supabase.table("CRIA").select("*").execute().data)
+   df_cria=df_cria.drop(columns=["index"])
+   df_embriones=pd.DataFrame(supabase.table("EMBRIONES").select("*").execute().data)
+   df_embriones=df_embriones.drop(columns=["index"])
+   df_inseminacion=pd.DataFrame(supabase.table("INSEMINACION").select("*").execute().data)
+   df_inseminacion=df_inseminacion.drop(columns=["index"])
+   df_fincas=pd.DataFrame(supabase.table("FINCAS").select("*").execute().data)
+   df_fincas=df_fincas.drop(columns=["index"])
+   df_toros=pd.DataFrame(supabase.table("TORO").select("*").execute().data)
+   df_razas=pd.DataFrame(supabase.table("RAZAS").select("*").execute().data)
+   df_ganado_puro=pd.DataFrame(supabase.table("GANADO_PURO").select("*").execute().data)
+   df_ganado_puro=df_ganado_puro.drop(columns=["index"])
+   df_servicios=pd.DataFrame(supabase.table("SERVICIO").select("*").execute().data)
+   df_servicios=df_servicios.drop(columns=["index"])
+   df_protocolo=pd.DataFrame(supabase.table("PROTOCOLO").select("*").execute().data)
+   df_protocolo=df_protocolo.drop(columns=["index"])
+   df_informe_crias=pd.DataFrame(columns=["ID","FINCA","TORO","VACA","FECHA_NACIMIENTO","EDAD","RAZA","SEXO","T_C"])
+   df_informe_vaca=pd.DataFrame(columns=["INFORME"])
+   df_palpacion=pd.DataFrame(supabase.table("PALPACION").select("*").execute().data)
+   df_palpacion=df_palpacion.drop(columns=["index"])
+   df_correccion=pd.DataFrame(supabase.table("CORRECCION").select("*").execute().data)
 class Informes():
 
    
@@ -158,23 +182,22 @@ class Informes():
       ancho_pagina=max(ancho_pagina)
       ancho_texto=ancho_pagina-20
       lineas_texto=[]
+      
       for texto in textos:
          ancho_letras = pdf.get_string_width(texto)
          lineas_texto.append( math.ceil(ancho_letras / ancho_texto))
 
       #print(lineas_texto,)
-      alto_texto = sum(lineas_texto)*20  #*len(textos)
-      alto_tabla = (sum(len(df) for df in dfs)) * alto_celda
-      alto_tabla=0
-      for df in dfs:
-         if len(df)>0:
-            alto_tabla+=(len(df)+1)*alto_celda
-         else:
-            alto_tabla+=2*alto_celda
+      alto_texto = sum(lineas_texto)*10 +20 #*len(textos)
+      #alto_tabla = (sum(len(df) for df in dfs)) * alto_celda
+      alto_tabla=[]
+      for df in dfss:
+         alto_tabla.append((len(df)+2)*alto_celda)
+         
          
       
       
-      alto_pagina= (alto_texto+alto_tabla+60)
+      alto_pagina= (alto_texto+sum(alto_tabla)+30)
      
 
       #primera pagina
@@ -186,11 +209,14 @@ class Informes():
    
          
       contador=0
+      
+      pdff.set_font("Helvetica", size=11) 
+      pdff.multi_cell(0,8,"Este informe fue generado en la fecha: "+str(datetime.today().date()),align="J")
       for df in dfss:         
          pdff.set_font("Helvetica", size=11) 
          pdff.ln()
          pdff.multi_cell(0,8,textos[contador],align="J")
-         pdff.ln()
+         
    # 3. Dibujar el encabezado de la tabla (Negrita)
          pdff.set_font("Helvetica", style="B", size=11)
          count=0

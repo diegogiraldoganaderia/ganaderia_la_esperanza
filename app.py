@@ -367,7 +367,7 @@ button[kind="tertiary"] {
 """)
 
 if st.button("🚀  INICIO",use_container_width=True,type="primary"):
-    from reportes import *
+    actualizar_datos()
     cerrar(0)
     st.rerun()
    
@@ -510,51 +510,62 @@ if st.session_state.informe_vacas:
     unsafe_allow_html=True
 )
     dfve=df_embriones
-    id_vaca = st.selectbox("SELECCIONE UNA VACA",df_partos["ID"].unique())
-    df_vaca_embriones=buscar.informe_receptoras(dfve)
-    df_vaca_embriones=df_vaca_embriones[df_vaca_embriones["RECEPTORA"]==id_vaca]
-    df_vaca_servicios=df_servicios[df_servicios["VACA"]==id_vaca]
-    df_vaca_inseminacion=df_inseminacion[df_inseminacion["ID"]==id_vaca]
+    id_vacas = st.multiselect("SELECCIONE UNA VACA",df_animal["ID"].unique())
+    
+   
 
     col1, col2= st.columns(2)
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
-            st.session_state.informe_vacas=False
-            st.session_state.informes = False
-            #df=buscar.informe_crias_v(df_cria,id_vaca)
-            informacion_vaca = df_animal[df_animal["ID"] == id_vaca].iloc[0]
-            texto_vaca = ( "La Vaca identificada " + str(id_vaca) +
-                          " de la raza " + str(informacion_vaca["RAZA"]) + " " +
-                            buscar.calcular_edad(informacion_vaca["FECHA_NACIMIENTO"])
-                            +"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
-            informacion_partos=buscar.numeros(df_cria,df_ganado_puro)
-            informacion_partos=informacion_partos[informacion_partos["VACA"]==id_vaca]
-            nombre_pdf = ("Informe_Vaca_"+ str(id_vaca.replace("/", "_")))
-           
-            if len(df_vaca_embriones)>0:
-                prenez_embriones=df_vaca_embriones["# p+"].values[0]
-                protocolos=df_vaca_embriones["#PROTOCOLOS"].values[0]
-                
-            else:
-                prenez_embriones=0
-                protocolos=0
-            numero_prenez=(prenez_embriones
-                           +len(df_vaca_inseminacion[df_vaca_inseminacion["CONFIRMACION"]=="p+"])+
-                           len(df_vaca_servicios[df_vaca_servicios["ESTADO"]=="p+"]))
-            numero_intentos_prenez=(protocolos+len(df_vaca_inseminacion)
-                                            +len(df_vaca_servicios))
+            nombre_pdf = ("Informe_Vaca")
+            textos_final=[]
+            informes_final=[]
+            
+            for id_vaca in id_vacas:
+                df_vaca_embriones=buscar.informe_receptoras(dfve)
+                informacion_partos=buscar.numeros(df_cria,df_ganado_puro)
+                df_vaca_embriones=df_vaca_embriones[df_vaca_embriones["RECEPTORA"]==id_vaca]
+                df_vaca_servicios=df_servicios[df_servicios["VACA"]==id_vaca]
+                df_vaca_inseminacion=df_inseminacion[df_inseminacion["ID"]==id_vaca]
+    
+                informacion_vaca = df_animal[df_animal["ID"] == id_vaca].iloc[0]
+                texto_vaca = ( "La Vaca identificada " + str(id_vaca) +
+                        " de la raza " + str(informacion_vaca["RAZA"]) + " " +
+                        buscar.calcular_edad(informacion_vaca["FECHA_NACIMIENTO"])
+                        )
+        
+                informacion_partos=informacion_partos[informacion_partos["VACA"]==id_vaca]
+            
+                if len(df_vaca_embriones)>0:
+                    prenez_embriones=df_vaca_embriones["# p+"].values[0]
+                    protocolos=df_vaca_embriones["#PROTOCOLOS"].values[0]
                     
-            
-            if numero_prenez>0:
-                texto_preñez=" se requieren "+str(round(numero_intentos_prenez/numero_prenez,2))+" intentos para lograr una preñez"
-            else:
-                texto_preñez=" no se tienen datos suficientes para determinar cuantos intentos se necesitan para lograr una preñez"
+                else:
+                    prenez_embriones=0
+                    protocolos=0
+                numero_prenez=(prenez_embriones
+                            +len(df_vaca_inseminacion[df_vaca_inseminacion["CONFIRMACION"]=="p+"])+
+                            len(df_vaca_servicios[df_vaca_servicios["ESTADO"]=="p+"]))
+                numero_intentos_prenez=(protocolos+len(df_vaca_inseminacion)
+                                                +len(df_vaca_servicios))
+                        
+                
+                if numero_prenez>0:
+                    texto_preñez=" se requieren "+str(round(numero_intentos_prenez/numero_prenez,2))+" intentos para lograr una preñez"
+                else:
+                    texto_preñez=" no se tienen datos suficientes para determinar cuantos intentos se necesitan para lograr una preñez"
 
-            informe=[informacion_partos,df_vaca_embriones,df_vaca_inseminacion.drop(columns=["ID"]),df_vaca_servicios.iloc[:, 1:]]
-            textos=[texto_vaca+texto_preñez+"\nHistorial de partos"
-                    ,"Resumen de procesos de embrion","Historial inseminación","Historial de servicios"]
-            
-            generar_informe.generar_pdf_multiple(textos,informe,nombre_pdf)
+                informes_final.append(informacion_partos)
+                informes_final.append(df_vaca_embriones)
+                informes_final.append(df_vaca_inseminacion.drop(columns=["ID"]))
+                informes_final.append(df_vaca_servicios.iloc[:, 1:])
+                textos_final.append(texto_vaca+texto_preñez+"\nHistorial de partos")
+                textos_final.append("Resumen de procesos de embrion")
+                textos_final.append("Historial inseminación")
+                textos_final.append("Historial de servicios")
+                  
+          
+            generar_informe.generar_pdf_multiple(textos_final,informes_final,nombre_pdf)
            
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
@@ -723,9 +734,9 @@ if st.session_state.informe_embriones:
     col1, col2= st.columns(2)
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
-            st.session_state.informe_embriones=False
-            st.session_state.informes = False
+      
             informe=buscar.informe_embriones(df,fecha,finca)
+    
             informedf=informe[0].sort_values(by="X1").reset_index(drop=True)
             texto=("En este informe se muestran todos los procesos de embrion en las fechas selecionadas, se sincronizaron "+informe[1]+" vacas de las cuales hubo un total de "+informe[2]+" vacas preñadas "+
                     "equivalente al "+informe[3]+"%, un total de "+informe[4]+" vacas vacias equivalente al " 
