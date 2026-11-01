@@ -143,6 +143,7 @@ class Informes():
       
       
       #revisa que los dfs no esten vacios
+      
       dfss=[]
       for df in dfs:
          df=df.dropna()
@@ -153,16 +154,15 @@ class Informes():
             df=df
          dfss.append(df)
 
-      #texto=textos[0]
-      #se marca como deberiaser la fuente 
+
+      #se marca como deberia ser la fuente
+      #  
       pdf = FPDF(unit="mm")      
       pdf.set_font("Helvetica", size=11)
 
-      
-      alto_celda = 10 
       #sedetermina el tamaño de la hoja
+      alto_celda = 10 
       lista_ancho_columnas=[]
-
       for df in dfss:
          ancho_columnas=[]
          for i in range(len(df.columns)):
@@ -173,17 +173,26 @@ class Informes():
             else:
                ancho_columnas.append(largo2)    
          lista_ancho_columnas.append(ancho_columnas)
-     
+         
+      
       ancho_pagina=[]
       for ancho_columnas in lista_ancho_columnas:
       #se setean los tamños d ela pagina
          ancho_pagina.append(sum(ancho_columnas)+20)
       
       ancho_pagina=max(ancho_pagina)
+      ancho_tabla=ancho_pagina-20
+      
+      if ancho_pagina<210:
+         ancho_pagina=210
+
+      margen_izquierdo = (ancho_pagina -ancho_tabla)/ 2
       ancho_texto=ancho_pagina-20
+      
       lineas_texto=[]
       
       for texto in textos:
+          
          ancho_letras = pdf.get_string_width(texto)
          lineas_texto.append( math.ceil(ancho_letras / ancho_texto))
 
@@ -193,10 +202,7 @@ class Informes():
       alto_tabla=[]
       for df in dfss:
          alto_tabla.append((len(df)+2)*alto_celda)
-         
-         
-      
-      
+   
       alto_pagina= (alto_texto+sum(alto_tabla)+30)
      
 
@@ -207,20 +213,24 @@ class Informes():
       pdff.image("logopdf.png", x=ancho_pagina-48, y=0, w=40)#logo
       pdff.set_y(15) 
    
-         
+
+
+
+     
       contador=0
       
-      pdff.set_font("Helvetica", size=11) 
-      pdff.multi_cell(0,8,"Este informe fue generado en la fecha: "+str(datetime.today().date()),align="J")
-      for df in dfss:         
-         pdff.set_font("Helvetica", size=11) 
-         pdff.ln()
+      pdff.multi_cell(0,8,"Fecha del informe: "+str(datetime.today().date()),align="J")
+      for df in dfss: 
+         pdff.set_font("Helvetica", size=11)     
          pdff.multi_cell(0,8,textos[contador],align="J")
+
          
    # 3. Dibujar el encabezado de la tabla (Negrita)
          pdff.set_font("Helvetica", style="B", size=11)
          count=0
-         for i in df.columns:
+         #margen_izquierdo = (ancho_pagina - sum(lista_ancho_columnas[contador])) / 2
+         pdff.set_x(margen_izquierdo)
+         for i in df.columns:    
             pdff.cell(lista_ancho_columnas[contador][count], alto_celda, str(i), border=1, align="C")
             count+=1
          pdff.ln()
@@ -228,6 +238,7 @@ class Informes():
          pdff.set_font("Helvetica", style="B", size=11)
          
          for index, fila in df.iterrows():
+            pdff.set_x(margen_izquierdo)
             for i, celda in enumerate(fila):
                if isinstance(celda ,(datetime, pd.Timestamp)):
                   pdff.cell(lista_ancho_columnas[contador][i], alto_celda, celda.strftime("%d/%m/%Y"), border=1, align="C")
@@ -444,7 +455,7 @@ class Buscador:
       return df
    
    def informe_embriones(self,df,fecha,finca):
-      df= df[["PROVEEDOR", "FINCA","RECEPTORA","DONADORA","REPRODUCTOR","RAZA","TIPO_EMBRION","X1"]]
+      df= df[["PROVEEDOR","FINCA","RECEPTORA","DONADORA","REPRODUCTOR","RAZA","TIPO_EMBRION","X1"]]
       l_finca=[]
       for i in finca:
          l_finca.append(df[df["FINCA"]==i.lower()])
@@ -641,3 +652,4 @@ class Buscador:
       df_a_corregir["ID"] = df_a_corregir["ID"].replace(
       df_correccion.set_index("ID_ERRONEO")["ID_CORREGIDO"].to_dict())
       return df_a_corregir
+

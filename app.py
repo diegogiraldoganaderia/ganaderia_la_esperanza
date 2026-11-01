@@ -468,8 +468,7 @@ if st.session_state.informe_nacimientos:
     with col1:
 
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
-            st.session_state.informe_nacimientos=False
-            st.session_state.informes = False
+       
             informe=buscar.numeros(df_cria,df_ganado_puro)
             #filtro la fecha
             informe=informe[pd.to_datetime(informe["FECHA_NACIMIENTO"])>fecha]
@@ -490,8 +489,7 @@ if st.session_state.informe_nacimientos:
             texto=("En este informe se muestran todas las crias nacidas"+
             txt+" a partir de la fecha: "+fecha+"\n"+ "cantidad de animales: "+str(len(informe))
             + ", cantidad de hembras: "+str(len(informe[informe["SEXO"]=="hembra"]))
-            + ", cantidad de machos: "+str(len(informe[informe["SEXO"]=="macho"]))
-            +"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
+            + ", cantidad de machos: "+str(len(informe[informe["SEXO"]=="macho"])))
             nombre_pdf = ("Informe_Nacimientos")
             informe=buscar.corregir_ID(df_correccion,informe)
             if solo_numeros=="TODOS LOS DATOS":
@@ -509,7 +507,7 @@ if st.session_state.informe_vacas:
     "<h2 style='text-align: center;'>HISTORIAL DE LAS VACAS</h2>",
     unsafe_allow_html=True
 )
-    dfve=df_embriones
+   
     id_vacas = st.multiselect("SELECCIONE UNA VACA",df_animal["ID"].unique())
     
    
@@ -522,7 +520,7 @@ if st.session_state.informe_vacas:
             informes_final=[]
             
             for id_vaca in id_vacas:
-                df_vaca_embriones=buscar.informe_receptoras(dfve)
+                df_vaca_embriones=df_embriones[df_embriones["RECEPTORA"]==id_vaca]
                 informacion_partos=buscar.numeros(df_cria,df_ganado_puro)
                 df_vaca_embriones=df_vaca_embriones[df_vaca_embriones["RECEPTORA"]==id_vaca]
                 df_vaca_servicios=df_servicios[df_servicios["VACA"]==id_vaca]
@@ -537,8 +535,8 @@ if st.session_state.informe_vacas:
                 informacion_partos=informacion_partos[informacion_partos["VACA"]==id_vaca]
             
                 if len(df_vaca_embriones)>0:
-                    prenez_embriones=df_vaca_embriones["# p+"].values[0]
-                    protocolos=df_vaca_embriones["#PROTOCOLOS"].values[0]
+                    prenez_embriones=len(df_vaca_embriones[df_vaca_embriones["X1"]=="p+"])
+                    protocolos=len(df_vaca_embriones)
                     
                 else:
                     prenez_embriones=0
@@ -556,7 +554,7 @@ if st.session_state.informe_vacas:
                     texto_preñez=" no se tienen datos suficientes para determinar cuantos intentos se necesitan para lograr una preñez"
 
                 informes_final.append(informacion_partos)
-                informes_final.append(df_vaca_embriones)
+                informes_final.append(df_vaca_embriones.iloc[:,[0,1,2,3,8,9,10]])
                 informes_final.append(df_vaca_inseminacion.drop(columns=["ID"]))
                 informes_final.append(df_vaca_servicios.iloc[:, 1:])
                 textos_final.append(texto_vaca+texto_preñez+"\nHistorial de partos")
@@ -925,11 +923,12 @@ if st.session_state.vacas_prennadas:
             df=df[filtro_finca]
             cantidad=len(df)
             cantidad_este_anno=len(df[df["DIAS_DE_PREÑADA"]+dias_faltantes>295])
-            textos=[("En este informe se muestran todas las vacas preñadas\ntotal de vacas "+str(cantidad)
-                        +" cantidad de vacas que paren este año "+str(cantidad_este_anno)
-                        +"\neste informe fue generado en la fecha: "+str(datetime.today().date()))]
+            revision=len(df[df["DIAS_DE_PREÑADA"]>280])
+            textos=["Hay una cantidad de "+str(cantidad)+" vacas preñadas, de las cuales se"
+            " espera que "+str(cantidad_este_anno)+" tengan su parto antes de finalizar\nel año, "
+            +str(revision)+" deben llevarse al potrero de parato para estar bajo revisión diaria"]
             nombre_pdf="informe_vacas_preñadas"
-            
+        
             generar_informe.generar_pdf_multiple(textos,[df],nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
