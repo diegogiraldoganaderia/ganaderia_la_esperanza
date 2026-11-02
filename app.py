@@ -16,6 +16,20 @@ buscar = Buscador()
 nacimientos = Agregar_Eliminar()
 generar_informe=Informes()
 
+
+import fpdf
+import sys
+import platform
+
+st.write("Python:", sys.version)
+st.write("FPDF:", fpdf.__version__)
+st.write("Sistema:", platform.system())
+
+
+
+
+
+
  
 #logo
 with open("logo.png", "rb") as image_file:
