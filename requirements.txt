@@ -1,7 +1,8 @@
 pandas
 openpyxl
-fpdf2
+
 python-dateutil
 streamlit
 plotly
 supabase
+fpdf==1.7.2
