@@ -116,14 +116,15 @@ class Informes():
       ancho_tabla = sum(ancho_columnas)
       margen_izquierdo = (ancho_pagina - ancho_tabla) / 2
       pdff.set_x(margen_izquierdo)
-      pdff.set_font("Helvetica", style="B", size=11)
+      #pdff.set_font("Helvetica", style="B", size=11)
       count=0
       for i in df.columns:
+         pdff.multi_cell(0,8,texto,align="C")
          pdff.cell(ancho_columnas[count], alto_celda, str(i), border=1, align="C")
          count+=1
       pdff.ln()
 # 4. Dibujar las filas con los datos (Texto normal)
-      pdff.set_font("Helvetica", style="B", size=11)
+      
      
       for index, fila in df.iterrows():
          
@@ -220,13 +221,17 @@ class Informes():
       contador=0
       
       pdff.multi_cell(0,8,"Fecha del informe: "+str(datetime.today().date()),align="J")
-      for df in dfss: 
+      saltos=0
+      for df in dfss:
+         saltos+=1
+         if saltos>1:
+            pdff.ln()
          pdff.set_font("Helvetica", size=11)     
          pdff.multi_cell(0,8,textos[contador],align="J")
 
          
    # 3. Dibujar el encabezado de la tabla (Negrita)
-         pdff.set_font("Helvetica", style="B", size=11)
+         pdff.set_font("Helvetica",style="B", size=10)
          count=0
          #margen_izquierdo = (ancho_pagina - sum(lista_ancho_columnas[contador])) / 2
          pdff.set_x(margen_izquierdo)
@@ -235,7 +240,7 @@ class Informes():
             count+=1
          pdff.ln()
    # 4. Dibujar las filas con los datos (Texto normal)
-         pdff.set_font("Helvetica", style="B", size=11)
+         pdff.set_font("Helvetica", size=11)
          
          for index, fila in df.iterrows():
             pdff.set_x(margen_izquierdo)

@@ -518,12 +518,18 @@ if st.session_state.informe_vacas:
             nombre_pdf = ("Informe_Vaca")
             textos_final=[]
             informes_final=[]
-            
+            informacion_partos_vacas=buscar.numeros(df_cria,df_ganado_puro)
             for id_vaca in id_vacas:
+                #df_vaca_embriones=df_embriones[df_embriones["RECEPTORA"]==id_vaca]
+                #informacion_partos=buscar.numeros(df_cria,df_ganado_puro)
+
+                informacion_partos=informacion_partos_vacas[informacion_partos_vacas["VACA"]==id_vaca]
+                
+
                 df_vaca_embriones=df_embriones[df_embriones["RECEPTORA"]==id_vaca]
-                informacion_partos=buscar.numeros(df_cria,df_ganado_puro)
-                df_vaca_embriones=df_vaca_embriones[df_vaca_embriones["RECEPTORA"]==id_vaca]
+
                 df_vaca_servicios=df_servicios[df_servicios["VACA"]==id_vaca]
+
                 df_vaca_inseminacion=df_inseminacion[df_inseminacion["ID"]==id_vaca]
     
                 informacion_vaca = df_animal[df_animal["ID"] == id_vaca].iloc[0]
@@ -553,7 +559,28 @@ if st.session_state.informe_vacas:
                 else:
                     texto_preñez=" no se tienen datos suficientes para determinar cuantos intentos se necesitan para lograr una preñez"
 
-                informes_final.append(informacion_partos)
+                #ARREGLO DF PARTOS
+                informacion_partos=informacion_partos.rename(columns={"FECHA_NACIMIENTO": "FECHA_PARTO"})
+                informacion_partos=informacion_partos.rename(columns={"EDAD": "TIEMPO_ENTRE_PARTOS"})
+                informacion_partos = informacion_partos.reset_index(drop=True)
+
+                for tiempo in range(len(informacion_partos)):
+
+                    if tiempo > 0:
+                        fecha2 = pd.to_datetime(informacion_partos.iloc[tiempo, 4])
+                        fecha1 = pd.to_datetime(informacion_partos.iloc[tiempo-1, 4])
+                        
+
+                        edad = relativedelta(fecha2, fecha1)
+
+                        informacion_partos.at[tiempo, 'TIEMPO_ENTRE_PARTOS'] = (
+                            f"{edad.years} años, {edad.months} meses y {edad.days} días"
+                        )
+
+                    else:
+                        informacion_partos.at[tiempo, 'TIEMPO_ENTRE_PARTOS'] = "No aplica"
+                                
+                informes_final.append(informacion_partos.iloc[:,[0,1,2,4,5,6]])
                 informes_final.append(df_vaca_embriones.iloc[:,[0,1,2,3,8,9,10]])
                 informes_final.append(df_vaca_inseminacion.drop(columns=["ID"]))
                 informes_final.append(df_vaca_servicios.iloc[:, 1:])
