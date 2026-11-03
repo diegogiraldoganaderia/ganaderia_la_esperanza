@@ -2,7 +2,7 @@ import os
 from abc import ABC, abstractclassmethod
 import pandas as pd
 #para fechas
-from datetime import datetime
+from datetime import datetime,timedelta
 from dateutil.relativedelta import relativedelta
 #para generar pdfs
 from fpdf import FPDF
@@ -215,7 +215,7 @@ class Informes():
       pdff.set_y(15) 
    
 
-
+      
 
      
       contador=0
@@ -235,7 +235,8 @@ class Informes():
          count=0
          #margen_izquierdo = (ancho_pagina - sum(lista_ancho_columnas[contador])) / 2
          pdff.set_x(margen_izquierdo)
-         for i in df.columns:    
+         
+         for i in df.columns:
             pdff.cell(lista_ancho_columnas[contador][count], alto_celda, str(i), border=1, align="C")
             count+=1
          pdff.ln()
@@ -591,10 +592,11 @@ class Buscador:
       df_servicios=df_servicios[df_servicios["ESTADO"]=="p+"][["VACA", "FINCA", "FECHA_SERVICIO","ESTADO"]]
       df_servicios= df_servicios.rename(columns={"FECHA_SERVICIO": "FECHA"})
       df_palpacion=df_palpacion[df_palpacion["ESTADO"]=="p+"][["VACA", "FINCA", "FECHA","DIAS_DE_PREÑEZ","ESTADO"]]
-      #print(df_palpacion)
+      
       for i in range(len(df_palpacion)):
-         df_palpacion.iloc[0,2]=str(pd.to_datetime(df_palpacion.iloc[i,2])- relativedelta(days=int(df_palpacion.iloc[i,3])))
-      df_palpacion=df_palpacion.drop('DIAS_DE_PREÑEZ', axis=1, inplace=True)
+         df_palpacion.iat[i,2]=str(pd.to_datetime(df_palpacion.iloc[i,2])-timedelta(days=int(df_palpacion.iloc[i,3])))
+      df_palpacion=df_palpacion.drop('DIAS_DE_PREÑEZ', axis=1)
+     
       df_natural=pd.concat([df_servicios, df_palpacion], ignore_index=True)
       df_natural=df_natural[df_natural["ESTADO"]=="p+"].sort_values("FECHA").drop_duplicates("VACA", keep="last")
       
@@ -606,14 +608,14 @@ class Buscador:
          df_partos=df_cria[df_cria["VACA"]==vaca]
          fecha_prennez=pd.to_datetime(df_embriones.iloc[contar_embriones,2])
          confirmar=0
-         if len(df_partos)>0:
+         if len(df_partos)>0 and abs(hoy-fecha_prennez).days<300:
             for contar_crias in range(len(df_partos)):     
                fecha_parto=pd.to_datetime(df_partos.iloc[contar_crias]["FECHA_NACIMIENTO"])
                if abs((fecha_parto-fecha_prennez).days-280)<45:
                   confirmar+=1
-            if confirmar==0:
+            if confirmar==0 and abs(hoy-fecha_prennez).days<300:
                df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"TE"]   
-         elif len(df_partos)==0:
+         elif len(df_partos)==0 and abs(hoy-fecha_prennez).days<300:
             df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"TE"]
 
    #INSEMINACION
@@ -624,14 +626,14 @@ class Buscador:
          df_partos=df_cria[df_cria["VACA"]==vaca]
          fecha_prennez=pd.to_datetime(df_inseminacion.iloc[contar_IA,0])
          confirmar=0
-         if len(df_partos)>0:
+         if len(df_partos)>0 and abs(hoy-fecha_prennez).days<300:
             for contar_crias in range(len(df_partos)):     
                fecha_parto=pd.to_datetime(df_partos.iloc[contar_crias]["FECHA_NACIMIENTO"])
                if abs((fecha_parto-fecha_prennez).days-280)<45:
                   confirmar+=1
-            if confirmar==0:
+            if confirmar==0 :
                df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"IA"]   
-         elif len(df_partos)==0:
+         elif len(df_partos)==0 and abs(hoy-fecha_prennez).days<300:
             df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"IA"]
    #MONTA NATURAL
       for contar_MN in range(len(df_natural)):
@@ -641,14 +643,15 @@ class Buscador:
          df_partos=df_cria[df_cria["VACA"]==vaca]
          fecha_prennez=pd.to_datetime(df_natural.iloc[contar_MN,2])
          confirmar=0
-         if len(df_partos)>0:
+         if len(df_partos)>0 and abs(hoy-fecha_prennez).days<300:
             for contar_crias in range(len(df_partos)):     
                fecha_parto=pd.to_datetime(df_partos.iloc[contar_crias]["FECHA_NACIMIENTO"])
                if abs((fecha_parto-fecha_prennez).days-280)<45:
                   confirmar+=1
             if confirmar==0:
                df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"MN"]   
-         elif len(df_partos)==0:
+         elif len(df_partos)==0 and abs(hoy-fecha_prennez).days<300:
+            
             df_prennez.loc[len(df_prennez)]=[vaca,finca,fecha_prennez.date(),(hoy-fecha_prennez).days,"MN"]
       df_prennez=df_prennez.sort_values(by="DIAS_DE_PREÑADA", ascending=False).reset_index(drop=True)
       return df_prennez
@@ -657,4 +660,3 @@ class Buscador:
       df_a_corregir["ID"] = df_a_corregir["ID"].replace(
       df_correccion.set_index("ID_ERRONEO")["ID_CORREGIDO"].to_dict())
       return df_a_corregir
-
