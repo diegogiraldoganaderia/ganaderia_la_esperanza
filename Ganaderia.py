@@ -660,3 +660,15 @@ class Buscador:
       df_a_corregir["ID"] = df_a_corregir["ID"].replace(
       df_correccion.set_index("ID_ERRONEO")["ID_CORREGIDO"].to_dict())
       return df_a_corregir
+   def ultimo_parto(self,df_cria):
+      df_ultimo_parto= df_cria.sort_values("FECHA_NACIMIENTO").drop_duplicates("VACA", keep="last")[["VACA", "FINCA", "FECHA_NACIMIENTO"]]
+      hoy = datetime.today()
+      tiempo_trasncurrido=[]
+      for line in range(len(df_ultimo_parto)):
+            tiempo=relativedelta(hoy,pd.to_datetime(df_ultimo_parto.iloc[line]["FECHA_NACIMIENTO"]))
+            tiempo_trasncurrido.append(  str(tiempo.years)+" años "+str(tiempo.months)+" meses "+str(tiempo.days)+" dias")
+      df_ultimo_parto["TIEMPO TRASNCURRIDOS"] = tiempo_trasncurrido
+      df_ultimo_parto= df_ultimo_parto.rename(columns={"FECHA_NACIMIENTO": "ULTIMO_PARTO"})
+      resultado=df_ultimo_parto.reset_index(drop=True)  
+      return resultado
+

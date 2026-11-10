@@ -19,10 +19,6 @@ generar_informe=Informes()
 
 
 
-
-
-
-
  
 #logo
 with open("logo.png", "rb") as image_file:
@@ -526,7 +522,12 @@ if st.session_state.informe_vacas:
             textos_final=[]
             informes_final=[]
             informacion_partos_vacas=buscar.numeros(df_cria,df_ganado_puro)
+            df_ultimo_parto=buscar.ultimo_parto(df_cria)
+            
+         
             for id_vaca in id_vacas:
+                
+                ultimo_parto=df_ultimo_parto[df_ultimo_parto["VACA"]==id_vaca].values[0,3]
                 #df_vaca_embriones=df_embriones[df_embriones["RECEPTORA"]==id_vaca]
                 #informacion_partos=buscar.numeros(df_cria,df_ganado_puro)
 
@@ -543,7 +544,7 @@ if st.session_state.informe_vacas:
                 texto_vaca = ( "La Vaca identificada " + str(id_vaca) +
                         " de la raza " + str(informacion_vaca["RAZA"]) + " " +
                         buscar.calcular_edad(informacion_vaca["FECHA_NACIMIENTO"])
-                        )
+                        +", su ultimo parto fue hace "+ultimo_parto)
         
                 informacion_partos=informacion_partos[informacion_partos["VACA"]==id_vaca]
             
@@ -562,9 +563,9 @@ if st.session_state.informe_vacas:
                         
                 
                 if numero_prenez>0:
-                    texto_preñez=" se requieren "+str(round(numero_intentos_prenez/numero_prenez,2))+" intentos para lograr una preñez"
+                    texto_preñez=". Se requieren "+str(round(numero_intentos_prenez/numero_prenez))+" intentos para lograr una preñez"
                 else:
-                    texto_preñez=" no se tienen datos suficientes para determinar cuantos intentos se necesitan para lograr una preñez"
+                    texto_preñez=". No se tienen datos suficientes para determinar cuantos intentos se necesitan para lograr una preñez"
 
                 #ARREGLO DF PARTOS
                 informacion_partos=informacion_partos.rename(columns={"FECHA_NACIMIENTO": "FECHA_PARTO"})
@@ -837,33 +838,21 @@ if st.session_state.ultimo_parto:
         )
     finca=[elemento.lower() for elemento in finca]#convierto las fincas a minusculas para filtrarlas
     tiempo_en_meses=st.selectbox("MESES TRASCURRIDOS",[0,1,2,3,4,5,6,7,8,9,10,11,12])
+    hoy = datetime.today()
+    mes_desde_el_parto=hoy - relativedelta(months=tiempo_en_meses)
     col1, col2= st.columns(2)
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
-            df_ultimo_parto= df_cria.sort_values("FECHA_NACIMIENTO").drop_duplicates("VACA", keep="last")[["VACA", "FINCA", "FECHA_NACIMIENTO"]]
-           
-            hoy = datetime.today()
-            mes_desde_el_parto=hoy - relativedelta(months=tiempo_en_meses)
-         
-            tiempo_trasncurrido=[]
-            for line in range(len(df_ultimo_parto)):
-                tiempo=relativedelta(hoy,pd.to_datetime(df_ultimo_parto.iloc[line]["FECHA_NACIMIENTO"]))
-                tiempo_trasncurrido.append(  str(tiempo.years)+" años "+str(tiempo.months)+" meses "+str(tiempo.days)+" dias")
-            
-            df_ultimo_parto["TIEMPO TRASNCURRIDOS"] = tiempo_trasncurrido
-            texto=("En este reporte se muestra el tiempo trasncurrido desde el ultimo parto, para todas las vacas que tienen más de "
-            +str(tiempo_en_meses)+" meses de parida\neste informe fue generado en la fecha: "+str(hoy.date()))
+            informe=buscar.ultimo_parto(df_cria)
+            texto=[("En este reporte se muestra el tiempo trasncurrido desde el ultimo parto, para todas las vacas que tienen más de "
+            +str(tiempo_en_meses)+" meses de parida")]
 
-            df_ultimo_parto= df_ultimo_parto.rename(columns={"FECHA_NACIMIENTO": "ULTIMO_PARTO"})
-            
             nombre_pdf=("ultimo_parto")
-            informe=df_ultimo_parto.reset_index(drop=True)
             filtro_finca=informe["FINCA"].isin(finca)
             informe=informe[filtro_finca]
-            
             informe=informe[pd.to_datetime(informe["ULTIMO_PARTO"])<=mes_desde_el_parto]
             
-            generar_informe.generar_pdf(texto,informe,nombre_pdf)
+            generar_informe.generar_pdf_multiple(texto,[informe],nombre_pdf)
             
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
