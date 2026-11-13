@@ -489,17 +489,17 @@ if st.session_state.informe_nacimientos:
             filtro_finca=informe["FINCA"].isin(finca)
             informe=informe[filtro_finca]
             
-            texto=("En este informe se muestran todas las crias nacidas"+
+            texto=[("En este informe se muestran todas las crias nacidas"+
             txt+" a partir de la fecha: "+fecha+"\n"+ "cantidad de animales: "+str(len(informe))
             + ", cantidad de hembras: "+str(len(informe[informe["SEXO"]=="hembra"]))
-            + ", cantidad de machos: "+str(len(informe[informe["SEXO"]=="macho"])))
+            + ", cantidad de machos: "+str(len(informe[informe["SEXO"]=="macho"])))]
             nombre_pdf = ("Informe_Nacimientos")
             informe=buscar.corregir_ID(df_correccion,informe)
             if solo_numeros=="TODOS LOS DATOS":
-                generar_informe.generar_pdf( texto,informe,nombre_pdf)
+                generar_informe.generar_pdf_multiple( texto,[informe],nombre_pdf)
             elif solo_numeros=="SOLO NÚMEROS":
-                informe=informe.iloc[:,[0,3,7,1]]
-                generar_informe.generar_pdf( texto,informe,nombre_pdf)
+                informe=informe.iloc[:,[0,3,7,1,6]]
+                generar_informe.generar_pdf_multiple( texto,[informe],nombre_pdf)
 
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
@@ -627,8 +627,7 @@ if st.session_state.informe_toros:
     col1, col2= st.columns(2)
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
-            st.session_state.informe_toros=False
-            st.session_state.informes = False
+            
             nombre_pdf = ("Informe_Toros")
             texto1="En este informe se muestan las crias del toro"
             texto2="En este informe se muestan las crias de los toros,"
@@ -667,8 +666,8 @@ if st.session_state.informe_toros:
             else:
                 texto_ano=str(filtro_ano[0])
                 textos=texto3
-            texto=textof+" "+texto_toros+" "+textos+" "+texto_ano+"\neste informe fue generado en la fecha: "+str(datetime.today().date())
-            generar_informe.generar_pdf(texto,df_crias_toro,nombre_pdf)
+            texto=[textof+" "+texto_toros+" "+textos+" "+texto_ano]
+            generar_informe.generar_pdf_multiple(texto,[df_crias_toro],nombre_pdf)
                
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
@@ -731,13 +730,11 @@ if st.session_state.informe_ganado_puro:
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):
             df=df[pd.to_datetime(df["FECHA_NACIMIENTO"])>=fecha]        
-            df=df.sort_values(by="ID").reset_index(drop=True)
-            st.session_state.informe_ganado_puro=False
-            st.session_state.informes = False
-            texto=("En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+fecha
-            +", total de animales "+str(len(df))+"\neste informe fue generado en la fecha: "+str(datetime.today().date()))
+            df=[df.sort_values(by="ID").reset_index(drop=True)]
+            texto=[("En este informe se muestran todos los animales puros nacidos apartir de la fecha: "+fecha
+            +", total de animales "+str(len(df)))]
             nombre_pdf = ("Informe_Ganado_Puro")
-            generar_informe.generar_pdf(texto,df,nombre_pdf)
+            generar_informe.generar_pdf_multiple(texto,df,nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):
@@ -770,15 +767,13 @@ if st.session_state.informe_embriones:
       
             informe=buscar.informe_embriones(df,fecha,finca)
     
-            informedf=informe[0].sort_values(by="X1").reset_index(drop=True)
-            texto=("En este informe se muestran todos los procesos de embrion en las fechas selecionadas, se sincronizaron "+informe[1]+" vacas de las cuales hubo un total de "+informe[2]+" vacas preñadas "+
+            informedf=[informe[0].sort_values(by="X1").reset_index(drop=True)]
+            texto=[("En este informe se muestran todos los procesos de embrion en las fechas selecionadas, se sincronizaron "+informe[1]+" vacas de las cuales hubo un total de "+informe[2]+" vacas preñadas "+
                     "equivalente al "+informe[3]+"%, un total de "+informe[4]+" vacas vacias equivalente al " 
-                    +informe[5]+"%, un total de "+informe[6]+" rechazaron el protocolo, equivalente al "+informe[7]+"%"
-                    +"\neste informe fue generado en la fecha: "+str(datetime.today().date())
-            )
+                    +informe[5]+"%, un total de "+informe[6]+" rechazaron el protocolo, equivalente al "+informe[7]+"%")]
 
             nombre_pdf = ("Informe_Embriones")
-            generar_informe.generar_pdf(texto,informedf,nombre_pdf)
+            generar_informe.generar_pdf_multiple(texto,informedf,nombre_pdf)
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
                 if st.download_button("Descargar PDF",pdf_bytes,file_name=nombre_pdf + ".pdf",mime="application/pdf",use_container_width=True,type="tertiary"):

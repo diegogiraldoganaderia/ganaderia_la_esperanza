@@ -74,72 +74,7 @@ class Informes():
       pdf_path  = "registros/"+str(registro)+".pdf"
       return pdf_path
  
-   def generar_pdf(self,texto,df,nombre_archivo):
-
-      df=df.dropna()
-      if df.empty:
-         df=pd.DataFrame(columns=["Mensaje"])
-         df.loc[0]=[" ----------------- No hay datos para mostrar en este informe ----------------- "]
-      pdf = FPDF(unit="mm")
-     
-      pdf.set_font("Helvetica", size=11)  
-      ancho_columnas=[]
-      alto_celda = 10 
-   
-      for i in range(len(df.columns)):
-         largo1=pdf.get_string_width(df.columns[i])+2
-         largo2=pdf.get_string_width(df.iloc[:,i].astype(str).loc[df.iloc[:,i].astype(str).str.len().idxmax()])+6
-         if largo1>largo2:
-            ancho_columnas.append(largo1)
-         else:
-            ancho_columnas.append(largo2)
-      ancho_pagina=sum(ancho_columnas)+20
-      if ancho_pagina<210:
-         ancho_pagina=210
-      ancho_texto=ancho_pagina-20
-      ancho_letras = pdf.get_string_width(texto)
-      lineas_texto = math.ceil(ancho_letras / ancho_texto)
-      alto_texto = lineas_texto * 10
-      alto_tabla = (len(df) + 1) * alto_celda
-      alto_pagina= (alto_texto+alto_tabla)+60
-
-
-      pdff = FPDF(unit="mm",format=(ancho_pagina,alto_pagina))
-      pdff.set_font("Helvetica", size=11) 
-      pdff.add_page()#format=(ancho_pagina,alto_pagina)
-   
-      pdff.image("logopdf.png", x=ancho_pagina-48, y=0, w=40)#logo
-      pdff.set_y(15) 
-      pdff.multi_cell(0,8,texto,align="J")
-      pdff.ln()
-# 3. Dibujar el encabezado de la tabla (Negrita)
-      ancho_tabla = sum(ancho_columnas)
-      margen_izquierdo = (ancho_pagina - ancho_tabla) / 2
-      pdff.set_x(margen_izquierdo)
-      #pdff.set_font("Helvetica", style="B", size=11)
-      count=0
-      for i in df.columns:
-         pdff.multi_cell(0,8,texto,align="C")
-         pdff.cell(ancho_columnas[count], alto_celda, str(i), border=1, align="C")
-         count+=1
-      pdff.ln()
-# 4. Dibujar las filas con los datos (Texto normal)
-      
-     
-      for index, fila in df.iterrows():
-         
-         pdff.set_x(margen_izquierdo)
-         for i, celda in enumerate(fila):
-            if isinstance(celda ,(datetime, pd.Timestamp)):
-               pdff.cell(ancho_columnas[i], alto_celda, celda.strftime("%d/%m/%Y"), border=1, align="C")
-            else:
-                pdff.cell(ancho_columnas[i], alto_celda, str(celda), border=1, align="C")
-        
-         pdff.ln()
-     
-# 5. Guardar el archivo final
-      return pdff.output(nombre_archivo+".pdf")
-
+  
    def generar_pdf_multiple(self,textos,dfs,nombre_archivo):
       
       
