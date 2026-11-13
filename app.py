@@ -155,6 +155,9 @@ if "agregar_datos_embriones" not in st.session_state:
 
     st.session_state.agregar_datos_embriones=False
 
+if "agregar_datos_servicios" not in st.session_state:
+
+    st.session_state.agregar_datos_servicios=False
 
 if "reporte_nacimientos" not in st.session_state:
     st.session_state.reporte_nacimientos=False
@@ -282,6 +285,12 @@ def cerrar(x):
         st.session_state.agregar_datos_embriones=True
     else:
        st.session_state.agregar_datos_embriones=False
+
+    if x==24:
+        st.session_state.agregar_datos_servicios=True
+    else:
+        st.session_state.agregar_datos_servicios=False
+    
     st.rerun()
 
     
@@ -810,11 +819,11 @@ if st.session_state.informe_receptoras:
                 filtro_receptora=informe["RECEPTORA"].isin(receptora)
                 informe=informe[filtro_receptora]
             
-            texto=("Se muestran todas las receptoras que hay en la ganadería \neste informe fue generado en la fecha: "+str(datetime.today().date())
+            texto=[("Se muestran todas las receptoras que hay en la ganadería \neste informe fue generado en la fecha: "+str(datetime.today().date())
                    +"\np+: Preñada, v: Vacia, rp: No respondío al protocolo"
-            )
+            )]
             nombre_pdf=("informe_receptoras")
-            generar_informe.generar_pdf(texto,informe,nombre_pdf)
+            generar_informe.generar_pdf_multiple(texto,[informe],nombre_pdf)
             
             with open(nombre_pdf + ".pdf", "rb") as file:pdf_bytes = file.read()
             with col2:
@@ -1018,8 +1027,11 @@ if st.session_state.reproduccion_produccion:
         if st.button("AGREGAR PALPACION",use_container_width=True) and password=="h":
             cerrar(10)
     with col2:
-            if st.button("AGREGAR EMBRIONES",use_container_width=True) and password=="h":
-                cerrar(23)
+        if st.button("AGREGAR EMBRIONES",use_container_width=True) and password=="h":
+            cerrar(23)
+    with col1:
+        if st.button("AGREGAR SERVICIOS",use_container_width=True) and password=="h":
+            cerrar(24)
 if st.session_state.registro_nacimientos: 
     vaca = st.text_input("ID de la vaca").lower()
     fn = st.date_input("Fecha nacimiento")
@@ -1094,7 +1106,27 @@ if st.session_state.agregar_datos_embriones:
             if st.success("GUARDADO"):
                 cerrar(0)
                 st.rerun()
-            
+if st.session_state.agregar_datos_servicios:
+    vaca = st.text_input("ID VACA").lower()
+    fecha_servicio= st.date_input("FECHA DEL SERVICIO")
+    fecha_servicio=pd.to_datetime(fecha_servicio,format="%d/%m/%Y")
+   
+    fincas=[]
+    for i in range(len(df_fincas)):
+        fincas.append(df_fincas.iloc[i,0]) 
+    finca = st.selectbox("FINCA",fincas)
+    toros=[]
+    for i in range(len(df_toros)):
+        toros.append(df_toros.iloc[i,0])
+    toro = st.selectbox("TORO",toros)
+    estado=st.selectbox("ESTADO DE LA PREÑEZ",["pendiente","p+"])
+    if st.button("GUARDAR",use_container_width=True):
+        registro_servicio=nacimientos.servicios(vaca,toro,fecha_servicio,finca,estado)
+        st.write(registro_servicio)
+        nacimientos.guardar(registro_servicio)
+        if st.success("Guardado"):
+            cerrar(0)
+            st.rerun()
             
 #FINAL REPRODUCCIÓN Y PRODUCCIÓN
 #-------------------------------------------------------------------------

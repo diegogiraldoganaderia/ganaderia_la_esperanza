@@ -272,7 +272,14 @@ class Agregar_Eliminar:
       dataframes_guardar.append(("PROTOCOLO", df_protocolo))
       dataframes_guardar.append(("GANADO_PURO", df_ganado_puro))
       return dataframes_guardar
-  
+   def servicios(self,vaca,toro,fecha_servicio,finca,estado):
+      df_servicios.loc[len(df_servicios)] = [vaca,toro,fecha_servicio,finca,estado]
+      dataframes_guardar=[]
+      dataframes_guardar.append(("SERVICIO", df_servicios))
+
+      return dataframes_guardar
+
+
 class Buscador:
    def calcular_edad(self,fecha):
       fecha=pd.to_datetime(fecha)
