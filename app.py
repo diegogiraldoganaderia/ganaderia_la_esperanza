@@ -20,7 +20,7 @@ generar_informe=Informes()
 st.set_page_config(
     page_title="Ganadería Vanguardia",
     page_icon="logo_sitio_web.jpeg",
-    layout="wide"
+    
 )
 
 
