@@ -16,7 +16,12 @@ buscar = Buscador()
 nacimientos = Agregar_Eliminar()
 generar_informe=Informes()
 
-
+#direccion web 
+st.set_page_config(
+    page_title="Ganadería Vanguardia",
+    page_icon="logo_sitio_web.jpeg",
+    layout="wide"
+)
 
 
  
