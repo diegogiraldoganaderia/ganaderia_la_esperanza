@@ -23,7 +23,6 @@ st.set_page_config(
     
 )
 
-
  
 #logo
 with open("logo.png", "rb") as image_file:
@@ -774,7 +773,7 @@ if st.session_state.informe_embriones:
             width="stretch"
         )
     finca=[elemento.lower() for elemento in finca]#convierto las fincas a minusculas para filtrarlas
-
+    
     col1, col2= st.columns(2)
     with col1:
         if st.button("GENERAR INFORME",use_container_width=True,type="tertiary"):

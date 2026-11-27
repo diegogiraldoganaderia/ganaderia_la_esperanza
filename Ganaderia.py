@@ -386,9 +386,12 @@ class Buscador:
    
    def informe_embriones(self,df,fecha,finca):
       df= df[["PROVEEDOR","FINCA","RECEPTORA","DONADORA","REPRODUCTOR","RAZA","TIPO_EMBRION","X1"]]
+      if  not finca:
+         finca=df["FINCA"].unique().tolist()
       l_finca=[]
       for i in finca:
          l_finca.append(df[df["FINCA"]==i.lower()])
+      
       df=pd.concat(l_finca)
       total=len(df)
       total_prenadas=len(df[df["X1"]=="p+"])
