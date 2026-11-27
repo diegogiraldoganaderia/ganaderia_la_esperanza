@@ -68,8 +68,8 @@ st.markdown(f"""
 }}
 
 .logo {{
-    width: 1080px;      /* Cambia el tamaño del logo */
-    height: 500px;
+    width: 1100px;      /* Cambia el tamaño del logo */
+    height: 400px;
 }}
 </style>
 <div class="titulo-ganaderia">
@@ -313,22 +313,22 @@ button[kind="primary"] {
     height: 72px !important;
 
     background: linear-gradient(
-        90deg,
-        #5C481F 0%,
-        #29251C 8%,
-        #15181B 100%
+        50deg,
+        #f08881 0%,
+        #441413 8%,
+        #2b2426 100%
     ) !important;
 
     color: #F2E8D0 !important;
 
-    border: 1px solid #806A35 !important;
+    border: 2px solid white !important;
     border-radius: 14px !important;
     
     font-size: 20px !important;
     font-weight: 1000 !important;
     letter-spacing: 0.8px;
 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    box-shadow: 0 12px 12px rgba(1,1,1,0.8);
 }
 
 
@@ -341,42 +341,44 @@ button[kind="secondary"] {
     height: 72px !important;
 
     background: linear-gradient(
-        90deg,
-        #5C481F 0%,
-        #29258C 8%,
-        #15181B 100%
+        50deg,
+        #f08881 0%,
+        #441413 8%,
+        #2b2426 100%
     ) !important;
 
     color: #F2E8D0 !important;
 
-    border: 1px solid white !important;
+    border: 2px solid #441413 !important;
     border-radius: 14px !important;
-
+    
     font-size: 20px !important;
     font-weight: 1000 !important;
+    letter-spacing: 0.8px;
 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    box-shadow: 0 12px 12px rgba(1,1,1,0.8);
 }
 button[kind="tertiary"] {
     width: 100%;
     height: 72px !important;
 
     background: linear-gradient(
-        90deg,
-        #4A121A 0%,    /* Vino tinto profundo */
-        #2D0B10 40%,   /* Vino tinto más oscuro */
-        #150507 100%  
+        50deg,
+        #f08881 0%,
+        #441413 8%,
+        #2b2426 100%
     ) !important;
 
     color: #F2E8D0 !important;
 
-    border: 1px solid white !important;
+    border: 2px solid #f08881 !important;
     border-radius: 14px !important;
-
+    
     font-size: 20px !important;
     font-weight: 1000 !important;
+    letter-spacing: 0.8px;
 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    box-shadow: 0 12px 12px rgba(1,1,1,0.8);
 }
 
 </style>
@@ -758,6 +760,7 @@ if st.session_state.informe_embriones:
         unsafe_allow_html=True
     )
     df_embriones=df_embriones.sort_values(by="FECHA_SINCRONIZACION").reset_index(drop=True)
+    
     fechas=st.multiselect("FECHA SINCRONIZACIÓN Y PROVEEDOR",
                        (df_embriones["FECHA_SINCRONIZACION"]+" // "+
                         df_embriones["PROVEEDOR"].astype(str).str.upper()).unique())
